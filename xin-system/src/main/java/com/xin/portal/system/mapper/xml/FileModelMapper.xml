@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xin.portal.system.mapper.FileModelMapper" >
+  <resultMap id="BaseResultMap" type="com.xin.portal.system.model.FileModel" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="name_before" property="nameBefore" jdbcType="VARCHAR" />
+    <result column="name_after" property="nameAfter" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="group_code" property="groupCode" jdbcType="VARCHAR" />
+    <result column="file_size" property="fileSize" jdbcType="DOUBLE" />
+    <result column="file_path_save" property="filePathSave" jdbcType="VARCHAR" />
+    <result column="file_path_view" property="filePathView" jdbcType="VARCHAR" />
+    <result column="file_type" property="fileType" jdbcType="VARCHAR" />
+    <result column="business_info" property="businessInfo" jdbcType="VARCHAR" />
+    <result column="business_type" property="businessType" jdbcType="VARCHAR" />
+  </resultMap>
+  <delete id="delete" parameterType="java.lang.Integer" >
+    delete from t_file
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+   <delete id="deleteAllPic" >
+    delete from t_file
+    where business_type in('banner','thumbnail','picture')
+  </delete>
+  <insert id="save" parameterType="com.xin.portal.system.model.FileModel" databaseId="mysql">
+  	<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            select LAST_INSERT_ID()
+    </selectKey>
+    insert into t_file (name_before, name_after, 
+      create_time, group_code, file_size, file_path_save, file_path_view,
+      file_type,business_info,business_type)
+    values ( #{nameBefore,jdbcType=VARCHAR}, #{nameAfter,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{groupCode,jdbcType=VARCHAR}, #{fileSize,jdbcType=DOUBLE}, #{filePathSave,jdbcType=VARCHAR}, 
+      #{filePathView,jdbcType=VARCHAR}, #{fileType,jdbcType=VARCHAR}, #{businessInfo,jdbcType=INTEGER}, #{businessType,jdbcType=VARCHAR})
+  </insert>
+  <insert id="save" parameterType="com.xin.portal.system.model.FileModel" useGeneratedKeys="true" keyProperty="id">
+    insert into t_file (name_before, name_after, 
+      create_time, group_code, file_size, file_path_save, file_path_view,
+      file_type,business_info,business_type)
+    values ( #{nameBefore,jdbcType=VARCHAR}, #{nameAfter,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{groupCode,jdbcType=VARCHAR}, #{fileSize,jdbcType=DOUBLE}, #{filePathSave,jdbcType=VARCHAR}, 
+      #{filePathView,jdbcType=VARCHAR}, #{fileType,jdbcType=VARCHAR}, #{businessInfo,jdbcType=INTEGER}, #{businessType,jdbcType=VARCHAR})
+  </insert>
+  <insert id="save" parameterType="com.xin.portal.system.model.FileModel" databaseId="oracle">
+  	<selectKey keyProperty="id" resultType="int" order="BEFORE">
+         select SEQ_T_FILE_ID.nextval as id from dual
+    </selectKey>
+    insert into t_file (id,name_before, name_after, 
+      create_time, group_code, file_size, file_path_save, file_path_view,
+      file_type,business_info,business_type)
+    values (#{id},#{nameBefore,jdbcType=VARCHAR}, #{nameAfter,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{groupCode,jdbcType=VARCHAR}, #{fileSize,jdbcType=DOUBLE}, #{filePathSave,jdbcType=VARCHAR}, 
+      #{filePathView,jdbcType=VARCHAR}, #{fileType,jdbcType=VARCHAR}, #{businessInfo,jdbcType=INTEGER}, #{businessType,jdbcType=VARCHAR})
+  </insert>
+  <update id="update" parameterType="com.xin.portal.system.model.FileModel" >
+    update t_file
+    set name_before = #{nameBefore,jdbcType=VARCHAR},
+      name_after = #{nameAfter,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      group_code = #{groupCode,jdbcType=VARCHAR},
+      file_size = #{fileSize,jdbcType=DOUBLE},
+      file_path_save = #{filePathSave,jdbcType=VARCHAR},
+      file_path_view = #{filePathView,jdbcType=VARCHAR},
+      file_type = #{fileType,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="find" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.FileModel" >
+    select id, name_before, name_after, create_time, group_code, file_size, file_path_save, file_path_view,file_type,business_info,business_type
+    from t_file
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+   <select id="findByNameAfter" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select id, name_before, name_after, create_time, group_code, file_size, file_path_save, file_path_view,file_type
+    from t_file
+    where name_after = #{nameAfter,jdbcType=INTEGER}
+  </select>
+  <select id="findList" resultMap="BaseResultMap" >
+    select id, name_before, name_after, create_time, group_code, file_size, file_path_save, file_path_view, file_type,business_info,business_type
+    from t_file
+    <where>
+    	<if test="businessInfo!=null and businessInfo!=''">
+    		and business_info = #{businessInfo}
+    	</if>
+    	<if test="businessType!=null and businessType!=''">
+    		and business_type = #{businessType}
+    	</if>
+    </where>
+  </select>
+  <select id="findBannerAndThumbnail" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.FileModel">
+   	select * from ( SELECT a.* FROM t_file a
+	INNER JOIN t_banner  b
+	ON a.id=b.file_id
+	UNION
+	SELECT a.* FROM t_file a
+	JOIN t_resource c
+	ON a.id=c.thumbnail_id
+	WHERE   a.business_type IN ('banner','thumbnail','picture') )t
+	<if test="id!=null and id!=''">
+    where  t.id = #{id}
+    </if>	
+  </select>
+  
+  
+	<insert id="insertWithTenantId" parameterType="com.xin.portal.system.model.FileModel" >
+	    insert into t_file (id, name_before, name_after, 
+	      create_time, group_code, file_size, file_path_save, file_path_view,
+	      file_type, business_info, business_type, tenant_id)
+	    values (#{id,jdbcType=VARCHAR},#{nameBefore,jdbcType=VARCHAR}, #{nameAfter,jdbcType=VARCHAR}, 
+	      #{createTime,jdbcType=TIMESTAMP}, #{groupCode,jdbcType=VARCHAR}, #{fileSize,jdbcType=DOUBLE}, #{filePathSave,jdbcType=VARCHAR}, 
+	      #{filePathView,jdbcType=VARCHAR}, #{fileType,jdbcType=VARCHAR}, #{businessInfo,jdbcType=INTEGER}, 
+	      #{businessType,jdbcType=VARCHAR}, #{tenantId,jdbcType=VARCHAR})
+	</insert>
+	
+	
+	<select id="selectByCreateTime" resultMap="BaseResultMap">
+		select id, name_before, name_after, create_time, group_code, file_size, file_path_save, file_path_view,file_type,business_info,business_type 
+		from t_file where file_type='lic' and business_info='license' and business_type='lic' order by create_time desc
+	</select>
+</mapper>

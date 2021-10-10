@@ -1,0 +1,111 @@
+ <#include "common/common.html" />
+<style>
+ 	.my-label {
+ 		width:100px!important;
+ 	}
+ 	.wide-input {
+ 		width:85%;
+ 	}
+ </style>
+<form id="form_add" class="layui-form" action=""
+	style="padding-top:10px;">
+	<div>
+		<input type="hidden" name="id" id="id" value="${(record.id)!}">
+		<input type="hidden" name="code" id="code" value="${(record.code)!}">
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label"><@spring.message 'sysConfig.configItem'/></label>
+			<div class="layui-input-inline">
+				<input type="text" name="name" id="name" value="${(record.name)!}" placeholder="<@spring.message 'tips.input'/>..." 
+					autocomplete="off" class="layui-input wide-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label"><@spring.message 'sysConfig.configValue'/></label>
+			<div class="layui-input-block">
+				
+				<#if record.code=='SYS_THEME'>
+					<input type="radio" name="value" value="theme_left_shen" title="<@spring.message 'sysConfig.themeLeft'/>" ${(record.value=='theme_left_shen')?string('checked','')}>
+      				<input type="radio" name="value" value="theme_default" title="<@spring.message 'sysConfig.themeTop'/>" ${(record.value=='theme_default')?string('checked','')}>
+      				<!-- <input type="radio" name="value" value="theme_top" title="顶部横向导航" ${(record.value=='theme_top')?string('checked','')}>
+      				<input type="radio" name="value" value="theme_top_left" title="横向左侧树导航" ${(record.value=='theme_top_left')?string('checked','')}>
+					<input type="radio" name="value" value="theme_left_shen" title="横向左侧树导航" ${(record.value=='theme_left_shen')?string('checked','')}> -->
+				<#elseif record.code=='SYS_LOCALE'>
+					<input type="radio" name="value" value="zh_CN" title="<@spring.message 'sysConfig.langTypeCN'/>" ${(record.value=='zh_CN')?string('checked','')}>
+      				<input type="radio" name="value" value="zh_TW" title="<@spring.message 'sysConfig.langTypeTW'/>" ${(record.value=='zh_TW')?string('checked','')}>
+      				<input type="radio" name="value" value="en_US" title="<@spring.message 'sysConfig.langTypeUS'/>" ${(record.value=='en_US')?string('checked','')}>
+      			<#elseif (record.code=='SYS_CHECK_CODE' || record.code=='SYS_FIRST_UPDATE_PWD' || record.code=='SYS_USER_EMAIL' || record.code=='SYS_MENU_ICON')>
+      				<input type="radio" name="value" value="0" title="<@spring.message 'action.disable'/>" ${(record.value=='0')?string('checked','')}>
+      				<input type="radio" name="value" value="1" title="<@spring.message 'action.enable'/>" ${(record.value=='1')?string('checked','')}>	
+      			<#elseif record.code=='SYS_LOGIN_PAGE'>
+      				<!-- <input type="radio" name="value" value="login/login_lenovo" title="Lenovo" ${(record.value=='login/login_lenovo')?string('checked','')}> -->
+      				<select name="value"  lay-verify="required" >
+				   		<option value="login/login_lenovo" ${(record.value=='login/login_lenovo')?string('selected','')} >LOGIN1</option>
+				   		<option value="login/login_shen" ${(record.value=='login/login_shen')?string('selected','')} >LOGIN2</option>
+				   		<option value="login/login_xdf" ${(record.value=='login/login_xdf')?string('selected','')} >LOGIN3</option>
+				   		<option value="login/login_edu" ${(record.value=='login/login_edu')?string('selected','')} >LOGIN4</option>
+					</select>
+				<#elseif record.code=='SYS_LOGO'>
+					<!-- <input type="radio" name="value" value="logo_dod" title="DOD" ${(record.value=='logo_dod')?string('checked','')}> -->
+					<select name="value"  lay-verify="required" >
+				   		<option value="logo_dod" ${(record.value=='logo_dod')?string('selected','')} >DOD</option>
+					</select>
+				<#else>
+				<input type="text" name="value" id= "value" value="${(record.value)!}" lay-verify="required" placeholder="<@spring.message 'tips.input'/>..."
+					autocomplete="off" class="layui-input wide-input">
+				</#if>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label"><@spring.message 'list.describe'/></label>
+			<div class="layui-input-inline" style="width:50%">
+				<textarea placeholder="<@spring.message 'tips.input'/>..." class="layui-textarea" name="remark" id= "remark" >${(record.remark)!}</textarea>
+			</div>
+		</div>
+	</div>
+</form>
+
+<script type="text/javascript">
+	function init (parentNode) {
+		
+	}
+	
+	function check() {
+		var selectors = ["#name"];
+		var result = true;
+		$.each(selectors,function(index, rec){
+			if (!checkField(rec)) {
+				result = false;
+				return false;//调出循环
+			}
+			
+		});
+  		return result;
+  	}
+  	
+  	function checkField(selector){
+  		var value = $(selector).val();
+  		if (value==null || value == '') {
+  			$(selector).addClass("layui-form-danger");
+  			$(selector).focus();
+  			layer.tips('<@spring.message "tips.inputSome"/>', selector);
+  			return false;
+  		} else {
+  			return true;
+  		}
+  	}
+	
+	function getData(){
+		if (check()) {
+			return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+  	}
+	
+	layui.use([ 'form', 'layedit', 'laydate' ],function() {
+		var form = layui.form, 
+			layer = layui.layer, 
+			layedit = layui.layedit, 
+			laydate = layui.laydate;
+	});
+</script>

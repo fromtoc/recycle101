@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<meta http-equiv="keywords" content="">
+<meta http-equiv="description" content="">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<style>
+    .btn-blockquote{
+        display: inline-block;
+        border-left: 5px solid #539fff;
+        line-height: 0px;
+        font-size: 10pt;
+    }
+    .layui-tab-title li{
+		display: block !important;
+    }
+    .layui-tab-title{
+      border-color: #fff;
+	}
+	.layui-tab-brief>.layui-tab-more li.layui-this:after, .layui-tab-brief>.layui-tab-title .layui-this:after{
+	    border: none; 
+	    border-radius: 0; 
+		border-right: 2px solid #5FB878 !important; 
+		border-bottom:0px !important;
+	}
+	.layui-tab-brief > .layui-tab-title .layui-this {
+	    background-color: #b3d4fc;
+	}
+	.testWdith{
+    width: 110px !important;
+}
+.btnWdith{
+	width: 85px !important;
+	margin-top: 4px;
+}
+.inpWdith{
+	height:35px !important;
+	margin-top: 2px;
+	border: none;
+}
+.lineHeight{
+	margin-bottom: 0px !important;
+}
+#preferenceDiv{
+   	width: 800px;
+    height: 250px;
+    padding: 0px 0px 0px 35px;
+    margin: 30px;
+    border: 1px solid #1E9FFF;
+    border-radius: 4px;
+}
+#languageDiv{
+	width: 800px;
+    height: 100px;
+    padding: 0px 0px 0px 35px;
+    margin: 30px;
+    border: 1px solid #1E9FFF;
+    border-radius: 4px;
+}
+span.title{
+    display: block;
+    width: 110px;
+    height: 30px;
+    position: relative;
+    top: -20px;
+    text-align: center;
+    background: white;
+    font-size: 20px;
+    margin-left: -16px;
+}
+.layui-input-inline{
+	width: 190px !important;
+}
+.layui-colorDiv{
+	float: left;
+	width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+    border-radius: 2px;
+    cursor: pointer;
+}
+.myicon-tick-checked {
+	position: relative;
+}
+
+.myicon-tick-checked:before, .myicon-tick-checked:after{
+	content: '';
+	pointer-events: none;
+	position: absolute;
+	color: white;
+	border: 1px solid;
+	background-color: white;
+}
+
+.myicon-tick-checked:before{
+	width: 5px;
+    height: 1px;
+    left: 10%;
+    top: 60%;
+    transform: skew(2deg,54deg);
+}
+.myicon-tick-checked:after {
+    width: 9px;
+    height: 1px;
+    left: 42%;
+    top: 49%;
+    transform: skew(0deg,-56deg);
+}
+
+</style>
+</head>
+<body>
+<form id="form_setting" class="layui-form" action="" >
+	<input type="hidden" id="id" name="id" value="${userSetting.id}" />
+	<input type="hidden" id="uid" name="uid" value="${info.id}" />
+	<div class="layui-tab layui-tab-brief" style="padding: 0px 0px 0px 27px;" >
+          <ul class="layui-tab-title" style="float: left;width: 15% !important;border-right-width: 1px;border-right-style: solid;border-bottom-width: 0px;top: 28px;height:100%;">
+              <li class="layui-this"><@spring.message 'PreferredItem'/></li>
+              <li><@spring.message 'homepageStyle'/></li>
+              <li><@spring.message 'msgNotice'/></li>
+          </ul>
+          <div class="layui-tab-content" style="float: left;width: 75% !important;">
+			<div class="layui-tab-item layui-show" id="preferenceHTML" style="height:100%;">
+			    <div id="preferenceDiv">
+					<span class="title"><@spring.message "Home_page_settings"/></span>
+					<div>
+						<div class="layui-form-item lineHeight">
+							<div class="layui-inline">
+								<input type="radio" lay-filter="preferenceType" name="preferenceType" ${(info.preferenceType=='orgHome')?string('checked','')} value="orgHome" title="<@spring.message 'Organization_front_page'/>">
+								<blockquote class="layui-elem-quote btn-blockquote"><@spring.message 'tips.attention'/>:<@spring.message 'personSetting.mainOrganizationAsStandard'/></blockquote>
+							</div>
+						</div>
+						<div class="layui-form-item lineHeight">
+							<div class="layui-inline">
+								<input type="radio" lay-filter="preferenceType" ${(info.preferenceType=='favorites')?string('checked','')} name="preferenceType" value="favorites" title="<@spring.message 'Favorites'/>">
+							</div>
+						</div>
+						<div class="layui-form-item lineHeight">
+							<div class="layui-inline">
+								<input type="radio" lay-filter="preferenceType" ${(info.preferenceType=='personalPage')?string('checked','')} name="preferenceType" value="personalPage" title="<@spring.message 'personal_homepage'/>">
+							</div>
+						</div>
+						<div class="layui-form-item lineHeight">
+							<div class="layui-inline">
+								<div class="layui-input-inline testWdith">
+									<input type="radio" lay-filter="preferenceType" ${(info.preferenceType=='catalogue')?string('checked','')} name="preferenceType" value="catalogue" title="<@spring.message 'Catalog'/>">
+								</div>
+								<div class="layui-input-inline btnWdith">
+									<!-- <div title="<@spring.message 'Select_directory'/>" onclick="preferenceValueChoose()" ><div style="height: 25px;width: 25px;background-color: #9E9E9E;"><i class="layui-icon" style="font-size: 25px;line-height: 23px;">&#xe642;</i></div></div> -->
+									<div><i  title="<@spring.message 'Select_directory'/>" onclick="preferenceValueChoose()"  class="fa fa-edit font-fa" style="font-size: 22px;line-height: 33px;cursor:pointer" ></i></div>
+									<!-- <button type="button" id="directoryChoose" class="layui-btn layui-btn-sm layui-btn-normal"><@spring.message 'Select_directory'/></button> -->
+								</div>
+								<div class="layui-input-inline">
+									<input type="text" id="preferenceValue_catalogue" value="${(info.preferenceType=='catalogue')?string(menu.name,'')}" name="preferenceValue" readonly autocomplete="off" class="layui-input inpWdith">
+									<input type="hidden" name="preferenceValue_hidden" id="preferenceValue_catalogue_hidden" readonly >
+								</div>
+							</div>
+						</div>
+						<div class="layui-form-item lineHeight">
+							<div class="layui-inline">
+								<div class="layui-input-inline testWdith">
+									<input type="radio" lay-filter="preferenceType" ${(info.preferenceType=='docObject')?string('checked','')} name="preferenceType" value="docObject" title="<@spring.message 'Document_object'/>">
+								</div>
+								<div class="layui-input-inline btnWdith">
+									<div><i class="fa fa-edit font-fa" title="<@spring.message 'Select_document'/>" onclick="preferenceValueChoose()" style="font-size: 22px;line-height: 33px;cursor:pointer"></i></div>
+									<!-- <button type="button" id="documentChoose" class="layui-btn layui-btn-sm layui-btn-normal"><@spring.message 'Select_document'/></button> -->
+								</div>
+								<div class="layui-input-inline">
+									<input type="text" id="preferenceValue_docObject" value="${(info.preferenceType=='docObject')?string(menu.name,'')}" name="preferenceValue" readonly  autocomplete="off" class="layui-input inpWdith">
+									<input type="hidden" name="preferenceValue_hidden" id="preferenceValue_docObject_hidden" readonly >
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="languageDiv">
+					<span class="title"><@spring.message 'Language_settings'/></span>
+					<div>
+						<div class="layui-form-item lineHeight">
+							<div class="layui-inline">
+								<input type="radio" lay-filter="locale" ${(info.locale=='zh_CN')?string('checked','')} name="locale" value="zh_CN" title="<@spring.message 'sysConfig.langTypeCN'/>">
+								<input type="radio" lay-filter="locale" ${(info.locale=='zh_TW')?string('checked','')} name="locale" value="zh_TW" title="<@spring.message 'sysConfig.langTypeTW'/>">
+								<input type="radio" lay-filter="locale" ${(info.locale=='en_US')?string('checked','')} name="locale" value="en_US" title="English">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="layui-tab-item" id="homepageStyleHTML"  style="height:100%;">
+			    <div class="layui-card" >
+					<div class="layui-card-header"><@spring.message 'config.Navigation_Bar_Style'/></div>
+					<div class="layui-card-body">
+						<div class="layui-form-item">
+							<div class="layui-inline">
+								<img class="" src="${basePath}/images/theme_default.png" style="width:277px;height:127px;margin-right: 37px;"><br>
+								<div style="margin-left:77px;">
+									<div name="navigaStyle" id="theme_default" value="theme_default" onclick="theme(this)" class="layui-unselect layui-form-checkbox ${(userSetting.navigaStyle=='theme_default')?string('layui-form-checked','')}">
+										<span><@spring.message 'config.Lateral_Navigation'/></span><i class="layui-icon layui-icon-ok"></i>
+									</div>
+								</div>
+							</div>
+							<div class="layui-inline">
+								<img class="" src="${basePath}/images/theme_left_shen.png" style="width:277px;height:127px;margin-right: 37px;"><br>
+								<div style="margin-left:77px;">
+									<div name="navigaStyle" id="theme_left_shen" value="theme_left_shen" onclick="theme(this)" class="layui-unselect layui-form-checkbox ${(userSetting.navigaStyle=='theme_left_shen')?string('layui-form-checked','')}">
+										<span><@spring.message 'config.Longitudinal_navigation'/>1</span><i class="layui-icon layui-icon-ok"></i>
+			                        </div>
+			                    </div>
+			                </div>
+							<div class="layui-inline">
+								<img class="" src="${basePath}/images/theme_left_black.png" style="width:277px;height:127px;margin-right: 37px;"><br>
+								<div style="margin-left:77px;">
+									<div name="navigaStyle" id="theme_left_black" value="theme_left_black" onclick="theme(this)" class="layui-unselect layui-form-checkbox ${(userSetting.navigaStyle=='theme_left_black')?string('layui-form-checked','')}">
+										<span><@spring.message 'config.Longitudinal_navigation'/>2</span><i class="layui-icon layui-icon-ok"></i>
+									</div>
+								</div>
+							</div>
+							<div class="layui-inline">
+								<img class="" src="${basePath}/images/theme_left_admin.png" style="width:277px;height:127px;margin-right: 37px;"><br>
+								<div style="margin-left:77px;">
+									<div name="navigaStyle" id="theme_left_admin" value="theme_left_admin" onclick="theme(this)" class="layui-unselect layui-form-checkbox ${(userSetting.navigaStyle=='theme_left_admin')?string('layui-form-checked','')}">
+										<span><@spring.message 'config.Longitudinal_navigation'/>3</span><i class="layui-icon layui-icon-ok"></i>
+									</div>
+								</div>
+							</div>		
+						</div> 
+					</div>
+				</div>
+				<!-- 主题颜色暂时还没有开发 -->
+				<!-- <div class="layui-card" >
+					<div class="layui-card-header"><@spring.message 'themeStyle'/></div>
+					<div class="layui-card-body">
+						<div class="layui-inline">	
+							<div class="layui-colorDiv ${(userSetting.themeStyle=='rgb(250, 173, 20)')?string('myicon-tick-checked','')}" name="themeStyle" title="日暮" onclick="chooseThemeStyle(this)" style="background-color: rgb(250, 173, 20);"></div>
+							<div class="layui-colorDiv ${(userSetting.themeStyle=='rgb(24, 144, 255)')?string('myicon-tick-checked','')}" name="themeStyle" title="拂晓蓝" onclick="chooseThemeStyle(this)" style="background-color: rgb(24, 144, 255);" ></div>
+							<div class="layui-colorDiv ${(userSetting.themeStyle=='rgb(47, 84, 235)')?string('myicon-tick-checked','')}" name="themeStyle"  title="极客蓝" onclick="chooseThemeStyle(this)" style="background-color: rgb(47, 84, 235);" ></div>
+						</div> 
+					</div>
+				</div> -->
+			</div>
+			
+			<div class="layui-tab-item" id="noticeSettingHTML" style="height:100%;">
+				<div class="layui-card" >
+					<div class="layui-card-header"><@spring.message 'mewMsgNotice'/></div>
+					<div class="layui-card-body">
+						<div class="layui-form-item">
+							<label class="layui-form-label" style="text-align: left;width:30%;line-height: 25px;">
+								<@spring.message 'systemMsg'/>
+								<span style="display:block;color: #ccc;"><@spring.message 'systemMsg'/> <@spring.message 'of_standing_letter'/></span>
+							</label>
+							<div class="layui-inline" style="width:30%;">
+								<div class="layui-input-block" style="margin-top: 15px;">
+									<input type="checkbox" name="systemMsg" id="systemMsg" lay-skin="switch" ${(userSetting.systemMsg==1)?string('checked','')} lay-filter="switchListen" lay-text="<@spring.message 'userInfo.open'/>|<@spring.message 'userInfo.close'/>" >
+								</div>
+				           	</div>
+						</div>
+					</div>	
+					<div class="layui-card-body">
+						<div class="layui-form-item">
+							<label class="layui-form-label" style="text-align: left;width:30%;line-height: 25px;">
+								<@spring.message 'CommentMsg'/>
+								<span style="display:block;color: #ccc;"><@spring.message 'CommentMsg'/> <@spring.message 'of_standing_letter'/></span>
+							</label>
+							<div class="layui-inline" style="width:30%;">
+								<div class="layui-input-block" style="margin-top: 15px;">
+									<input type="checkbox" name="commentMsg" id="commentMsg" lay-skin="switch" ${(userSetting.commentMsg==1)?string('checked','')} lay-filter="switchListen" lay-text="<@spring.message 'userInfo.open'/>|<@spring.message 'userInfo.close'/>" >
+								</div>
+				           	</div>
+						</div>
+					</div>
+					<div class="layui-card-body">
+						<div class="layui-form-item">
+							<label class="layui-form-label" style="text-align: left;width:30%;line-height: 25px;">
+								<@spring.message 'noticeMsg'/>
+								<span style="display:block;color: #ccc;"><@spring.message 'noticeMsg'/> <@spring.message 'of_standing_letter'/></span>
+							</label>
+							<div class="layui-inline" style="width:30%;">
+								<div class="layui-input-block" style="margin-top: 15px;">
+									<input type="checkbox" name="noticeMsg" id="noticeMsg" lay-skin="switch" ${(userSetting.noticeMsg==1)?string('checked','')} lay-filter="switchListen" lay-text="<@spring.message 'userInfo.open'/>|<@spring.message 'userInfo.close'/>" >
+								</div>
+				           	</div>
+						</div>
+					</div>	
+					<div class="layui-card-body">
+						<div class="layui-form-item">
+							<label class="layui-form-label" style="text-align: left;width:30%;line-height: 25px;">
+								<@spring.message 'issueMsg'/>
+								<span style="display:block;color: #ccc;"><@spring.message 'issueMsg'/> <@spring.message 'of_standing_letter'/></span>
+							</label>
+							<div class="layui-inline" style="width:30%;">
+								<div class="layui-input-block" style="margin-top: 15px;">
+									<input name="issueMsg" id="issueMsg" type="checkbox" lay-skin="switch" ${(userSetting.issueMsg==1)?string('checked','')} lay-filter="switchListen" lay-text="<@spring.message 'userInfo.open'/>|<@spring.message 'userInfo.close'/>" >
+								</div>
+				           	</div>
+						</div>
+					</div>
+				</div>
+			</div>
+    	  </div>
+	</div>
+</form>	
+</body>
+<script type="text/javascript">
+	layui.use(['form','layer','element'], function(){
+		var form=layui.form ,layer = layui.layer ,element = layui.element; 
+		form.on('switch(switchListen)', function(data){
+		    var value = '0';
+		    if(this.checked==true){
+		        value="1";
+		    }
+		    var code = data.elem.name;
+		    changeUserSetting(code,value);
+		});
+		form.on('radio(preferenceType)', function (data) {
+			var code = data.elem.name;
+			var nowType = data.value;
+			if(nowType=="catalogue" || nowType=="docObject"){
+				showChooseObject(code,nowType);
+			}else{
+				updateUserInfo(code,nowType,"","");
+			}
+		});
+		form.on('radio(locale)', function (data) {
+			var code = data.elem.name;
+			var type = data.value;
+			updateUserInfo(code,type,"","");
+		});
+	});
+	
+	function updateUserInfo(code,type,key,value){
+		var uid = $("#uid").val();
+		var data = {id:uid};
+		data[code]=type;
+		if(type=="catalogue" || type=="docObject"){
+			data[key]=value;
+		}
+		$.ajax({
+	        type: "POST",
+	        url:'${basePath}/userInfo/updatePersonalRecord',
+	        data:data,
+	        error: function(request) {
+	        	deletepreferenceValue(type)
+	            parent.layer.msg('<@spring.message "result.fail"/>！');
+	        },
+	        success: function(result) {
+	        	if(result.code==0){
+	        		deletepreferenceValue(type)
+	        		if(code=="locale"){
+	        			layer.msg('<@spring.message "language_setting_success_please_refresh"/>！');
+	        		}else{
+	        			layer.msg('<@spring.message "result.success"/>！');
+	        		}
+	        	}else{
+	        		deletepreferenceValue(type)
+	        		parent.layer.msg('<@spring.message "result.fail"/>！');
+	        	}
+	        }
+	    });
+	}
+
+	function preferenceValueChoose(type){
+		var preferenceType = $("input[name='preferenceType']:checked").val();
+		if(preferenceType =="catalogue" || preferenceType =="docObject"){
+			showChooseObject('preferenceType',preferenceType);
+		}else{
+			parent.layer.msg('<@spring.message "Please_select_the_catalogue"/>');
+		}
+	}
+
+	function showChooseObject(code,type){
+		var typeId = type=="catalogue"?1:2;
+		parent.layer.open({
+			title: '<@spring.message "Document_object_selection"/>',
+			type:2,
+			content:'${basePath}/menu/selctMenu/'+typeId,
+			area: ['700px', '550px'],
+		    btn:['<@spring.message"action.ok"/>','<@spring.message"action.cancel"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init();
+			},
+			yes:function(index,layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				var data = iframeWin.getData();
+				if(data){
+					//删除所有的input
+					$("input[name='preferenceValue_hidden']").each(function(){$(this).val('')});
+					$("input[name='preferenceValue']").each(function(){$(this).val('')});
+					//设置当前选中的值
+					$('#preferenceValue_'+type).val(data[0].name);
+					$('#preferenceValue_'+type+'_hidden').val(data[0].id);
+					//保存
+					updateUserInfo(code,type,"preferenceValue",data[0].id);
+					parent.layer.close(index);
+				}else{
+					parent.layer.msg("<@spring.message 'Unselected_content'/>");
+				}
+			}
+		})
+	}
+
+
+	function deletepreferenceValue(type){
+		if(type!="catalogue" && type!="docObject"){
+			$("input[name='preferenceValue_hidden']").each(function(){$(this).val('')});
+			$("input[name='preferenceValue']").each(function(){$(this).val('')});
+		}
+	}
+
+	function theme(obj){
+	    var code = $(obj).attr("name");
+	    var value = $(obj).attr("value");
+	    var id = "#"+$(obj).attr("id");
+	    var arr  = $('div[name='+code+']');
+	    for(var i=0;i<arr.length;i++){
+	        $(arr[i]).removeClass("layui-form-checked");
+	    }
+	    $(id).addClass("layui-form-checked");
+	    changeUserSetting(code,value);
+	}
+
+	function chooseThemeStyle(obj){
+		var code = $(obj).attr("name");
+	    var value = obj.style.backgroundColor;
+		var allClass = $(".layui-colorDiv");
+		for(var i = 0; i < allClass.length; i++){
+			if(allClass[i].getAttribute('class').indexOf('myicon-tick-checked') > -1){
+				allClass[i].setAttribute('class',allClass[i].getAttribute("class").replace('myicon-tick-checked',' '));
+			}
+		}
+		obj.setAttribute('class',obj.getAttribute("class").concat(' myicon-tick-checked'));
+		changeUserSetting(code,value);
+	}
+
+	function changeUserSetting(code,value){
+		var id = $("#id").val();
+		var data = {'id':id};
+		data[code]=value;
+		$.ajax({
+	        type: "POST",
+	        url:'${basePath}/userSetting/update',
+	        data:data,
+	        error: function(request) {
+	        	parent.layer.msg("<@spring.message 'result.fail'/>");
+	        },
+	        success: function(result) {
+	        	if(result.code==0){
+	        		parent.layer.msg("<@spring.message 'result.success'/>");
+	        		parentPageReaload();
+	        	}else{
+	        		parent.layer.msg("<@spring.message 'result.fail'/>");
+	        	}
+	        }
+	    });
+	}
+	function parentPageReaload(){
+		//parent.location.reload();
+	}
+</script>	
+</html>

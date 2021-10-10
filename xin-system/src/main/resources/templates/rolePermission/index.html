@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<#include "common/common.html" />
+	<#include "common/common_table.html" />
+	<#include "common/common_ztree.html" />
+	<style>
+		.resource-form{
+			margin: 0 auto;
+			/* width:60%; */
+		}
+		.resouce-name{
+			float:left;
+			/* width: 70%; */
+			width: 170px;
+			text-align: left;
+			word-break: keep-all;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		.resouce-box{
+			float: right;
+		}
+		.permission-form{
+			width:80%;
+			float:left;
+			text-align: left;
+		}
+		.permission-box{
+			float: left;
+		}
+		.layui-tab .layui-form-checked span, .layui-tab .layui-form-checked:hover span {
+			background-color: #fff!important;
+		}
+		.table {table-layout:fixed;}
+	</style>
+	<script type="text/javascript">
+        var resourceTypeList = [];
+        layui.use([ 'form','element','treeSelect'],function() {
+            var form = layui.form,
+                element = layui.element,
+                treeSelect = layui.treeSelect;
+
+            function formatResourceType(value,row,index) {
+                if (value!=null && value!=''){
+                    return treeSelect.zTree('type').getNodeByParam('id',value).name;
+
+                }
+                //return zTree.getNodesByParam("id", value, null)[0].name;
+            }
+
+            $('#query').on('click',function(){
+                var name =   $.trim($('#name').val());
+                var showType = $('#showType').val();
+                var t1 = $("#NowresourceType1").val();
+                var t2 = $("#NowresourceType2").val();
+                var code = $('#permissionCode').val();
+                if(t1 != null && t2 != ""){
+                    $('#table_'+showType).bootstrapTable('refresh', {query: {name: name,resourceType2:t2,permissionCode:code}});
+                }else if(t1 != null && t2 == ""){
+                    $('#table_'+showType).bootstrapTable('refresh', {query: {name: name,resourceType1:t1,permissionCode:code}});
+                }
+            });
+
+            function NowResourceType(){
+            	var name =   $.trim($('#name').val());
+                var t1 = $("#NowresourceType1").val();
+                var t2 = $("#NowresourceType2").val();
+                var showType = $('#showType').val();
+                var code = $('#permissionCode').val();
+                if(t1 != null && t2 != ""){
+                    $('#table_'+showType).bootstrapTable('refresh', {query: {name: name,resourceType2:t2,permissionCode:code}});
+                }else if(t1 != null && t2 == ""){
+                    $('#table_'+showType).bootstrapTable('refresh', {query: {name: name,resourceType1:t1,permissionCode:code}});
+                }
+            };
+
+            $('.reset').on('click',function(){
+                $('#query_form')[0].reset();
+                $("input[type='hidden']").val("");
+            });
+
+            //监听锁定操作
+            form.on('checkbox(all)', function(obj){
+                var data={
+
+                    resourceId:$(this).attr('data-resourceId'),
+                    permissionId:$(this).attr('data-permissionId'),
+                    code:$(this).attr('data-code'),
+                    roleId:$('#checkedId').val()
+                };
+                if (!obj.elem.checked) {
+                    delete data.permissionId;
+                }
+                var resourceType1 = $(this).attr('data-resourceType1');
+                $.post('${basePath}/rolePermission/saveAll',data,function(result){
+                    $('#table_'+resourceType1).bootstrapTable('refresh');
+                    $('#table_all').bootstrapTable('refresh');
+                    if(result.code==0){
+                    	parent.layer.msg('<@spring.message "result.saveSuccess"/>');
+                    }else{
+                    	parent.layer.msg('<@spring.message "result.saveFail"/>');
+                    }
+                });
+            });
+            form.on('checkbox(perms)', function(obj){
+                if ($('#checkedId').val()==null||$('#checkedId').val()=='') {
+                    parent.layer.msg('<@spring.message "permissions.Choose_roles_first"/>');
+                    $(this).attr("checked",!obj.elem.checked);
+                    return ;
+                }
+                var data={
+                    id:$(this).attr('data-id'),
+                    resourceId:$(this).attr('data-resourceId'),
+                    permissionId:$(this).attr('data-permissionId'),
+                    code:$(this).attr('data-code'),
+                    roleId:$('#checkedId').val()
+                };
+                var resourceType1 = $(this).attr('data-resourceType1');
+                var showType = $('#showType').val();
+                if (obj.elem.checked) {
+                    $.post('${basePath}/rolePermission/save',data,function(result){
+                        if (showType=='all') {
+                            $('#table_'+resourceType1).bootstrapTable('refresh');
+                        } else {
+                            $('#table_all').bootstrapTable('refresh');
+                        }
+                        if(result.code==0){
+                        	parent.layer.msg('<@spring.message "result.saveSuccess"/>');
+                        }else{
+                        	parent.layer.msg('<@spring.message "result.saveFail"/>');
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: '${basePath}/rolePermission/delete',
+                        data:{resourceId:data.resourceId,permissionId:data.permissionId,roleId:data.roleId},
+                        type: 'POST',
+                        success:function(result){
+                            if (showType=='all') {
+                                $('#table_'+resourceType1).bootstrapTable('refresh');
+                            } else {
+                                $('#table_all').bootstrapTable('refresh');
+                            }
+                            if(result.code==0){
+                            	parent.layer.msg('<@spring.message "result.deleteSuccess"/>');
+                            }else if(result.code==-2){
+                            	parent.layer.msg('<@spring.message "rolePermission.parameterError"/>');
+                            }else{
+                            	parent.layer.msg('<@spring.message "result.deleteFail"/>');
+                            }
+                        }
+                    });
+                }
+				
+            });
+
+            $('table').on('load-success.bs.table',function(e, data){
+                form.render('checkbox');
+            });
+
+            /* element.on('tab(permissionTab)', function(data){
+                $('#showType').val(this.getAttribute('lay-id'));
+            }); */
+            
+            element.on('tab(permissionTab)', function(data){
+            	var typeId = this.getAttribute('lay-id');
+            	var typeParentId = this.getAttribute('data-parentId');
+                if(typeParentId == '0' || typeParentId == 'all'){//加载第二级节点
+                	$('#showType').val(typeId);
+                	$('#resource_type2_tab').empty();//置空容器重新加载
+                	
+                	var _html = '<input type="radio" name="type2" value="all_type2" title="<@spring.message "list.all"/>" checked="" lay-filter="resourceType2Radio">';
+                	if(typeParentId == '0'){
+                		var type2Data = getResourceTypeData(typeId);
+                		if(type2Data != null && typeof type2Data != 'undefined'){
+	                		for(var i = 0; i < type2Data.length; i++){
+	                			_html += '<input type="radio" name="type2" value="'+type2Data[i].id+'" title="'+type2Data[i].name+'" lay-filter="resourceType2Radio">';
+	                    	}
+                		}
+                	}
+                	$('#resource_type2_tab').html(_html);
+                	form.render();
+                	$("#NowresourceType2").val("");//触发事件
+                	NowResourceType();
+                }
+            });
+            
+            form.on('radio(resourceType2Radio)', function(data){
+            	var typeId = data.value;
+               	if(typeId == 'all_type2'){//触发事件 resourceType1
+               		$("#NowresourceType2").val("");
+               	}else{//触发事件 resourceType2
+               		$("#NowresourceType2").val(typeId);
+               	}
+               	NowResourceType();
+            })
+            
+            function getResourceTypeData(parentId){
+            	var res;
+            	$.ajax({
+                    type:'GET',
+                    url:'${basePath}/resourceType/list?parentId='+parentId,
+                    async:false,
+                    success:function(result){
+                    	res = result.list;
+                    }
+                });
+            	return res;
+            }
+
+            /* $.ajax({
+                type:'GET',
+                url:'${basePath}/resourceType/list',
+                success:function(result){
+                    var treeData = utils.toTreeData(result.list);
+                    treeSelect.render({
+                        // 选择器
+                        elem: '#resourcetype',
+                        // 数据
+                        data: treeData,
+                        // 异步加载方式：get/post，默认get
+                        type: 'get',
+                        // 占位符
+                        placeholder: '<@spring.message "banner.Selection_of_resource_types"/>',
+                        // 是否开启搜索功能：true/false，默认false
+                        search: true,
+                        view:{
+                            showIcon:false,
+                        },
+                        // 点击回调
+                        click: function(d){
+                            var parentNode = treeSelect.zTree('resourcetype').getNodeByParam('id',d.current.parentId);
+                            if (parentNode!=null) {
+                                $('#NowresourceType1').val(parentNode.id);
+                                $('#NowresourceType2').val(d.current.id);
+
+                            } else {
+                                $('#NowresourceType1').val(d.current.id);
+
+                            }
+                            NowResourceType();
+                        },
+                        // 加载完成后的回调函数
+                        success: function (d) {
+
+                        }
+                    });
+                }
+            }); */
+            
+
+        })
+        
+        //是否是测试用户
+        var isTestRole = "<@shiro.hasRole name='role_test' >true</@shiro.hasRole>" ? true : false;
+
+        function nameFormatter(value,row,index){
+            var permissionsArr = new Array();
+            var all = $('#checkedId').val()===''?false:true;
+            if (row.permissions!=null && row.permissions.length>0) {
+                for (var i=0;i<row.permissions.length;i++) {
+                    permissionsArr.push(row.permissions[i].id+'_'+row.permissions[i].code);
+
+                    if (row.permissions[i].rolePermissionId==null||row.permissions[i].rolePermissionId=='') {
+                        all = (all && false);
+                    }
+
+                }
+            } else {
+                return value;
+            }
+            var checked = all?'checked':'';
+            var disabled = $('#checkedId').val()!=''?'':'disabled';
+            if (isTestRole) {
+                disabled = 'disabled';
+            }
+            if(getSelectedCode()=='role'){
+                disabled = 'disabled';
+            }
+            var permission = permissionsArr.join(',');
+            var attrStr = ' data-resourceId="'+row.id+'"'
+                + ' data-permissionId="'+permission+'"'
+                + ' data-resourceType1="'+row.resourceType1+'"'
+                + ' data-roleId="'+$('#checkedId').val()+'"';
+            var v = '<div class="layui-form resource-form"><span class="resouce-name" title="'+value+'">' +value + '</span>&nbsp;&nbsp;&nbsp;&nbsp;<input class="resouce-box" type="checkbox" name="" title="" lay-filter="all" lay-skin="primary" '+checked+' '+attrStr+' '+disabled+'>'
+                +'</div>';
+            return v;
+        }
+
+        function permFormatter(value,row,index){
+
+            var v = '<div class="layui-form permission-form">';
+            if (row.permissions!=null && row.permissions.length>0) {
+                for (var i=0;i<row.permissions.length;i++) {
+                    var checked = '';
+                    if (row.permissions[i].rolePermissionId!=null&&row.permissions[i].rolePermissionId!=''&&$('#checkedId').val()!='') {
+                        checked = 'checked';
+                    };
+                    var attrStr = ' data-id="'+(row.permissions[i].rolePermissionId==null?'':row.permissions[i].rolePermissionId)+'" '
+                        + ' data-resourceId="'+row.id+'"'
+                        + ' data-permissionId="'+row.permissions[i].id+'"'
+                        + ' data-resourceType1="'+row.resourceType1+'"'
+                        + ' data-code="'+row.permissions[i].code+'"'
+                        + ' data-roleId="'+$('#checkedId').val()+'"';
+                    //console.log(attrStr);
+                    var disabled = $('#checkedId').val()==''?'disabled':'';
+                    if (isTestRole) {
+                        disabled = 'disabled';
+                    }
+                    if(getSelectedCode()=='role'){
+                        disabled = 'disabled';
+					}
+                    v += '<input class="permission-box" type="checkbox" name="" '+attrStr+' title="'+row.permissions[i].name+'" lay-filter="perms" lay-skin="primary" '+checked+' '+disabled+'>'
+                }
+            }
+            v +='</div>';
+            return v;
+        }
+
+
+
+        var zTree,resourceTree,orgTree;
+        var roleTreeSetting = {
+            check: {
+                enable: false
+            },
+            view: {
+                dblClickExpand: false,
+                showLine: true,
+                selectedMulti: false
+            },
+            data: {
+                simpleData: {
+                    enable:true,
+                    idKey: "id",
+                    pIdKey: "parentId",
+                    rootPId: "0"
+                }
+            },
+            async: {
+                enable: true,
+                contentType: "application/json",
+                url: "${basePath}/role/list",
+            },
+            callback: {
+                onClick: zTreeOnClick,
+                onAsyncSuccess: onRoleTreeAsyncSuccess
+            }
+        };
+
+
+        function onRoleTreeAsyncSuccess(){
+            zTree.expandAll(true);
+        }
+
+
+
+        var parentResIds='';
+        function getParentNodes(node,allNode){
+            if(node!=null){
+                if (allNode=='') {
+                    allNode = node['id'];
+                }else {
+                    allNode += ","+node['id'];
+                }
+                curNode = node.getParentNode();
+                getParentNodes(curNode,allNode);
+            }else{
+                //根节点
+                parentResIds = allNode;
+            }
+        }
+
+
+
+
+        $(function(){
+            $.fn.zTree.init($("#tree"), roleTreeSetting);
+            zTree = $.fn.zTree.getZTreeObj("tree");
+            $('#add_user').on('click',function(){
+                addUser();
+            });
+        });
+        
+        function zTreeOnClick(event, treeId, treeNode) {
+            $('#checkedId').val(treeNode.id),
+				$('table').bootstrapTable('refresh');
+            layui.form.render('checkbox');
+
+        }
+
+
+        var checkedResourceIds = '';
+        function zTreeOnClick(event, treeId, treeNode) {
+            $('#checkedId').val(treeNode.id),
+				$('table').bootstrapTable('refresh');
+            layui.form.render('checkbox');
+
+        }
+
+        /* function queryParams(params) {
+            params.roleId = -1;
+            if (zTree!=null) {
+                var nodes = zTree.getSelectedNodes();
+                if (nodes!=null && nodes.length!=0 && nodes[0].id!=1) {
+                    params.roleId = nodes[0].id;
+                }
+            }
+            return params;
+        } */
+
+        function queryResourceParams(params) {
+        	var name =   $.trim($('#name').val());
+        	var type2 = $('#NowresourceType2').val();
+        	var code = $('#permissionCode').val();
+        	if(type2){
+        		params.resourceType2 = type2;
+        	}
+        	if(name){
+        		params.name = name;
+        	}
+        	if(code){
+        		params.permissionCode=code
+        	}
+            if (zTree!=null) {
+                var nodes = zTree.getSelectedNodes();
+                if (nodes!=null && nodes.length!=0) {
+                    params.roleId = nodes[0].id;
+                }
+            }
+            return params;
+        }
+
+        function getSelectedCode(code) {
+            if (zTree!=null) {
+                var nodes = zTree.getSelectedNodes();
+                if (nodes!=null && nodes.length!=0) {
+                    code = nodes[0].code;
+                }
+            }
+            return code;
+        }
+
+
+
+
+        function opeFormatter(value,row,index){
+            var v = '<div class="layui-btn-group layui-btn-group-xs">'
+                +'<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="javascript:remove(\'%\',\'#\')"><i class="icon-info-sign"></i> <@spring.message "action.remove"/></button>'
+                +'</div>';
+            return v.replace(new RegExp(/(%)/g),row.id).replace(new RegExp(/(#)/g),row.username);
+        }
+
+
+
+
+        function addUser(){
+            var nodes = zTree.getSelectedNodes();
+            if (nodes==null || nodes.length==0) {
+                layer.msg('<@spring.message "tips.choosRole"/>！');
+                return;
+            }
+            var isSubmit = false;
+            parent.layer.open({
+                title: '<@spring.message "role.Add_user"/>',
+                type:2,
+                content:'${basePath}/userInfo/select/role?id='+nodes[0].id,
+                //area: ['800px', '700px'],
+                area: ['60%', '75%'],
+                maxmin: true,
+                btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+                success: function(layero){
+                    var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                    iframeWin.init(nodes[0]);
+                },
+                yes:function(index,layero){
+                    if(!isSubmit){
+                        isSubmit = true;
+                        var iframeWin = top.window[layero.find('iframe')[0]['name']];
+                        var data = iframeWin.getData();
+                        if (data==null) {
+                            parent.layer.msg("<@spring.message 'tips.choosUser'/>！");
+                            isSubmit = false;
+                            return;
+                        }
+                        $.ajax({
+                            type: "POST",
+                            url:'${basePath}/roleUser/saveRoleUsersByRoleId',
+                            data:data,
+                            async: false,
+                            error: function(request) {
+                                parent.layer.msg('<@spring.message "result.addFail"/>！');
+                                isSubmit = false;
+                            },
+                            success: function(result) {
+                                if(result.code==0){
+                                    parent.layer.close(index);
+                                    layer.msg('<@spring.message "result.addSuccess"/>！');
+                                    $('#table').bootstrapTable('refresh', null);
+                                }else{
+                                	layer.msg('<@spring.message "result.addFail"/>！');
+                                    isSubmit = false;
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        function remove(id,username) {
+            var nodes = zTree.getSelectedNodes();
+            var name = '';
+            if (nodes!=null && nodes.length!=0 && nodes[0].id!=1) {
+                name = nodes[0].name;
+            } else {
+                layer.msg('<@spring.message "permissions.Loss_of_user_role_information"/>！');
+                return;
+            }
+            layer.confirm('<@spring.message "role.from"/>【'+name+'】<@spring.message "role.Remove_users_from_roles"/>【'+username+'】？', {title:'<@spring.message "action.info"/>',
+                btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+                yes: function(index, layero){
+                    $.post('${basePath}/roleUser/delete',{userId:id,roleId:nodes[0].id},function(result){
+                    	layer.close(index);
+                    	if(result.code==0){
+                        	$('#table').bootstrapTable('refresh', null);
+                        	parent.layer.msg('<@spring.message "result.deleteSuccess"/>');
+                        }else{
+                        	parent.layer.msg('<@spring.message "result.deleteFail"/>');
+                        }
+                    });
+                }
+            });
+        }
+        
+        function initTree(){
+    		//var treeHeight = $('body').height()-$('.mycontent').offset().top;
+    		var treeHeight = document.documentElement.clientHeight-$('.layui-row').offset().top-10;
+    		$('#tree').height(treeHeight);
+    	}
+
+	</script>
+
+</head>
+
+<body onload="initTree()">
+<div class="layui-fluid">
+	<@system.path id="${menuId!}"></@system.path>
+<div class="layui-row">
+	<div class="layui-col-md2">
+		<ul id="tree" class="ztree" style="overflow:auto;"></ul>
+	</div>
+	<div class="layui-col-md10" style="padding-top: 5px;">
+		<input type="hidden" id="showType" value="all"/>
+		<input type="hidden"  id="NowresourceType1"  name="NowresourceType1" lay-filter="NowresourceType1" autocomplete="off"  class="layui-input"  >
+		<input type="hidden"  id="NowresourceType2"  name="NowresourceType2" lay-filter="NowresourceType2" autocomplete="off"  class="layui-input"  >
+		<form id="query_form" class="layui-form layui-form-pane" style="padding-bottom: 5px;">
+			<div class="layui-inline">
+				<!--<div class="layui-input-inline">
+					<input type="text" id="resourcetype" lay-filter="resourcetype" name="resourcetype" placeholder="<@spring.message 'permissions.Search_resource_type'/>"
+						   autocomplete="off" class="layui-input">
+				</div>-->
+				<label class="layui-form-label"><@spring.message 'comment.Resource_name'/></label>
+					<div class="layui-input-inline">
+						<input type="text" id="name" name="name" placeholder="<@spring.message 'permissions.Search_for_resource_names'/>"
+							   autocomplete="off" class="layui-input">
+					</div>
+				</div>
+			<div class="layui-inline">
+			    <label class="layui-form-label"><@spring.message 'permissions.view_permission'/></label>
+			  	<div class="layui-input-inline">
+			  		<select id="permissionCode" name="permissionCode" class="layui-inline" >
+						<option  value="" selected><@spring.message 'list.all'/></option>
+						<option  value="view"><@spring.message 'permissions.view'/></option>
+						<option  value="noview"><@spring.message 'permissions.no_view'/></option>
+					</select>
+				</div>
+			</div>
+			<div class="layui-inline">
+				<div class="layui-input-inline" >
+				<button type="button" id="query" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon" style="position: relative;top: 1px;font-size: 20px;">&#xe615;</i><@spring.message 'action.query'/></button>
+				<button type="button" class="reset layui-btn layui-btn-sm layui-btn-normal"><i class="glyphicon glyphicon-refresh"></i> <@spring.message 'action.reset'/></button>
+				</div>
+			</div>
+			
+		</form>
+		<div class="layui-tab" lay-filter="permissionTab" style="-webkit-box-sizing: initial;">
+			<ul class="layui-tab-title layui-tab-brief">
+				<li class="layui-this" style="-webkit-box-sizing: initial;" data-parentId="all" lay-id="all"><@spring.message "list.all"/></li>
+				<#list resourceTypeList as rec>
+					<li style="-webkit-box-sizing: initial;" data-parentId="${rec.parentId}" lay-id="${rec.id}">${rec.name}</li>
+				</#list>
+			</ul>
+			<div class="layui-form layui-form-pane" id="resource_type2_tab">
+		    	<input type="radio" name="type2" value="all_type2" title="<@spring.message 'list.all'/>" checked="" lay-filter="resourceType2Radio">
+		  	</div> 
+			<input type="hidden" id="checkedId" />
+			<div class="layui-tab-content">
+				<div class="layui-tab-item layui-show">
+					<table id="table_all"
+						   data-toggle="table"
+						   data-search="false"
+						   data-side-pagination="server"
+						   data-pagination="true"
+						   data-page-list="[10]"
+						   data-query-params-type=""
+						   data-url="${basePath}/resource/pageResourcePerm"
+						   data-query-params="queryResourceParams"
+					>
+						<thead>
+						<tr>
+							<th data-align="center"
+								data-halign="center"
+								data-valign="middle"
+								data-field="name"
+								data-width=240
+								data-formatter="nameFormatter"><@spring.message "list.name"/></th>
+							<th data-align="center"
+								data-valign="middle"
+								data-halign="center"
+								data-formatter="permFormatter" ><@spring.message "action.action"/></th>
+						</tr>
+						</thead>
+					</table>
+				</div>
+				<#list resourceTypeList as rec>
+					<div class="layui-tab-item">
+						<div id="toolbar_${rec.id}">
+							<div class="layui-inline layui-form layui-hide">
+								<input type="checkbox" name="" title="<@spring.message 'permissions.Select_All'/>" lay-skin="primary" >
+							</div>
+						</div>
+						<table id="table_${rec.id}"
+							   data-toggle="table"
+							   data-search="false"
+							   data-side-pagination="server"
+							   data-pagination="true"
+							   data-page-list="[10]"
+							   data-query-params-type=""
+							   data-url="${basePath}/resource/pageResourcePerm?resourceType1=${rec.id}"
+							   data-query-params="queryResourceParams">
+							<thead>
+							<tr>
+								<th data-align="center"
+									data-halign="center"
+									data-valign="middle"
+									data-field="name"
+									data-width=240
+									data-formatter="nameFormatter"><@spring.message "list.name"/></th>
+								<th data-align="center"
+									data-valign="middle"
+									data-halign="center"
+									data-formatter="permFormatter" ><@spring.message "action.action"/></th>
+							</tr>
+							</thead>
+						</table>
+					</div>
+				</#list>
+			</div>
+		</div>
+	</div>
+</div>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+
+<html style="overflow: hidden;">
+
+<head>
+<meta charset="utf-8">
+<title>${CACHE_CONFIG_SYS_NAME!'系统主页'} </title>
+<meta name="renderer" content="webkit">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<link href="${basePath}/images/favicon.ico" rel="icon" type="image/x-icon" />
+<#include "common/common.html" />
+<style type="text/css">
+.layui-icon-notice:before {
+    content: "\e667";
+    position: relative;
+    top: 1px;
+    font-size: 16px;
+}
+.layui-icon-notice {
+	position: relative;
+    top: 1px;
+    font-size: 16px;
+}
+.layui-badge-dot {
+    margin-left: 11px!important;
+}
+</style>
+<script type="text/javascript">
+	var basePath = '${basePath}';
+</script>
+<script type="text/javascript"
+			src="${basePath}/js/index.js"></script>
+<style>
+	.system-name {
+		font-size: 13pt;
+	    border-left: 1px solid;
+	    border-width: 2px;
+	    padding-left: 10px;
+	}
+	
+	
+</style>
+</head>
+
+<body onload="javascript:onLoad()">
+	<div class="layui-layout layui-layout-admin">
+		<div class="layui-header "  >
+			<div class="head-logo">
+				<img style="width: 157px;height: 43px" src="${basePath}/images/${(CACHE_CONFIG_SYS_LOGO+'_inner.png')!'logo_dod_inner.png'}" />&nbsp;&nbsp;<span class="system-name">${CACHE_CONFIG_SYS_NAME!''} </span>
+			</div>
+			<div style="float: left;">
+				<!-- <ul class="layui-nav  admin-header-item layui-nav-left head-menu"> -->
+				<ul class="layui-nav nav-head head-menu-ul" style="float:right">
+					<#if (user_menus?? && user_menus?size>0)> 
+						<#if CACHE_CONFIG_SYS_THEME=="theme_default">
+							<#list user_menus as rec>
+							<li class="layui-nav-item ">
+								<#if (rec.linkUrl)?? && rec.linkUrl!='' >
+									<a href="javascript:loadSinglePage(${rec_index},${rec.linkType},'${rec.linkUrl}');">${rec.name}</a>
+						       <#else>
+						          <a href="javascript:;">${rec.name}</a>
+						       </#if>
+							    <#if (rec.children?? && rec.children?size>0)>
+							    <dl class="layui-nav-child">
+							    	<#list rec.children as child>
+							      		<dd><a href="javascript:loadContent(${rec_index},${child.linkType},'${child.linkUrl}',${child_index});">${(child.name)!}</a></dd>
+							      	</#list> 
+							    </dl>
+							    </#if>
+							 </li>
+							 </#list> 
+						</#if>
+						<#if CACHE_CONFIG_SYS_THEME=="theme_ext_1">
+							<#list user_menus as rec>
+							<li class="layui-nav-item ${(rec.id==2)?string('layui-this','')}">
+								<a href="javascript:loadPage(${rec_index},${rec.linkType},'${rec.linkUrl}',1);">${(rec.name)!}</a>
+							</li> 
+							</#list> 
+						</#if>
+						
+					</#if>
+					
+					<#if (notices && notices?size>0)>
+			        <li class="layui-nav-item">
+						<a href="javascript:void(0)" layadmin-event="message" lay-text="消息中心">
+			              <span class="layui-badge-dot"></span>
+			              <i class="layui-icon layui-icon-notice"></i>
+			            </a>
+						<dl class="layui-nav-child" >
+							<#list notices as rec>
+							<dd><a href="javascript:noticeInfo(${(rec.id)},'${(rec.title)}');">${(rec.title)!}</a></dd>
+							</#list> 
+					    </dl>
+					</li>
+					</#if>
+					<li class="layui-nav-item">
+						<a href="javascript:void(0)" > 欢迎您,${(user.realname)!}</a>
+						<dl class="layui-nav-child">
+							<dd><a href="javascript:" id="setPassword">修改密码</a></dd>
+					      	<dd><a href="${basePath}/logout">注销</a></dd>
+					    </dl>
+					</li>
+
+				</ul>
+			</div>
+		</div>
+		<div class="admin-side " id="admin-side">
+			<div class="layui-side-scroll" id="admin-navbar-side" lay-filter="side">
+				
+				<div id="menu_search" class="layui-form" lay-filter="test1">
+					<input type="text" id="parentName" name="parentName" value=""
+						class="layui-input search-input layui-hide">
+					<select name="menu-sel" lay-verify="" value="" placeholder="输入关键字搜索" lay-search lay-filter="menu-filter">
+						<#if (user_menus?? && user_menus?size>0)> 
+							<option></option>
+							<#list user_menus as rec>
+								<#if ((rec.linkUrl)?? && rec.linkUrl!='') || rec.type==2>
+									<option value="loadSinglePage@${rec_index}@${rec.linkType}@${rec.linkUrl}">${rec.name}</option>
+						       </#if>
+							    <#if (rec.children?? && rec.children?size>0)>
+							    	<#list rec.children as child>
+							      		<option value="loadContent@${rec_index}@${child.linkType}@${child.linkUrl}@${child_index}">${child.name}</option>
+							      	</#list> 
+							    </#if>
+					  			
+					  		</#list> 
+					  	</#if>
+					</select> 
+				</div>
+				
+				<ul class="layui-nav layui-nav-tree layui-inline left-menu" lay-filter="demo" style="margin-right: 10px;">
+				<#if (user_menus?? && user_menus?size>0)> 
+					<#list user_menus as rec>
+					  <li class="layui-nav-item">
+					    <#if ((rec.linkUrl)?? && rec.linkUrl!='') || rec.type==2>
+							<a href="javascript:loadSinglePage(${rec_index},${rec.linkType},'${rec.linkUrl}');">
+							<i class="layui-icon">${rec.iconName}</i>
+							<span class="item-span">${rec.name}</span>
+							</a>
+				       <#else>
+				          <a href="javascript:void(0);"><i class="layui-icon">${rec.iconName!}</i><span class="item-span">${rec.name}</span></a>
+				       </#if>
+					    <#if (rec.children?? && rec.children?size>0)>
+					    <dl class="layui-nav-child">
+					    	<#list rec.children as child>
+					      		<dd><a href="javascript:loadContent(${rec_index},${child.linkType},'${child.linkUrl}',${child_index});">${(child.name)!}</a></dd>
+					      	</#list> 
+					    </dl>
+					    </#if>
+					  </li>
+				  </#list> 
+				</#if>
+				
+				<!-- 
+				<#if (user_records?? && user_records?size>0)> 
+					  <li class="layui-nav-item">
+				          <a href="javascript:void(0);"><i class="layui-icon">&#xe857;</i><span class="item-span">我的收藏</span></a>
+					    <dl class="layui-nav-child">
+					    	<#list user_records as rec>
+					    		<#if rec.type==1>
+					      		<dd><a href="javascript:loadUserRecord(${rec.resourceId},${rec.linkType},'${rec.linkUrl}',${rec_index});">${(rec.name)!}</a></dd>
+					      		</#if>
+					      	</#list> 
+					    </dl>
+					  </li>
+				</#if>
+				<#if (user_records?? && user_records?size>0)> 
+					  <li class="layui-nav-item">
+				          <a href="javascript:void(0);"><i class="layui-icon">&#xe60a;</i><span class="item-span">访问记录</span></a>
+					    <dl class="layui-nav-child">
+					    	<#list user_records as rec>
+					    		<#if rec.type==2>
+					      		<dd><a href="javascript:loadUserRecord(${rec.resourceId},${rec.linkType},'${rec.linkUrl}',${rec_index});">${(rec.name)!}</a></dd>
+					      		</#if>
+					      	</#list> 
+					    </dl>
+					  </li>
+				</#if>
+				 -->
+				</ul>
+			</div>
+		</div>
+		<div class="main-body left200" 
+			id="admin-body">
+			<iframe id="content_iframe" width="100%;" height="100%" style="border: 0;" >
+			</iframe>
+		</div>
+		
+
+
+	</div>
+</body>
+<script>
+function noticeInfo(id,title) {
+	parent.layer.open({
+		  type: 2,
+		  title: title,
+		  shadeClose: true,
+		  shade: 0.8,
+		  area: ['80%', '70%'],
+		  content: basePath + '/notice/info?id='+id //iframe的url
+	}); 
+}
+
+			layui.use(['form','layer','laytpl','navbar'], function() {
+				//菜单打开一个折叠其他的
+				$('ul.layui-nav li').click(function() {
+						$(this).siblings("li").removeClass('layui-nav-itemed');
+					if($(this).hasClass('layui-nav-itemed')){
+						$(this).addClass('layui-nav-itemed');
+					}else{
+						$(this).removeClass('layui-nav-itemed');
+					}
+				});
+				
+				var layer = layui.layer,
+				laytpl = layui.laytpl
+					form = layui.form;
+				var navbar = layui.navbar();
+				
+				form.on('select(menu-filter)', function(data){
+					var dataValue = data.value.split('@');
+					if (dataValue[0]=='loadSinglePage') {
+						loadSinglePage(dataValue[1],dataValue[2],dataValue[3]);
+					} else if (dataValue[0]=='loadContent') {
+						loadContent(dataValue[1],dataValue[2],dataValue[3],dataValue[4]);
+					}
+				});   
+				
+				//form.render('select', 'test2');
+				
+				$("p").mouseover(function(){
+				  $("p").css("background-color","yellow");
+				});
+				
+				/* $('.layui-nav-itemed a').mouseover(function(){
+					alert();
+					layer.tips('我是另外一个tips，只不过我长得跟之前那位稍有些不一样。', '吸附元素选择器', {
+						  tips: [1, '#3595CC'],
+						  time: 4000
+						});
+				}); */
+				
+				
+				$('#setPassword').on('click',function(){
+					var isSubmit = false;
+					parent.layer.open({
+							title: '修改密码',
+							type:2,
+							content:'${basePath}/userInfo/setPassword',
+							area: ['600px', '300px'],
+							btn:['确定','取消'],
+							success: function(layero){
+							},
+							yes:function(index,layero){
+								if(!isSubmit){
+									isSubmit = true;
+					    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+									var data = iframeWin.getData();
+									if (data!=null) {
+										$.ajax({
+							                type: "POST",
+							                url:'${basePath}/user/updatePwd',
+							                data:data,
+							                async: false,
+							                error: function(request) {
+							                    parent.layer.msg('添加失败！');
+							                    isSubmit = false;
+							                },
+							                success: function(result) {
+							                	if(result.code==0){
+							                		parent.layer.close(index);
+							                		layer.confirm('密码修改成功,请重新登录!', {title:'<@spring.message "action.info"/>',
+													  btn: ['确定'] //按钮
+													}, function(indexCon){
+													  	layer.close(indexCon);
+													  	window.location.href = basePath + '/logout';
+													});
+							                	}else{
+							                		parent.layer.msg(result.msg);
+							                		isSubmit = false;
+							                	}
+							                }
+							            });
+									} else{
+										isSubmit = false;
+									}
+								}
+				   		    	
+				    		}
+						});
+				});
+				//$('#content_iframe').attr('src',"${basePath}/banner/index");
+			});
+
+			var errorUrl = basePath + '/error/system';
+			var menuData = JSON.parse('${user_menus_json!}');
+			function loadPage(index,linkType, linkUrl,level) {
+				$('#content_iframe').html('');
+				var url = '';
+				if (linkUrl!=null && linkUrl!='') {
+					if (linkUrl.startWith('http://') || linkUrl.startWith('https://')) {
+						url = linkUrl;
+					} else {
+						url = basePath + linkUrl;
+					}
+				}
+				switch (linkType) {
+				case 1:
+					if (level==1) {
+						if (menuData[index].children==null) {
+							
+							if (url!=null && url!='') {
+								if (menuData[index].linkType==3) {
+										window.open(url);
+								} else {
+									$('#admin-side').addClass('layui-hide');
+									$('#admin-body').removeClass('left200');
+									$('#content_iframe').attr('src', url);
+								}
+							}
+							return;
+						}
+						$('#admin-side').removeClass('layui-hide');
+						$('#admin-body').addClass('left200');
+
+						//设置navbar
+						navbar.set({
+							spreadOne: true,
+							elem: '#admin-navbar-side',
+							cached: true,
+							data: menuData[index].children
+
+						});
+						//渲染navbar
+						navbar.render(); 
+						//监听点击事件
+						navbar.on('click(side)', function(data) {
+							var index = layer.load(1, {
+							  shade: [0.1,'#fff'] //0.1透明度的白色背景
+							});
+							if (data.type==2) {
+								delete data.createTime;
+								delete data.updateTime;
+								$.post(basePath+'/mstrProject/getReportUrl',data,function(result){
+									layer.close(index);
+									if (data.linkType==3) {
+										window.open(encodeURI(result.data));
+									} else {
+										$('#content_iframe').attr('src', encodeURI(result.data));
+									}
+									
+								})
+							} else {
+								var url = '';
+								if (data.href!=null && data.href!='') {
+									if (data.href.startWith('http://') || data.href.startWith('https://')) {
+										url = data.href;
+									} else {
+										url =  basePath+data.href;
+									}
+									
+									if (data.linkType==3) {
+											window.open(url);
+									} else {
+										$('#content_iframe').attr('src', url);
+									}
+								}
+								
+								
+								layer.close(index);
+							}
+						});
+						//console.log(navbar);
+						//console.log(menuData[index].children[0].href);
+						if (menuData[index].children!=null && menuData[index].children.length>0) {
+							if (menuData[index].children[0].type!=2) {
+								$('.layui-nav-tree .layui-nav-item:first').addClass('layui-this');
+								var url_now = menuData[index].children[0].href;
+								if (url_now=='' || url_now==null) {
+									if ( menuData[index].children[0].children==null) {
+										console.log('invalid url');
+										$('#content_iframe').attr('src', errorUrl+'?msg=提示：请检查菜单链接配置！！！');
+										return ;
+									}
+									var childUrl = menuData[index].children[0].children[0].href;
+									if (!url_now.startWith('http://') && !url_now.startWith('https://') &&childUrl!=null && childUrl!='') {
+										$('#content_iframe').attr('src', childUrl);
+									}
+									return;
+								}
+								if (!url_now.startWith('http://') && !url_now.startWith('https://')) {
+									url_now = basePath+menuData[index].children[0].href;
+								} 
+								if (menuData[index].children[0].linkType==3) {
+									window.open(url_now);
+								} else {
+									$('#content_iframe').attr('src', url_now);
+								}
+								
+							}
+						}
+					} else {
+							if (data.linkType==3) {
+									window.open(url);
+							} else {
+								$('#content_iframe').attr('src', url);
+							}
+						}
+					break;
+				case 2:
+					$('#admin-side').addClass('layui-hide');
+					$('#admin-body').removeClass('left200');
+					$('#content_iframe').attr('src', url);
+					break;
+				default:
+					window.open(url);
+					break;
+				}
+			}
+			
+			function loadContent(index,linkType, linkUrl,childIndex) {
+				var data = menuData[index].children[childIndex];
+				if (data.type==2) {
+					delete data.createTime;
+					delete data.updateTime;
+					//if (data.linkType==3) {
+					//	window.open(encodeURI(linkUrl));
+					//} else {
+						var params = parseParam(data);
+						
+						if (data.linkType==3) {
+							window.open('${basePath}/mstr/reportContainer?'+params);
+						} else {
+							$('#content_iframe').attr('src', '${basePath}/mstr/reportContainer?'+params);
+						}
+					//}
+					/* $.post(basePath+'/mstrProject/getReportUrl',data,function(result){
+						console.log(result.data);
+						if (data.linkType==3) {
+							window.open(encodeURI(result.data));
+						} else {
+							$('#content_iframe').attr('src', encodeURI(result.data));
+						}
+					}) */
+				} else {
+					var url = '';
+					if (data.href!=null && data.href!='') {
+						if (data.href.startWith('http://') || data.href.startWith('https://')) {
+							url = data.href;
+						} else {
+							url =  basePath+data.href;
+						}
+						
+						if (data.linkType==3) {
+								window.open(url);
+						} else {
+							$('#content_iframe').attr('src', url);
+						}
+					}
+				}
+			}
+			
+			function loadUserRecord(resourceId,linkType, linkUrl) {
+				var data = null;
+					$.each(menuData,function(index,rec){
+						if (rec.id == resourceId) {
+							data = rec;
+							return false;
+						} else if (rec.children!=null) {
+							$.each(rec.children,function(i,child){
+								if (child.id == resourceId) {
+									data = child;
+									return false;
+								}
+							})
+							if (data!=null) {
+								return false;
+							}
+						}
+					})
+				//var data = menuData[index];
+				if (data.type==2) {
+					delete data.createTime;
+					delete data.updateTime;
+					if (data.linkType==3) {
+						//window.open(encodeURI(result.data));
+					} else {
+						var params = parseParam(data);
+						
+						$('#content_iframe').attr('src', '${basePath}/mstr/reportContainer?'+params);
+					}
+				} 
+			}
+			
+			function loadSinglePage(index,linkType, linkUrl) {
+				var data = menuData[index];
+				if (data.type==2) {
+					delete data.createTime;
+					delete data.updateTime;
+					if (data.linkType==3) {
+						//window.open(encodeURI(result.data));
+					} else {
+						var params = parseParam(data);
+						
+						$('#content_iframe').attr('src', '${basePath}/mstr/reportContainer?'+params);
+					}
+					/* $.post(basePath+'/mstrProject/getReportUrl',data,function(result){
+						if (data.linkType==3) {
+							window.open(encodeURI(result.data));
+						} else {
+							$('#content_iframe').attr('src', encodeURI(result.data));
+						}
+					}) */
+				} else {
+					var url = '';
+					if (data.href!=null && data.href!='') {
+						if (data.href.startWith('http://') || data.href.startWith('https://')) {
+							url = data.href;
+						} else {
+							url =  basePath+data.href;
+						}
+						
+						if (data.linkType==3) {
+								window.open(url);
+						} else {
+							$('#content_iframe').attr('src', url);
+						}
+					}
+				}
+			}
+			
+			function onLoad() {
+				var defaultUrl = '${(defaultUrl)!}';
+				if (defaultUrl!=null) {
+					loadSinglePage(0,2,defaultUrl);
+				} else {
+					loadSinglePage(0,menuData[0].linkType,menuData[0].likUrl);
+				}
+			}
+			
+			
+			var parseParam=function(param, key){ 
+				 
+				  var paramStr=""; 
+				 
+				  if(param instanceof String||param instanceof Number||param instanceof Boolean){ 
+				 
+				    paramStr+="&"+key+"="+encodeURIComponent(param); 
+				 
+				  }else{ 
+				 
+				    $.each(param,function(i){ 
+				 
+				      var k=key==null?i:key+(param instanceof Array?"["+i+"]":"."+i); 
+				 
+				      paramStr+='&'+parseParam(this, k); 
+				 
+				    }); 
+				 
+				  } 
+				 
+				  return paramStr.substr(1); 
+				 
+				};
+		</script>
+
+</html>

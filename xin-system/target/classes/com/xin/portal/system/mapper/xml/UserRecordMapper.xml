@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.UserRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.UserRecord">
+        <id column="id" property="id" />
+        <result column="type" property="type" />
+        <result column="owner" property="owner" />
+        <result column="resource_id" property="resourceId" />
+        <result column="name" property="name" />
+        <result column="url" property="url" />
+        <result column="params" property="params" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, type, owner, url, params, create_time AS createTime
+    </sql>
+    
+    
+    <select id="findList" parameterType="com.xin.portal.system.model.UserRecord" 
+    	resultType="com.xin.portal.system.model.UserRecord" databaseId="oracle">
+    	select * from (select ur.id,ur.type, owner, ur.resource_id as resourceId,ur.create_time as createTime,
+    	r.name, r.link_url as linkUrl, r.code, r.state, r.parent_id as parentId,  r.icon_name as iconName, 
+	    	r.sort, r.type as resourceType, r.link_type as linkType,rp.report_id as reportId,rp.hidden_sections as hiddenSections,
+	    	rp.project_id as projectId,rp.type_value as typeValue
+    	from t_user_record ur 
+    	left join t_resource r on ur.resource_id = r.id
+		left join t_resource_report rp on r.id = rp.resource_id
+		where ur.type = 1 and rownum &lt; 11 order by ur.create_time desc)
+		UNION ALL
+		select * from (
+		select ur.id,ur.type, owner, ur.resource_id as resourceId,ur.create_time as createTime,
+					r.name, r.link_url as linkUrl, r.code, r.state, r.parent_id as parentId,  r.icon_name as iconName, 
+			    	r.sort, r.type as resourceType, r.link_type as linkType,rp.report_id as reportId,rp.hidden_sections as hiddenSections,
+			    	rp.project_id as projectId,rp.type_value as typeValue
+		    	from t_user_record ur 
+		    	left join t_resource r on ur.resource_id = r.id
+				left join t_resource_report rp on r.id = rp.resource_id
+		where ur.type = 2 order by ur.create_time desc)
+    </select>
+    
+    <select id="findList" parameterType="com.xin.portal.system.model.UserRecord" 
+    	resultType="com.xin.portal.system.model.UserRecord" databaseId="mysql">
+    	select * from (select ur.id,ur.type, owner, ur.resource_id as resourceId,ur.create_time as createTime,
+    	r.name, r.link_url as linkUrl, r.code, r.state, r.parent_id as parentId,  r.icon_name as iconName, 
+	    	r.sort, r.type as resourceType, r.link_type as linkType,rp.report_id as reportId,rp.hidden_sections as hiddenSections,
+	    	rp.project_id as projectId,rp.type_value as typeValue
+    	from t_user_record ur 
+    	left join t_resource r on ur.resource_id = r.id
+		left join t_resource_report rp on r.id = rp.resource_id
+		where ur.type = 1  order by ur.create_time desc limit 0,11) A
+		UNION ALL
+		select * from (
+		select ur.id,ur.type, owner, ur.resource_id as resourceId,ur.create_time as createTime,
+					r.name, r.link_url as linkUrl, r.code, r.state, r.parent_id as parentId,  r.icon_name as iconName, 
+			    	r.sort, r.type as resourceType, r.link_type as linkType,rp.report_id as reportId,rp.hidden_sections as hiddenSections,
+			    	rp.project_id as projectId,rp.type_value as typeValue
+		    	from t_user_record ur 
+		    	left join t_resource r on ur.resource_id = r.id
+				left join t_resource_report rp on r.id = rp.resource_id
+		where ur.type = 2 order by ur.create_time desc) B
+    </select>
+    
+    <select id="findList" parameterType="com.xin.portal.system.model.UserRecord" 
+    	resultType="com.xin.portal.system.model.UserRecord" >
+    	select * from (
+    	select * from (select top 11 ur.id,ur.type, owner, ur.resource_id as resourceId,ur.create_time as createTime,
+    	r.name, r.link_url as linkUrl, r.code, r.state, r.parent_id as parentId,  r.icon_name as iconName, 
+	    	r.sort, r.type as resourceType, r.link_type as linkType,rp.report_id as reportId,rp.hidden_sections as hiddenSections,
+	    	rp.project_id as projectId,rp.type_value as typeValue
+    	from t_user_record ur 
+    	left join t_resource r on ur.resource_id = r.id
+		left join t_resource_report rp on r.id = rp.resource_id
+		where ur.type = 1 ) A
+		UNION ALL
+		select * from (
+		select ur.id,ur.type, owner, ur.resource_id as resourceId,ur.create_time as createTime,
+					r.name, r.link_url as linkUrl, r.code, r.state, r.parent_id as parentId,  r.icon_name as iconName, 
+			    	r.sort, r.type as resourceType, r.link_type as linkType,rp.report_id as reportId,rp.hidden_sections as hiddenSections,
+			    	rp.project_id as projectId,rp.type_value as typeValue
+		    	from t_user_record ur 
+		    	left join t_resource r on ur.resource_id = r.id
+				left join t_resource_report rp on r.id = rp.resource_id
+		where ur.type = 2) B
+		) c 
+		order by  c.createTime desc
+    </select>
+    
+    <update id="updateIntroduce" parameterType="map">
+		UPDATE  t_user_report SET remark = #{introduce} 
+		WHERE id =#{resourceId} and user_id=#{userId}
+    </update>
+</mapper>

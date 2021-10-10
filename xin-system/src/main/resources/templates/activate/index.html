@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+	<title><@spring.message 'activate.systemActivation'/></title>
+	<link rel="stylesheet" href="${basePath}/plugins/vue/element-index.css">
+	<script src="${basePath}/plugins/vue/vue.js"></script>
+	<script src="${basePath}/plugins/vue/vue-resource.js"></script>
+	<script src="${basePath}/plugins/vue/element-index.js"></script>
+	<script src="${basePath}/js/moment.min.js"></script>
+	<style>
+		.el-step__head:hover {
+		  color: #67c23a;
+		  border-color: #67c23a;
+		  cursor:pointer;
+		}     
+		.tab-content{
+			margin-top:30px;text-align:center 
+		}
+		.el-tabs__header {
+		    display: none;
+		}
+	</style>
+	
+</head>
+<body>
+    <div id="content" style="padding-top:20px">		
+    	<template>
+			<el-row>
+			  <el-col :span="12" :offset="6" style="box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);padding: 50px;">
+			  <el-alert
+			    title="<@spring.message 'activate.titletext'/>"
+			    type="warning"
+			    :closable="false"
+			    show-icon>
+			  </el-alert>
+	    		<el-tabs v-model="tabActive" >
+	    			<!-- <el-tab-pane label="在线激活" name="online" >
+						<el-form :model="onLineForm" :rules="applyRules" ref="onLineForm" label-width="100px" style="margin-top:20px;">
+						  <el-form-item label="公司名称" prop="company">
+						    <el-input v-model="onLineForm.company"></el-input>
+						  </el-form-item>
+						  <el-form-item label="姓名" prop="creater">
+						    <el-input v-model="onLineForm.creater"></el-input>
+						  </el-form-item>
+						  <el-form-item label="联系电话" prop="phone">
+						    <el-input v-model="onLineForm.phone"></el-input>
+						  </el-form-item>
+						  <el-form-item label="联系邮箱" prop="email" placeholder="该邮箱用于接收激活文件">
+						    <el-input v-model="onLineForm.email"></el-input>
+						  </el-form-item>
+						  <el-form-item label="联系地址" prop="address">
+						    <el-input type="textarea" v-model="onLineForm.address"></el-input>
+						  </el-form-item>
+						  
+						  
+						  <el-form-item>
+						    <el-button type="primary" @click="onSubmit()">申请使用</el-button>
+						  </el-form-item>
+						</el-form>
+	    			</el-tab-pane> -->
+	    			<el-tab-pane label="<@spring.message 'activate.offlineActivation'/>" name="offline" >
+	    				<el-steps :active="offLineActiveStep" finish-status="success" style="margin-top: 20px">
+						  <el-step title="<@spring.message 'activate.activateInformationCollection'/>" @click.native="offLineActiveStep=1" name="1"  description="<@spring.message 'activate.Fill_in_information_and_generate_data'/>"></el-step>
+						  <el-step title="<@spring.message 'activate.Get_the_activation_file'/>" @click.native="offLineActiveStep=2"name="2" description="<@spring.message 'activate.Submit_information_to_obtain_activation_files'/>"></el-step>
+						  <el-step title="<@spring.message 'activate.Upload_Activation_File'/>" @click.native="offLineActiveStep=3" name="3" description="<@spring.message 'activate.Activate_with_Activation_File'/>"></el-step>
+						  <el-step title="<@spring.message 'activate.Successful_activation'/>" @click.native="offLineActiveStep=4" name="4" description="<@spring.message 'activate.Start_using'/>"></el-step>
+						</el-steps>
+						<el-form :model="offLineForm" v-if="offLineActiveStep===1" :rules="applyRules" ref="offLineForm" label-width="100px" style="margin-top:20px;">
+						  <!-- <el-form-item label="使用类型">
+						    <el-radio-group v-model="offLineForm.customerType" @change="onChangeCustomerType">
+						      <el-radio label="company" >公司</el-radio>
+						      <el-radio label="user">个人</el-radio>
+						    </el-radio-group>
+						  </el-form-item> -->
+						  <el-form-item label="<@spring.message 'activate.companyName'/>" prop="company">
+						    <el-input v-model="offLineForm.company"></el-input>
+						  </el-form-item>
+						  <el-form-item label="<@spring.message 'activate.name'/>" prop="creater">
+						    <el-input v-model="offLineForm.creater"></el-input>
+						  </el-form-item>
+						  <el-form-item label="<@spring.message 'activate.telephone'/>" prop="phone">
+						    <el-input v-model="offLineForm.phone"></el-input>
+						  </el-form-item>
+						  <el-form-item label="<@spring.message 'activate.e-mail'/>" prop="email">
+						    <el-input v-model="offLineForm.email" placeholder="<@spring.message 'activate.This_email_is_used_to_receive_activation_files'/>"></el-input>
+						  </el-form-item>
+						  <el-form-item label="<@spring.message 'activate.contactAddress'/>" prop="address">
+						    <el-input type="textarea" v-model="offLineForm.address"></el-input>
+						  </el-form-item>
+						  <el-form-item label="<@spring.message 'activate.useTime'/>"  v-if="offLineForm.type==1" >
+						    <el-date-picker
+						      v-model="timeBetween"
+						      type="daterange"
+						      range-separator="<@spring.message 'activate.to'/>"
+						      start-placeholder="<@spring.message 'activate.startDate'/>"
+						      end-placeholder="<@spring.message 'activate.endDate'/>"
+						      format="yyyy-MM-dd"
+						      value-format="yyyy-MM-dd"
+						      >
+						    </el-date-picker>
+						  </el-form-item>
+						  
+						  
+						  <el-form-item>
+						    <el-button  type="primary" @click="offSubmit()"><@spring.message 'activate.generateDate'/></el-button>
+						  </el-form-item>
+						</el-form>
+						<el-alert v-if="offLineActiveStep===2"  class="tab-content"
+						    title="<@spring.message 'activate.Technical_Support_Email'/>"
+						    type="success"
+						    :closable="false">
+						  </el-alert>
+					  <el-form ref="activeForm"  v-if="offLineActiveStep===3"  class="tab-content">
+					    <el-upload
+						  class="upload-demo tab-content"
+						  ref="upload"
+						  action="${basePath}/activate/upload/lic"
+						  :auto-upload="true"
+						  :on-success="onUploadSuccess"
+						  :on-error="onUploadError"
+						  :show-file-list="false"
+						  >
+						  <el-button><@spring.message 'activate.Upload_Activation_File'/></el-button>
+						</el-upload>
+					  </el-form>
+					  <el-alert v-if="offLineActiveStep===4"  class="tab-content"
+						    title="<@spring.message 'activate.Successful_activation_welcome_to_use'/>"
+						    type="success"
+						    :closable="false">
+						  </el-alert>
+	    			</el-tab-pane>
+	    		</el-tabs>
+					  </el-col>
+					</el-row>
+    	</template>        
+    </div>
+	
+    <footer align="center">
+    </footer>
+
+	<script>
+	
+	var vue = new Vue({			
+			el:"#content",
+		    data: {		  
+		    	tabActive:'offline',
+		    	onLineActiveStep:1,
+		    	offLineActiveStep:1,
+		    	timeBetween:[],
+		    	onLineForm:{
+		    		applyType:'online',
+		    		startTime:moment().format("YYYY-MM-DD 00:00:00"),
+		    		endTime: moment().add(1, 'months').format("YYYY-MM-DD 23:59:59"),
+		    		applyTime:moment().format('YYYY-MM-DD HH:mm:ss'),
+		    		type: '1',
+		    		state: 1,
+		    		creater: '',
+		    		company: '',
+		    		email: '',
+		    		phone: '',
+		    		address: '',
+		    		customerType:'user'
+		    	},
+		    	offLineForm:{
+		    		applyType:'offline',
+		    		startTime:moment().format("YYYY-MM-DD 00:00:00"),
+		    		endTime: moment().add(1, 'months').format("YYYY-MM-DD 23:59:59"),
+		    		applyTime:moment().format('YYYY-MM-DD HH:mm:ss'),
+		    		type: '1',
+		    		state: 1,
+		    		creater: '',
+		    		company: '',
+		    		email: '',
+		    		phone: '',
+		    		address: '',
+		    		customerType:'user'
+		    	},
+		    	validDate:(rule,value,callback) => {
+		            if(!value[0] || !value[1]){
+		                callback(new Error("<@spring.message 'activate.Please_choose_the_time'/>"))
+		            }else{
+		                callback()
+		            }
+		        },
+		    	applyRules: {
+		    		company: [
+		              //{ required: true, message: '请输入公司名称', trigger: 'blur' },
+		              //{ min: 2,  message: '长度在 3 到 5 个字符', trigger: 'blur' },
+		              { validator: checkCompany, trigger: 'blur' }
+		            ],
+		            creater: [
+		              { required: true, message: "<@spring.message 'activate.Please_enter_your_name'/>请输入您的姓名", trigger: 'blur' }
+		            ],
+		            phone: [
+				      { required: true, message: "<@spring.message 'activate.Please_enter_your_contact_number'/>", trigger: 'blur' }
+				    ],
+				     email: [
+				      { required: true, message: "<@spring.message 'activate.Please_enter_your_email_address'/>", trigger: 'blur' }, { type: 'email', message:  "<@spring.message 'activate.Please_enter_the_correct_email_address'/>", trigger: 'blur,change' }
+				    ],
+				    
+		    	},
+		    	
+		    },
+
+		    methods: {
+		    	onChangeCustomerType:function(value){
+		    		if (this.tabActive=='online') {
+		    			this.$refs.onLineForm.clearValidate();
+		    		} else if (this.tabActive=='offline') {
+			    		this.$refs.offLineForm.clearValidate();
+		    		}
+		    	},
+		    
+		    	onUploadSuccess: function(response, file, fileList) {
+		    		
+		    		if (response && response.code==0) {
+		    			this.$message({
+			                  message: "<@spring.message 'activate.Activate_successfully_Page_Jump'/>",
+			                  type: 'success',
+			                  onClose:function(){
+			                	  window.location.href="${basePath}/login"
+			                  }
+			            });
+		    		} else {
+		    			this.$message.error("<@spring.message 'activate.Activation_failed_Please_use_the_correct_activation_file'/>");
+		    		}
+		    		this.$refs.upload.clearFiles();
+		    		
+	        	},
+	        	onUploadError:function(){
+		    		this.$message.error("<@spring.message 'activate.Upload_failure'/>");
+	        	},
+	        	
+	        	onUpload: function(){
+	        		this.$refs.upload.submit();
+	        	},
+	        	
+	        	offSubmit: function(){
+	        		this.$refs.offLineForm.validate((valid) => {
+	        				
+	        	          if (valid) {
+			        		const loading = this.$loading({
+						          lock: true,
+						          text: "<@spring.message 'activate.Data_Generating'/>",
+						          spinner: 'el-icon-loading',
+						          //background: 'rgba(0, 0, 0, 0.7)'
+						        });
+	        	        	  this.offLineForm.applyTime=moment().format('YYYY-MM-DD HH:mm:ss');
+	        	        	  this.offLineForm.startTime=this.timeBetween[0]+' 00:00:00';
+	        	        	  this.offLineForm.endTime=this.timeBetween[1]+' 23:59:59';
+	        	        	  this.$http.post('${basePath}/activate/apply/'+this.tabActive,this.offLineForm,{emulateJSON:true}).then(function(res){
+	      					  	console.log(res); 
+	      					  	loading.close();
+	      					  	if (res.body.code==0) {
+	      					  		this.offLineActiveStep=2;
+	      					  		window.open('${basePath}/activate/file/download');
+	      					  	}
+		                      },function(){
+		                         console.log('failed');
+		                      });	
+	        	          } else if(res.body.code==2){
+                        parent.layer.msg("<@spring.message 'activate.Failed_to_create_activation_data'/>");
+                    }else {
+	        	            console.log('error submit!!');
+	        	            return false;
+	        	          }
+	        	    });
+	        	},
+	        	onSubmit: function(){
+	        		this.$refs.onLineForm.validate((valid) => {
+	        	          if (valid) {
+	        		const loading = this.$loading({
+				          lock: true,
+				          text: "<@spring.message 'activate.Activating'/>",
+				          spinner: 'el-icon-loading',
+				        });
+	        	        	  this.$http.post('${basePath}/activate/apply/'+this.tabActive,this.onLineForm,{emulateJSON:true}).then(function(res){
+	      					  	console.log(res);
+	      					  	if (res.body.code==0) {
+	      					  		loading.close();
+		      					  	this.$message({
+		  			                  message: "<@spring.message 'activate.Activate_successfully_Page_Jump'/>",
+		  			                  type: 'success',
+		  			                  onClose:function(){
+		  			                	  window.location.href="${basePath}/login"
+		  			                  }
+		  			            	});
+	      					  	}
+		                      },function(){
+		                         console.log('failed');
+		                      });	
+	        	          }else if(res.body.code==2){
+                        parent.layer.msg("<@spring.message 'activate.Failed_to_create_activation_data'/>");
+						}else {
+	        	            console.log('error submit!!');
+	        	            return false;
+	        	          }
+	        	    });
+	        	},
+	        	
+	        	
+		    	
+		    },	    
+		    
+		    
+		  });
+	vue.timeBetween = [vue.offLineForm.startTime,vue.offLineForm.endTime];
+	function checkCompany(rule, value, callback)  {
+		
+		
+		if (vue.offLineForm.customerType=="company") {
+			if (!value) {
+			      callback(
+			        new Error("<@spring.message 'activate.Company_name_cannot_be_empty'/>")
+			      ) 
+			}
+		}
+	    callback();
+	}
+	
+	</script>  
+	
+</body>
+</html>

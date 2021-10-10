@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.ListManageMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.ListManage">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="parent_id" property="parentId" />
+        <result column="create_time" property="createTime" />
+        <result column="creater" property="creater" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, parent_id, create_time, creater
+    </sql>
+	
+	<insert id="insertListManageAllColunmForNewTenant" parameterType="com.xin.portal.system.model.ListManage" 
+	useGeneratedKeys="true" keyProperty="id" >
+		INSERT INTO t_list_manage 
+	 	( id,
+		name,
+		parent_id,
+		create_time,
+		creater,
+		sort,
+		introduce,
+		tenant_id
+		) VALUES 
+	 	( #{id,jdbcType=VARCHAR},
+		#{name,jdbcType=VARCHAR},
+		#{parentId,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{creater,jdbcType=VARCHAR},
+		#{sort,jdbcType=INTEGER},
+		#{introduce,jdbcType=VARCHAR},
+		#{tenantId,jdbcType=VARCHAR} )
+	</insert>
+</mapper>

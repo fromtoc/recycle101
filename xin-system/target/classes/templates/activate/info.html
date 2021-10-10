@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title><@spring.message 'activate.systemActivation'/></title>
+<link rel="stylesheet"
+	href="${basePath}/plugins/layui/2.4.3/css/layui.css" media="all" />
+<script type="text/javascript"
+	src="${basePath}/plugins/layui/2.4.3/layui.js"></script>
+<script type="text/javascript" src="${basePath}/js/jquery-2.2.4.min.js"></script>
+<style>
+ul li {
+	list-style: none;
+	line-height: 34px;
+	font-size: 11pt;
+}
+
+.link-activate {
+	border-radius: 4px 4px 4px 4px;
+	border: 1px solid rgba(244, 158, 0, 1);
+	width: 166px;
+	height: 42px;
+	line-height: 42px;
+	position: absolute;
+	cursor: pointer;
+	display: inline-block;
+	text-align: center;
+}
+
+.link-activate:hover {
+	background-color: rgba(244, 158, 0, 1);
+	background-image: none;
+	transition: border-color 0.4s ease 0s, background-color 0.4s ease 0s;
+}
+
+a {
+	color: blue;
+	text-decoration:underline;
+}
+/*访问过的样式*/
+a:visited {
+}
+/*鼠标悬浮样式*/
+a:hover {
+	color: blue;
+}
+/*鼠标按下未松口的样式*/
+a:active {
+}
+</style>
+</head>
+<body>
+	<div class="layui-fluid">
+		<@system.path id="${menuId!}"></@system.path>
+		<div class="layui-row">
+			<div class="layui-col-md12" style="padding: 50px; padding-top: 10px;">
+				<ul>
+					<li style="padding-bottom: 10px;"><img alt=""
+						style="height: 100%;" src="${basePath}/images/logo_dod_black.png"></li>
+					<li><@spring.message
+						'activate.productName'/>：${name!'DataWindow'}</li>
+					<li><@spring.message
+						'activate.productVersion'/>：${(record.version)!}</li>
+					<li><@spring.message 'activate.Java_Virtual_Machine'/>
+						：${(record.jvm)!}</li>
+					<li><@spring.message
+						'activate.operate_system'/>：${(record.os)!}</li>
+					<li><@spring.message 'activate.browser'/>：${(brower)!}</li>
+					<li><@spring.message
+						'activate.Term_of_validity'/>：${(record.startTime?string('yyyy-MM-dd
+						HH:mm:ss'))!} - ${(record.endTime?string('yyyy-MM-dd HH:mm:ss'))!}</li>
+					<li><@spring.message
+						'activate.customer'/>：${(record.company)!}</li>
+					<li>© 2009 - 2021 <a href="http://www.dataondemand.cn"
+						target="_blank"><@spring.message
+							'activate.dataondemand_Information_Technology_Limited_company'/></a>
+						<@spring.message 'user.phone'/>：400-108-5818 Email：<a
+						href="support@dataondemand.cn">support@dataondemand.cn</a>
+					</li>
+					<li><a href="http://m.imobilebi.com:8081/dataWindow/sysRelease/timeline"><@spring.message
+								'activate.revisions_manager'/></a></li>
+					<li style="padding-top: 20px;">
+						<div
+							style="padding: 0px; border: 0px solid transparent; overflow: hidden; width: 168px; height: 44px;">
+							<@shiro.lacksRole name='role_test' > <a
+								href="${basePath}/activate/" target="_blank"
+								class="link-activate"><@spring.message
+								'activate.Application_for_authorization'/></a> </@shiro.lacksRole>
+						</div>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+
+	<script>
+		
+	</script>
+
+</body>
+</html>

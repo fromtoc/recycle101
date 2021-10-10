@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.WxPushMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.WxPush">
+        <id column="id" property="id" />
+        <result column="agent_id" property="agentId" />
+        <result column="app_id" property="appId" />
+        <result column="type" property="type" />
+        <result column="task_type" property="taskType" />
+        <result column="push_type" property="pushType" />
+        <result column="create_type" property="createType" />
+        <result column="user_type" property="userType" />
+        <result column="task_name" property="taskName" />
+        <result column="task_desc" property="taskDesc" />
+        <result column="to_type" property="toType" />
+        <result column="to_content" property="toContent" />
+        <result column="msg_type" property="msgType" />
+        <result column="msg_content" property="msgContent" />
+        <result column="msg_title" property="msgTitle" />
+        <result column="msg_descript" property="msgDescript" />
+        <result column="msg_url" property="msgUrl" />
+        <result column="msg_pic_url" property="msgPicUrl" />
+        <result column="resource_id" property="resourceId" />
+        <result column="job_name" property="jobName" />
+        <result column="job_group" property="jobGroup" />
+        <result column="trigger_name" property="triggerName" />
+        <result column="trigger_group" property="triggerGroup" />
+        <result column="job_time" property="jobTime" />
+        <result column="job_state" property="jobState" />
+        <result column="job_cron" property="jobCron" />
+        <result column="job_last_run_time" property="jobLastRunTime" />
+        <result column="job_next_run_time" property="jobNextRunTime" />
+        <result column="job_curr_run_time" property="jobCurrRunTime" />
+        <result column="create_time" property="createTime" />
+        <result column="creater" property="creater" />
+        <result column="update_time" property="updateTime" />
+        <result column="updater" property="updater" />
+        <result column="tenant_id" property="tenantId" />
+    </resultMap>
+
+</mapper>

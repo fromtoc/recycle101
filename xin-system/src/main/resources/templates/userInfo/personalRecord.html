@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+
+    <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+    <meta http-equiv="description" content="this is my page">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="${basePath}/css/module.css">
+    <link rel="stylesheet" href="${basePath}/plugins/zui/zui.min.css">
+    <link rel="stylesheet" href="${basePath}/plugins/zui/zui.dashboard.min.css" />
+    <script type="text/javascript" src="${basePath}/plugins/echartsV3/echarts-all-3.js"></script>
+    <#include "common/common.html" />
+    <style>
+        body {
+            margin: 0;
+            font-family: "Helvetica Neue",Helvetica,Tahoma,Arial,'Microsoft Yahei','PingFang SC','Hiragino Sans GB','WenQuanYi Micro Hei',sans-serif  !important;
+            font-size: 13px;
+            line-height: 1.53846154;
+            color: #353535;
+            background-color: #fff;
+        }
+        header {
+            border-bottom: 2px solid #000;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+        }
+        .rightBox{
+            width:61%;height:90%;
+            margin:27px 0 0  37px;
+            box-shadow:0px 0px 12px #7E7E7E;
+            border-radius: 5px;
+            height:700px;
+        }
+        .leftBox{
+            width:27%;height:90%;
+            margin:27px 0 0  37px;
+            box-shadow:0px 0px 12px #7E7E7E;
+            border-radius: 5px;
+            height:700px;
+        }
+        .titleLi{
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .info li{
+            position:relative;
+            left:16px;
+            /* top:57px; */
+            margin-bottom:17px;
+
+        }
+        info li span{
+            color:#666;
+        }
+        .font-fa{
+            font-size: 16px;
+        }
+        .fa-left{
+            positon:relative;
+            left:-5px;
+        }
+        .fa-div-right{
+            float:right;
+            margin-right:40px;
+        }
+        .userInfoDiv{
+	        overflow-x: auto;
+	    	overflow-y: auto;
+	    	position: relative;
+	    	height: 100%;
+        }
+    </style>
+</head>
+<body>
+<div class="allWrap">
+    <div class="leftBox layui-inline" >
+        <div class="userInfoDiv">
+            <div style="/* width:77px; height:77px;*/border-radius: 50%;position:relative;margin:14px auto 7px auto;text-align: center;" >
+                <br>
+                <div style="width:77px;height:77px;border-radius: 50%;margin:0px auto;overflow: hidden;box-shadow: 0px 0px 12px #7E7E7E;">
+                    <img id="personalRecordPic" src="${record.avatar}" style="width:77px;height:77px;">
+                </div>
+                <div class="layui-inline" ><br>
+                    <p title="${record.realname}"style="width:77px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap;"><span style="font-size:16px;font-weight:600;">${record.realname}</span><p>
+                </div>
+                <br>
+                <div class="layui-inline" style="/* position:absolute;top:26px;left:90px; */position: relative;top: -100px;left: 85px;">
+                    <button type="button" onclick="personalRecord()" class="layui-btn layui-btn-sm layui-btn-normal"><@spring.message 'userInfo.Replace_picture'/><!--更换图片--></button>
+                </div>
+            </div>
+            <ul class="info" style="width:283px;margin:0px auto">
+                <li><div class="layui-inline" style="position: relative;left:-7px;">
+                        <i class="fa fa-user-o font-fa "></i>
+                    </div>${user.username}(<@spring.message 'userInfo.Login_account'/><!--登录账号-->)<!--<img src="555">-->
+                </li>
+                <li><div class="layui-inline"style="position: relative;left:-7px;">
+                        <i class="fa fa-lock font-fa "></i>
+                </div>&nbsp;<@spring.message 'login.password'/><!--密码-->：<span id="passwordHide">*******</span>
+                    <div class="fa-div-right">
+                        <i class="fa fa-edit font-fa"  onclick="changePassword('')"></i>
+                    </div>
+                </li>
+                <li>
+                	<div class="layui-inline"style="position: relative;left:-9px;" >
+                        <i class="fa fa-sitemap font-fa "></i>
+                    </div>
+                    <#list userOrgs as org>
+                    	<#if org.isDeputy == 0>
+                    		<span class="layui-badge layui-bg-orange" >${org.name}</span>
+                    	<#else>
+                    		<span class="layui-badge layui-bg-gray" >${org.name}</span>
+                    	</#if>
+                    </#list>
+                </li>
+                <li><div class="layui-inline"style="position: relative;left:-7px;">
+                        <i class="fa fa-map-marker font-fa "></i>
+                </div>&nbsp;<@spring.message 'userInfo.Last_login_address'/><!--上次登录地址-->：<span style="font-size: 12px;">${lastLoginAdress}(${lastLoginip})</span>
+                </li>
+                <li><div class="layui-inline"style="position: relative;left:-8px;">
+                        <i class="fa fa-clock-o font-fa "></i>
+                    </div><@spring.message 'userInfo.Last_login_time'/><!--上次登录时间-->：<span style="font-size: 12px;">${lastLoginTime}</span>
+                </li>
+                <li>
+                    <p style="font-size: 14px;font-weight: 600;position:relative;left:-5px"><@spring.message 'userInfo.identity_information'/><!--身份信息--></p>
+                </li>
+                <li>
+                    <div class="layui-inline"style="position: relative;left:-6px;">
+                        <i class="fa fa-mobile font-fa " style="font-size: 18px"></i>
+                    </div>
+                    &nbsp;<span style="font-size: 12px;" id="phoneHide">${record.phone}</span>
+                    <input id="phoneHideInput" type="text" style="display:none" value="${record.phone}" onblur="updateShow('#phoneHide')">
+                    <div class="fa-div-right">
+                        <i class="fa fa-edit font-fa" onclick="phoneHideFn('#phoneHide')"></i>
+                    </div>
+                </li>
+                <li>
+                    <div class="layui-inline"style="position: relative;left:-7px;">
+                    <i class="fa fa-envelope-o font-fa " style="font-size:15px;"></i>
+                    </div>
+                    <span id="emailHide" >${record.email}</span>
+                    <input id="emailHideInput"type="text" style="display:none" value="${record.email}" onblur="updateShow('#emailHide')">
+                    <div class="fa-div-right">
+                        <i class="fa fa-edit font-fa" onclick="emailHideFn('#emailHide')"></i>
+                    </div>
+                </li>
+                <li>
+                    <p style="font-size: 14px;font-weight: 600;position:relative;left:-5px"><@spring.message 'userInfo.Account_validity'/><!--账户有效期--></p>
+                </li>
+                <li>
+                    <div class="layui-inline"style="position: relative;left:-7px;">
+                        <i class="fa fa-hourglass-o"></i>
+                    </div>
+                    <#if user.activateStartTimeTran=='' && user.activateEndTimeTran==''><@spring.message "versionNotice.ValidStateP"/><#else>${user.activateStartTimeTran}<@spring.message 'tips.to'/>${user.activateEndTimeTran}</#if>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="rightBox layui-inline">
+    	<div class="userInfoDiv">
+	        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief" style="padding:5px;">
+	            <ul class="layui-tab-title">
+	                <li class="layui-this titleLi"><@spring.message 'userInfo.Common_resources'/><!--常用资源--></li>
+	                <li class="titleLi"><@spring.message 'userInfo.Circle_the_dynamic'/><!--圈子动态--></li>
+	            </ul>
+	            <div class="layui-tab-content">
+	                <div class="layui-tab-item layui-show" style="text-align: center">
+	                    <div id="ECharts" style="width: 80%;height:447px;margin-left:7%">
+	                    </div>
+	                </div>
+	                <div class="layui-tab-item"><@spring.message 'userInfo.Circle_the_dynamic'/><!--圈子动态-->（<@spring.message 'userInfo.not_available'/>）</div>
+	            </div>
+	        </div>
+	    </div>
+    </div>
+</div>
+</body>
+<script>
+    var EchartData = JSON.parse('${EchartData!}');
+    layui.use(['element','layer'], function(){
+        var element = layui.element,
+            layer=layui.layer;
+    });
+    var myChart = echarts.init(document.getElementById('ECharts'));
+    // 指定图表的配置项和数据
+    var option = {
+        title: {
+            text: "<@spring.message 'userInfo.Common_resources'/>（<@spring.message 'userInfo.Nearly_a_month'/>）"
+        },
+        tooltip: {},
+        legend: {
+            data:['<@spring.message "userInfo.recordSales"/>']
+        },
+        xAxis: {
+            data:EchartData.xAxis,
+            axisLabel : {//坐标轴刻度标签的相关设置。
+                clickable:true,//并给图表添加单击事件  根据返回值判断点击的是哪里
+                interval : 0,
+                formatter : function(params,index){
+                    if (index % 2 != 0) {
+                        return '\n\n' + params;
+                    }
+                    else {
+                        return params;
+                    }
+                }
+            }
+        },
+        yAxis: {},
+        series: [{
+            name: '<@spring.message "userInfo.recordVisits"/>',
+            type: 'bar',
+            data:EchartData.yAxis,
+            itemStyle: {
+                normal: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                        offset: 0,
+                        color: '#85f3dc'
+                    }, {
+                        offset: 1,
+                        color: '#718cf2'
+                    }]),
+                }
+            }
+        }]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+
+    var emailHide = '0';
+    var phoneHide = '0';
+    function phoneHideFn(id){
+        if(phoneHide=='0'){
+            phoneHide = '1';
+            $(id).hide();
+            $(id+"Input").show();
+        }else{
+            phoneHide = '0';
+            updateShow(id)
+        }
+    }
+    function emailHideFn(id){
+        if(emailHide=='0'){
+            emailHide = '1';
+            $(id).hide();
+            $(id+"Input").show();
+        }else{
+            emailHide = '0';
+            updateShow(id)
+        }
+    }
+    function updateShow(id){
+
+        $(id).show();
+        $(id+"Input").hide();
+        emailHide = '0';
+        phoneHide = '0';
+        var data =  $(id+"Input").val();
+        var email ='';
+        var phone = '';
+        if(id=="#emailHide"){
+            email=data;
+            //判断邮箱格式
+            var regm = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;//验证Mail的正则表达式,^[a-zA-Z0-9_-]:开头必须为字母,下划线,数字,
+            if (!regm.test(email)){
+                layer.msg('<@spring.message "userInfo.Please_enter_the_correct_mailbox"/>');
+                $(id).hide();
+                $(id+"Input").show();
+                $(id+"Input").focus();
+                return ;
+            }
+            $(id).html(data);
+        }else if(id=="#phoneHide"){
+            phone=data;
+            //判断手机号格式
+            var regx=/^(?:12\d|13\d|15\d|16\d|17\d|18\d|19[1234567890])-?\d{5}(\d{3}|\*{3})$/;
+            if(!regx.test(phone)){
+                layer.msg('<@spring.message "userInfo.Please_enter_the_correct_number"/>');
+                $(id).hide();
+                $(id+"Input").show();
+                $(id+"Input").focus();
+                return;
+            }
+            $(id).html(data);
+        }
+        $.ajax({
+            type: 'post', // 提交方式 get/post
+            url: '${basePath}/userInfo/updatePersonalRecord', // 需要提交的 url
+            data:{email:email,phone:phone},
+            dataType:'json',
+            success: function(res) { // data 保存提交后返回的数据，一般为 json 数据
+                if(res.code==0){
+                    layer.msg('<@spring.message"result.success"/>');
+                }else{
+                    layer.msg('<@spring.message"result.fail"/>');
+                }
+            },
+            error:function (){
+            }
+        });
+        email='';
+        phone='';
+    }
+    function changePassword(msg) {
+        parent.layer.open({
+            title: '<@spring.message "updatePassword"/>'+ msg,
+            type:2,
+            content:'${basePath}/userInfo/setPassword',
+            area: ['800px', '400px'],
+            btn:['<@spring.message"action.ok"/>','<@spring.message"action.cancel"/>'],
+            success: function(layero){
+            },
+            yes:function(index,layero){
+                var iframeWin = top.window[layero.find('iframe')[0]['name']];
+                var data = iframeWin.getData();
+                if (data!=null) {
+                    $.ajax({
+                        type: "POST",
+                        url:'${basePath}/user/updatePwd',
+                        data:data,
+                        async: false,
+                        error: function(request) {
+                            parent.layer.msg('<@spring.message "result.updateFail"/>！');
+                        },
+                        success: function(result) {
+                            if(result.code==0){
+                                parent.layer.close(index);
+                                layer.confirm('<@spring.message "theme.Password_modification_is_successful_please_login_again"/>', {title:'<@spring.message "action.info"/>',
+                                    btn: ['<@spring.message"action.ok"/>'] //按钮
+                                }, function(indexCon){
+                                    layer.close(indexCon);
+                                    window.location.href = '${basePath}/logout';
+                                });
+                            }else{
+                            	parent.layer.msg('<@spring.message "result.updateFail"/>！');
+                            }
+                        }
+                    });
+                }
+
+            }
+        });
+    }
+    function personalRecord(){
+        parent.layer.open({
+            title: '<@spring.message "userInfo.recordHeadSet"/>',
+            type:2,
+            content:'${basePath}/userInfo/userMessage',
+            area: ['730px', '567px'],
+            yes:function(index,layero){
+                parent.layer.close(index);
+            }
+        });
+    }
+
+</script>
+</html>

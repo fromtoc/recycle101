@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+	<title>产品授权</title>
+	<link rel="stylesheet" href="${basePath}/plugins/vue/element-index.css">
+	<script src="${basePath}/plugins/vue/vue.js"></script>
+	<script src="${basePath}/plugins/vue/vue-resource.js"></script>
+	<script src="${basePath}/plugins/vue/element-index.js"></script>
+	<script src="${basePath}/js/moment.min.js"></script>
+	<style>      
+	.el-table .warning-row {
+	    background: #f5f7fa;
+	  }
+	</style>
+	
+</head>
+<body>
+    <div id="content">		        
+		<div id="top">		
+				<!-- <el-button size="small" type="primary" @click="search" >查询</el-button>	 -->
+				
+			<el-form :inline="true" :model="queryForm" ref="queryForm" class="query-form">
+			  <el-form-item >
+				<el-button size="small" type="primary" @click="onAddClick" ><@spring.message 'action.add'/></el-button>	
+			  </el-form-item>
+			  <el-form-item label="客户名称">
+			    <el-input v-model="queryForm.company" placeholder="客户名称"></el-input>
+			  </el-form-item>
+			  <el-form-item label="联系人">
+			    <el-input v-model="queryForm.creater" placeholder="联系人"></el-input>
+			  </el-form-item>
+			  <el-form-item label="版本">
+			    <el-input v-model="queryForm.version" placeholder="版本"></el-input>
+			  </el-form-item>
+			  <el-form-item>
+			    <el-button type="primary" size="small" @click="onQueryClick" >查询</el-button>
+			  	<el-button type="primary" size="small" @click="onResetClick('queryForm')" >重置</el-button>
+			  </el-form-item>
+			</el-form>					
+		</div>
+        <div style="margin-top:15px;">
+		  <el-table
+		    ref="testTable"		  
+		    :data="tableData"
+		    :fit="true"
+		    border
+		    :row-class-name="tableRowClassName"
+		    >
+		    <!-- <el-table-column
+		      prop="type"
+		      label="type"
+		      sortable
+		      >
+		    </el-table-column> -->
+		    <el-table-column
+		      prop="company"
+		      label="公司"
+		      width="320px"
+		      >
+		    </el-table-column>
+		    <el-table-column
+		      prop="creater"
+		      label="联系人"
+		      width="80px"
+		      >
+		    </el-table-column>
+		    <el-table-column
+		      prop="version"
+		      label="产品版本"
+		      width="100px"
+		      >
+		    </el-table-column>
+		    <el-table-column
+		      prop="os"
+		      label="服务器OS"
+		      width="280px">
+		      <template scope="scope">
+		      	{{scope.row.osName}} {{scope.row.osVersion}}
+		      </template>
+		      
+		    </el-table-column>
+		    <el-table-column
+		      prop="dbInfo"
+		      label="数据库"
+		      width="80px"
+		      >
+		    </el-table-column>
+		    
+		    <el-table-column
+		      label="使用期限"
+		      width="220px"
+		      >
+		      <template scope="scope">
+		      	{{dateFormatter(scope.row.startTime)}} 至 {{dateFormatter(scope.row.endTime)}}
+		      </template>
+		    </el-table-column>
+		    
+   		    <!-- <el-table-column
+		      prop="applyType"
+		      label="申请来源"
+		      sortable>
+		    </el-table-column> -->
+		    
+		    <el-table-column
+		      prop="state"
+		      label="状态"
+		      :formatter="stateFormatter"
+		      :filters="[{ text: '申请中', value: 1 }, { text: '已通过', value: 2 }, { text: '已拒绝', value: 3 }]"
+		      :filter-method="filterState"
+		      >
+		      <template scope="scope">
+		      	<el-tag v-if="scope.row.state === 1" type="warning" disable-transitions>申请中</el-tag>
+		      	<el-tag v-else-if="scope.row.state === 2" type="success" disable-transitions>已通过</el-tag>
+		      	<el-tag v-else="scope.row.state === 3" type="danger" disable-transitions>已拒绝</el-tag>
+		      </template>
+		    </el-table-column>
+		    
+		    <el-table-column
+		      prop="approveTime"
+		      label="审核时间"
+		      :formatter="dateTimeFormatter"
+		      
+		      sortable>
+		    </el-table-column>
+		    <el-table-column
+		      prop="approver"
+		      label="审核人"
+		      width="80px"
+		      sortable>
+		    </el-table-column>
+		    
+		    
+		    
+	        <el-table-column label="操作" width="300">
+		      <template scope="scope" >
+		        <el-button 
+		          size="small"
+		          type="primary"
+		          fixed="right"
+		          @click="onEdit(scope.$index, scope.row)">查看</el-button>
+	            <el-button 
+		          size="small"
+		          type="primary"
+		          fixed="right"
+		          @click="onSend(scope.$index, scope.row)">重新发送邮件</el-button>
+	            <el-button 
+		          size="small"
+		          type="primary"
+		          fixed="right"
+		          @click="onDownLoad(scope.$index, scope.row)">下载</el-button>
+		      </template>
+		    </el-table-column>
+		  </el-table>
+		  
+		  <div align="center">
+			  <el-pagination
+			      @size-change="handleSizeChange"
+			      @current-change="handleCurrentChange"
+			      :current-page="currentPage"
+			      :page-sizes="[10, 20, 30, 40]"
+			      :page-size="pagesize"
+			      layout="total, sizes, prev, pager, next, jumper"
+			      :total="totalCount">
+			  </el-pagination>
+		  </div>
+		</div>
+		
+		<el-dialog title="授权审核" :visible.sync="applyFormVisible">
+		  <el-form :model="applyForm" :rules="applyRules" ref="applyForm" label-width="100px" style="margin-top:20px;">
+			  <el-form-item label="公司名称" >
+			    <el-input v-model="applyForm.company"></el-input>
+			  </el-form-item>
+			  <el-form-item label="联系人" >
+			    <el-input v-model="applyForm.creater"></el-input>
+			  </el-form-item>
+			  <el-form-item label="联系电话" >
+			    <el-input v-model="applyForm.phone"></el-input>
+			  </el-form-item>
+			  <el-form-item label="联系邮箱"  placeholder="该邮箱用于接收激活文件">
+			    <el-input v-model="applyForm.email"></el-input>
+			  </el-form-item>
+			  <el-form-item label="联系地址" >
+			    <el-input type="textarea" v-model="applyForm.address"></el-input>
+			  </el-form-item>
+			  <el-form-item label="产品版本"  >
+			    <el-input v-model="applyForm.version"></el-input>
+			  </el-form-item>
+			  <el-form-item label="服务器名称"  >
+			    <el-input v-model="applyForm.computerName"></el-input>
+			  </el-form-item>
+			  <el-form-item label="服务器地址"  >
+			    <el-input v-model="applyForm.macAddress"></el-input>
+			  </el-form-item>
+			  <el-form-item label="服务器OS"  >
+			    <el-input v-model="applyForm.osName"></el-input>
+			  </el-form-item>
+			  <el-form-item label="服务器版本"  >
+			    <el-input v-model="applyForm.osVersion"></el-input>
+			  </el-form-item>
+			  <el-form-item label="jdk" >
+			    <el-input v-model="applyForm.jvm"></el-input>
+			  </el-form-item>
+			  <el-form-item label="数据库"  >
+			    <el-input v-model="applyForm.dbInfo"></el-input>
+			  </el-form-item>
+			  <el-form-item  label="最大用户数" >
+			    <el-input type="number" v-model="applyForm.maxUserCount"></el-input>
+			  </el-form-item>
+			  <el-form-item label="使用时间" required>
+			    <el-date-picker
+			      v-model="timeBetween"
+			      type="daterange"
+			      range-separator="至"
+			      start-placeholder="开始日期"
+			      end-placeholder="结束日期"
+			      :default-time="['00:00:00', '23:59:59']">
+			    </el-date-picker>
+			  </el-form-item>
+			  <el-form-item  label="审核意见" >
+			    <el-input type="textarea" v-model="applyForm.reason"></el-input>
+			  </el-form-item>
+			</el-form>
+		  <div slot="footer" class="dialog-footer" v-show="applyForm.state==1">
+		    <el-button type="primary" @click="onApplyYES">同意</el-button>
+		    <el-button @click="onApplyNO">拒绝</el-button>
+		  </div>
+		</el-dialog> 
+		
+		<el-dialog title="导入申请" :visible.sync="addFormVisible">
+		  <el-form :model="applyForm" :rules="applyRules" ref="applyForm" label-width="100px" style="margin-top:20px;">
+			  <el-upload
+				  class="upload-demo tab-content"
+				  ref="upload"
+				  action="${basePath}/license/apply"
+				  :auto-upload="true"
+				  :on-success="onUploadSuccess"
+				  :on-error="onUploadError"
+				  :show-file-list="false"
+				  >
+				  <el-button>导入申请文件</el-button>
+				</el-upload>
+			</el-form>
+		</el-dialog> 
+		
+		
+    </div>
+	
+    <footer align="center">
+    </footer>
+
+	<script>
+	var vue = new Vue({			
+			el:"#content",
+		    data: {		  
+		    	//表格当前页数据
+		    	tableData: [],
+		        
+		        //默认每页数据量
+		        pagesize: 10,		        
+		        
+		        //当前页码
+		        currentPage: 1,
+		        
+		        //查询的页码
+		        start: 1,
+		        
+		        //默认数据总数
+		        totalCount: 1000,
+		        //添加对话框默认可见性
+		        applyFormVisible: false,
+		        addFormVisible:false,
+		        
+		        currentUser:'${user.realname!}',
+		        
+		        timeBetween:[],
+		    	applyForm:{
+		    		id:'',
+		    		applyType:'',
+		    		type: '',
+		    		state: '',
+		    		creater: '',
+		    		company: '',
+		    		email: '',
+		    		phone: '',
+		    		address: '',
+		    		reason:'',
+		    		amount:'1',
+		    		version: '',
+		    		osName: '',
+		    		computerName:'',
+		    		jvm: '',
+		    		maxUserCount: '',
+		    		macAddress:'',
+		    		startTime:'',
+		    		endTime:'',
+		    		activateTime:''
+		    	},
+		    	queryForm:{
+		    		company: '',
+		    		creater: '',
+		    		version: '',
+		    	},
+		    	applyRules: {
+				    startTime: [
+				      { type: 'date', required: true, message: '请选择日期', trigger: 'change' }
+				    ]
+		    	}
+		    },
+
+		    methods: {
+		    	dateTimeFormatter: function(row, column, value){
+		    		if(value!=null && value!=0){
+		    			return getFormatDate(new Date(value));
+		    		}else{
+		    			return '';
+		    		}
+		    	},
+		    	dateFormatter:function(value){
+		    		if(value!=null && value!=0){
+		    			return getFormatDate(new Date(value));
+		    		}else{
+		    			return '';
+		    		}
+		    	},
+		    	stateFormatter: function(row, column, value) {
+		    		if(value!=null && value!=''){
+		    			if (value==1) {
+		    				return ''
+		    			}
+		    			return getFormatDate(new Date(value));
+		    		}else{
+		    			return '';
+		    		}
+		    	},
+		    	timeOutFormatter: function(row, column, value) {
+		    		if(value!=null && value!=0){
+		    			return value/1000/60 + '分钟' ;
+		    		}else{
+		    			return '';
+		    		}
+		    	},
+		    	tableRowClassName({row, rowIndex}) {
+		            if (row.endTime < new Date()) {
+		              return 'warning-row';
+		            }
+		            return '';
+		          },
+		    	filterState(value, row) {
+		            return row.state === value;
+		          },
+		        //从服务器读取数据
+				loadData: function(pageNum, pageSize){	
+					
+					this.$http.get('${basePath}/license/page?' + 'pageNumber=' +  pageNum + '&pageSize=' + pageSize,{params:this.queryForm}).then(function(res){
+						console.log(res)
+                		this.tableData = res.body.rows;
+                		this.totalCount = res.body.total;
+                	},function(){
+                  		console.log('failed');
+                	});					
+				},			    		        
+				      
+			    onApplyYES: function() {
+			    	this.applyForm.approver=this.currentUser;
+			    	this.applyForm.approveTime=moment().format('YYYY-MM-DD HH:mm:ss');
+			    	this.applyForm.state = 2;
+			    	
+			    	this.applyForm.startTime=moment(this.timeBetween[0]).format('YYYY-MM-DD HH:mm:ss');
+			    	this.applyForm.endTime=moment(this.timeBetween[1]).format('YYYY-MM-DD HH:mm:ss');
+			    	
+			    	delete this.applyForm.applyTime;
+			    	delete this.applyForm.activateTime;
+					this.$http.post('${basePath}/license/update',this.applyForm,{emulateJSON: true}).then(function(res){
+						this.loadData( this.currentPage, this.pagesize);
+						this.applyFormVisible = false;
+		            },function(){
+		                console.log('failed');
+		            });
+		        },
+		        onApplyNO: function(index, row) {
+		        	if (this.applyForm.reason==null || this.applyForm.reason=='') {
+			        	this.$message.error('请输入拒绝原因!');
+			        	//this.applyForm.state = 3;
+		        	} else {
+		        		this.applyForm.state = 3;
+		        		
+		        		var data = {
+				    		id:this.applyForm.id,
+				    		approver:this.currentUser,
+				    		approve_time:moment().format('YYYY-MM-DD HH:mm:ss'),
+				    		state:3,
+				    		email:this.applyForm.email,
+				    		reason:this.applyForm.reason,
+				    		startTime:moment(this.timeBetween[0]).format('YYYY-MM-DD HH:mm:ss'),
+				    		endTime:moment(this.timeBetween[1]).format('YYYY-MM-DD HH:mm:ss'),
+				    	};
+		        		console.log(data);
+						this.$http.post('${basePath}/license/update',data,{emulateJSON: true}).then(function(res){
+							this.loadData( this.currentPage, this.pagesize);
+							this.applyFormVisible = false;
+			            },function(){
+			                console.log('failed');
+			            });
+		        	}
+		        },
+		        
+		        onEdit:function(index,row){
+		        	this.applyFormVisible = true;
+		        	this.applyForm = Object.assign(this.applyForm, row);
+		        	this.timeBetween=[moment(this.applyForm.startTime).format('YYYY-MM-DD HH:mm:ss'),moment(this.applyForm.endTime).format('YYYY-MM-DD HH:mm:ss')];
+		        	this.applyForm.maxUserCount = '9999';
+		        	//this.applyForm.startTime = moment(this.applyForm.startTime).format('YYYY-MM-DD HH:mm:ss');
+		        	//this.applyForm.endTime = moment(this.applyForm.endTime).format('YYYY-MM-DD HH:mm:ss');
+		        },
+		        onSend:function(index,row){
+		        	this.$http.get('${basePath}/license/send',{params:{id:row.id}}).then(function(res){
+						if (res.code===0) {
+							this.$message({
+						          message: '重新发送授权文件成功',
+						          type: 'success'
+						        });
+						}
+		            },function(){
+		                console.log('failed');
+		            });
+		        },
+
+		        onDownLoad:function(index,row){
+		        	location.href = '${basePath}/license/download/'+row.id;
+		        },
+
+		        
+		        
+		        
+		        
+		        
+		        //添加
+		        onAddClick: function(){
+		        	this.addFormVisible = true;
+		        },
+		        onResetClick(formName) {
+		        		this.queryForm.company='';
+		        		this.queryForm.creater= '';
+		        		this.queryForm.version= '';
+		        },
+		      
+		        onQueryClick: function(){
+		        	this.loadData( this.currentPage, this.pagesize);
+		        },
+		        
+				onUploadSuccess: function(response, file, fileList) {
+					this.loadData( this.currentPage, this.pagesize);
+					this.$message({
+				          message: '申请导入成功',
+				          type: 'success'
+				        });
+					this.addFormVisible = false;
+	        	},
+	        	onUploadError:function(){
+		    		this.$message.error('上传失败！');
+	        	},
+		        
+		        //更新
+		        handleUpdate: function(index, row){
+		        	console.log(row)
+		        	this.updateFormVisible = true;
+		        	this.updateform.jobName = row.jOB_CLASS_NAME;
+		        	this.updateform.jobGroup = row.jOB_GROUP;
+		        },
+		        
+		        //更新任务
+		        update: function(){
+		        	this.$http.post
+		        	('${basePath}/job/reschedulejob',
+		        			{"jobClassName":this.updateform.jobName,
+		        			 "jobGroupName":this.updateform.jobGroup,
+		        			 "cronExpression":this.updateform.cronExpression
+		        			 },{emulateJSON: true}
+		        	).then(function(res){
+		        		this.loadData(this.currentPage, this.pagesize);
+        				this.updateFormVisible = false;
+		        	},function(){
+                        console.log('failed');
+                    });
+		    
+		        },
+		      
+		        //每页显示数据量变更
+		        handleSizeChange: function(val) {
+		            this.pagesize = val;
+		            this.loadData(this.currentPage, this.pagesize);
+		        },
+		        
+		        //页码变更
+		        handleCurrentChange: function(val) {
+		            this.currentPage = val;
+		            this.loadData(this.currentPage, this.pagesize);
+		        },	      
+		        		        
+		    },	    
+		    
+		    
+		  });
+		  //载入数据
+    	  vue.loadData(vue.currentPage, vue.pagesize);
+		  
+    	  function getFormatDate(date, pattern) {
+    		 
+    		  
+    		  return  moment(date).format('YYYY-MM-DD');
+              if(date == undefined) {
+                  date = new Date();
+              }
+              if(pattern == undefined) {
+                  pattern = "yyyy-MM-dd hh:mm:ss";
+              }
+
+              var o = {
+                  "M+": date.getMonth() + 1,
+                  "d+": date.getDate(),
+                  "h+": date.getHours(),
+                  "m+": date.getMinutes(),
+                  "s+": date.getSeconds(),
+                  "q+": Math.floor((date.getMonth() + 3) / 3),
+                  "S": date.getMilliseconds()
+              };
+              if(/(y+)/.test(pattern)) {
+                  pattern = pattern.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+              }
+
+              for(var k in o) {
+                  if(new RegExp("(" + k + ")").test(pattern)) {
+                      pattern = pattern.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+                  }
+              }
+              return pattern;
+          }
+	</script>  
+	
+</body>
+</html>

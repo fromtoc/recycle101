@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<#include "common/common.html" />
+<#include "common/common_ztree.html" />
+<script type="text/javascript">
+
+	layui.use([ 'form'],function() {
+		var form = layui.form, 
+			layer = layui.layer;
+	})
+	
+ 	var zTree;
+    var zTreeSetting = {
+        check: {
+            enable: true,
+            chkboxType: { "Y":"","N": "" }
+        },
+        view: {
+            dblClickExpand: false,
+            showLine: true,
+            selectedMulti: false
+        },
+        data: {
+            simpleData: {
+                enable:true,
+                idKey: "id",
+                pIdKey: "parentId",
+                rootPId: "0"
+            }
+        },
+        async: {
+			enable: false,
+		},
+        callback: {
+        }
+    };
+    
+    $(function(){
+    	initZTree();
+        zTree = $.fn.zTree.getZTreeObj("tree");
+        zTree.expandAll(true);//指定选中ID节点展开
+    });
+    
+    function initZTree(){//异步加载修改为同步，异步使用时不能会写数据
+    	$.ajax({
+            url : "${basePath}/organization/list",
+            async: false,
+            type : "post",
+            dataType : "json",
+            success : function(data) {
+            	$.fn.zTree.init($("#tree"), zTreeSetting, data);
+            },
+            error : function() {
+            }
+        });
+    }
+
+    function init(userId) {
+    	$.post('${basePath}/organization/findOrgByUser',{userId:userId},function(result){
+            //result中data为组织数据
+            var data = result.data;
+    		for (var i=0; i < data.length; i++) {
+    			var node = zTree.getNodesByParam("id", data[i].id, null);
+    			if (node!=null) {
+					zTree.checkNode(node[0], true, false);
+					//主组织禁止修改
+					if (data[i].isDeputy == 0) {
+						node[0].chkDisabled = true;
+						zTree.updateNode(node[0],false);
+					}
+    			}
+			}
+    	});
+    }
+    
+    function getData() {
+    	return zTree.getCheckedNodes(true);
+    }
+    
+</script>
+</head>
+<body>
+<ul id="tree" class="ztree" style="overflow:auto;"></ul>
+</body>
+</html>

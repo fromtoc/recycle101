@@ -1,0 +1,439 @@
+<#include "common/common.html" />
+<script type="text/javascript" src="${basePath}/plugins/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="${basePath}/plugins/ueditor/ueditor.all.min.js"></script>
+<#if SYS_LOCALE=='zh_CN'>
+ <script type="text/javascript" charset="utf-8" src="${basePath}/plugins/ueditor/lang/zh-cn/zh-cn.js"></script>
+ <#elseif (SYS_LOCALE=='zh_TW' || SYS_LOCALE=='en_US')>
+    <script type="text/javascript" charset="utf-8" src="${basePath}/plugins/ueditor/lang/en/en.js"></script>
+    <#else>
+       <script type="text/javascript" charset="utf-8" src="${basePath}/plugins/ueditor/lang/zh-cn/zh-cn.js"></script>
+</#if>
+ <style>
+ 	.my-label {
+ 		width:100px!important;
+ 	}
+ 	.wide-input {
+ 		width:85%;
+ 	}
+ 	.o1{
+ 		color:#ea644a;
+ 	}
+ 	.o2{
+ 		color:#f1a325;
+ 	}
+ 	.o3{
+ 		color:#03b8cf;
+ 	}
+ 	.o4{
+ 		color:#3280fc;
+ 	}
+ 	.o5{
+ 		color:#38b03f;
+ 	}
+ 	#drawing {
+		/* width: 220px;
+		height: 60px; 
+		border:1px solid;*/
+		position: relative;
+	}
+	.circle {
+		position: absolute;
+	}
+	.boll{
+		width: 20px; 
+		height: 20px; 
+		border-radius: 10px; 
+		top:30px;
+		cursor:pointer;
+	}
+	.cleanDiv{
+		width: 20px; 
+		height: 20px; 
+		top:30px;
+		margin-left: 35px;
+	}
+	.clean{
+		color:#353535;
+		cursor:pointer;
+	}
+	#edui1_iframeholder{
+		height: 80px;
+	}
+ </style>
+
+<form id="form_add" class="layui-form" action=""
+	style="padding-top:10px;">
+	<div>
+		<input type="hidden" name="id" value="${(record.id)!}"/>
+		<div class="layui-form-item">
+			<label class="layui-form-label label-required-diy" style="width:100px"><@spring.message 'versionNotice.title'/></label>
+		    <div class="layui-input-block" >
+		      	<input type="text" id="title" style="color:${(record.titleColor==null)?string('#000',record.titleColor)}" value="${(record.title)!}" maxlength="100" name="title" placeholder="<@spring.message 'tips.input'/>"  autocomplete="off" class="layui-input wide-input">
+		    	<i class="layui-icon" id="setTitleColor" title="<@spring.message 'versionNotice.titleColor'/>" style="position: absolute;top:8px;right:16%;cursor:pointer;color: #1E9FFF;">&#xe66a;</i>
+		    </div>
+		</div>
+		<div class="layui-form-item">
+			<div class="layui-inline" id="noticeLevelDiv">
+				<!-- <label class="layui-form-label" style="width:100px">推荐等级</label>
+			    <div class="layui-input-inline" >
+			      <input type="text" id="noticeLevel" name="noticeLevel"  autocomplete="off" class="layui-input">
+			    </div> -->
+			</div>
+			<div class="layui-inline">
+				<label class="layui-form-label label-required-diy"><@spring.message 'versionNotice.noticeType'/></label>
+				<div class="layui-input-block">
+					<input type="radio" name="type" lay-filter="type" value="1" title="<@spring.message 'versionNotice.TextType'/>" ${(record.type==1)?string("checked","")}> 
+					<input type="radio" name="type" lay-filter="type" value="2" title="<@spring.message 'versionNotice.linkType'/>" ${(record.type==2)?string("checked","")}>
+				</div>
+			</div>
+			<div class="layui-inline">
+				<label class="layui-form-label" style="width:100px"><@spring.message 'list.order'/></label>
+			    <div class="layui-input-inline" >
+			      <input type="number" min="1" max="999" value="${(record.sort)!}" id="sort" name="sort" autocomplete="off" class="layui-input">
+			    </div>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label label-required-diy" style="width:100px"><@spring.message 'user.activateTime'/></label>
+		    <div class="layui-input-inline" >
+		      <input type="text" id="validStartTime" name="validStartTime" value="${((record.validStartTime)?string('yyyy-MM-dd'))!}" autocomplete="off" class="layui-input">
+		    </div> 
+			<span style="float: left;margin-top: 1%;margin-right: 10px;">~</span>
+		    <div class="layui-input-inline" >
+		      <input type="text" id="validEndTime" name="validEndTime" value="${((record.validEndTime)?string('yyyy-MM-dd'))!}"  autocomplete="off" class="layui-input">
+		    </div>
+		    <label class="layui-form-label" style="width:100px"><@spring.message 'versionNotice.isPermanenValid'/></label>
+		    <div class="layui-input-inline">
+				<input type="checkbox" value="1" ${(record.isForEver==1)?string('checked','')} name="isForEver" id="isForEver" lay-skin="switch" lay-filter="switchForEver" lay-text="<@spring.message 'list.yes'/>|<@spring.message 'list.no'/>">
+			</div>
+		</div>
+		<div class="layui-form-item" id="contentFormDiv">
+			<label class="layui-form-label label-required-diy" style="width:100px"><@spring.message 'moContent.Rich_text_content'/>/HTML</label>
+		    <div class="layui-input-block wide-input" id="contentDiv" style="z-index: 1;"></div>
+		</div>
+		<div class="layui-form-item layui-hide" id="linkUrlFormDiv">
+			<label class="layui-form-label label-required-diy"  style="width:100px"><@spring.message 'versionNotice.linkaddress'/></label>
+			<div class="layui-input-block" style="width: 85%;">
+				<textarea style="height:255px;" placeholder="<@spring.message 'tips.inputSome'/>..." class="layui-textarea" name="linkUrl" id= "linkUrl" >${(record.content)!}</textarea>
+			</div>
+		</div>
+		<input type="hidden" id="content" name="content" value='${(record.content)!}'/>
+		<input type="hidden" id="titleColor" name="titleColor"/>
+	</div>
+</form>
+<script id="dictSelect" type="text/html">
+<label class="layui-form-label label-required-diy" style="width:100px">{{ d.title }}</label>
+<div class="layui-input-inline" style="z-index: 1000;">
+	<select name="noticeLevel" id="noticeLevel" lay-verify="required" lay-filter="level">
+	{{#  layui.each(d.list, function(index, item){ }}
+   		<option value="{{ item.itemValue }}" {{(item.itemValue==${(record.noticeLevel)!})?'selected':''}} >{{ item.itemName }}</option>
+	{{#  }); }}
+	</select>
+</div>
+</script>
+<script type="text/javascript">
+var ue = UE.getEditor('contentDiv');
+ue.addListener("ready", function () {
+	var contentValue = $('#content').val();
+    ue.setContent(contentValue);
+});
+layui.use([ 'form', 'laytpl','laydate' ],function() {
+	var form = layui.form, 
+		laydate = layui.laydate,
+		laytpl = layui.laytpl;
+	
+	$('[name=type]').each(function(i,item){  
+	    if(item.checked){
+	       if($(item).val()=='1'){
+	    	$('#contentFormDiv').show();
+			$('#contentFormDiv').removeClass('layui-hide');
+			$('#linkUrlFormDiv').hide();
+			$('#linkUrlFormDiv').addClass('layui-hide');
+	      }else if ($(item).val()=='2'){
+	    	$('#linkUrlFormDiv').show();
+			$('#linkUrlFormDiv').removeClass('layui-hide');
+			$('#contentFormDiv').hide();
+			$('#contentFormDiv').addClass('layui-hide');
+	      }
+	      form.render('radio'); 
+	    }  
+	}); 
+	
+	$('#setTitleColor').on("click", function(e) {
+		var tipsHtml = '<div id="drawing">'
+						+'<div class="circle boll" title="<@spring.message "versionNotice.stateUrgency"/>" onclick="changeColor(\'#ea644a\')" style="left: 0px; background-color: #ea644a;"></div>'
+						+'<div class="circle boll" title="<@spring.message "versionNotice.stateUrgent"/>" onclick="changeColor(\'#f1a325\')" style="left: 28px; background-color: #f1a325;"></div>'
+						+'<div class="circle boll" title="<@spring.message "versionNotice.stateMajor"/>" onclick="changeColor(\'#03b8cf\')" style="left: 56px; background-color: #03b8cf;"></div>'
+						+'<div class="circle boll" title="<@spring.message "versionNotice.stateImportant"/>" onclick="changeColor(\'#3280fc\')" style="left: 84px; background-color: #3280fc;"></div>'
+						+'<div class="circle boll" title="<@spring.message "versionNotice.stateCommon"/>" onclick="changeColor(\'#38b03f\')" style="left: 112px; background-color: #38b03f;"></div>'
+						+'<div class="circle cleanDiv" style="left: 140px;"><i class="layui-icon clean" onclick="cleanColor()" title="<@spring.message "versionNotice.stateCleanColor"/>">&#xe640;</i></div>'
+						+'</div>';
+		layer.tips(tipsHtml, '#setTitleColor', {
+			tips: [3, '#fff'],
+			time: 0,
+			area: ['220px', '70px'],
+			closeBtn: 1,
+		});
+	})
+		
+	form.on('radio(type)', function(data){
+		var type = data.value;
+		if(type=='1'){//内容
+			$('#contentFormDiv').show();
+			$('#contentFormDiv').removeClass('layui-hide');
+			$('#linkUrlFormDiv').hide();
+			$('#linkUrlFormDiv').addClass('layui-hide');
+		} else if(type=='2'){//链接
+			$('#linkUrlFormDiv').show();
+			$('#linkUrlFormDiv').removeClass('layui-hide');
+			$('#contentFormDiv').hide();
+			$('#contentFormDiv').addClass('layui-hide');
+		}
+	});
+	
+	form.on('switch(switchForEver)', function(data){
+	   if(this.checked){//是
+		   $('#validStartTime').val('');
+		   $('#validEndTime').val('');//readonly unselectable="on" 
+		   $('#validStartTime').attr("readonly",true);
+		   $('#validEndTime').attr("readonly",true);
+	   } else if(!this.checked){//否
+		   $('#validStartTime').removeAttr("readonly");
+		   $('#validEndTime').removeAttr("readonly");
+	   }
+	});
+	
+	form.on('select(level)', function(data){
+		changeClass(data.value);
+	});
+	//执行一个laydate实例
+	/* var start = {
+		elem: '#validStartTime', //指定元素
+		min: '1970-06-16',
+		max: '2099-06-16',
+	    format: 'yyyy-MM-dd',  
+	    theme: '#539fff',
+	    //type: 'datetime'
+    	istime: true,  
+        istoday: false, 
+        choose: function(datas){  
+            end.min = datas; //开始日选好后，重置结束日的最小日期  
+            end.start = datas //将结束日的初始值设定为开始日  
+        }				
+	};
+	var end = {
+		elem: '#validEndTime', //指定元素
+	    format: 'yyyy-MM-dd',
+	    min: '1970-06-16',
+		max: '2099-06-16',
+	    theme: '#539fff',
+	    //type: 'datetime'
+	    istime: true,  
+	    istoday: false,  
+	    choose: function(datas){  
+	        start.max = datas; //结束日选好后，重置开始日的最大日期  
+	    } 	
+	};
+	laydate.render(start);
+	laydate.render(end); */
+	
+	var endDate= laydate.render({
+        elem: '#validEndTime',//选择器结束时间
+        format: 'yyyy-MM-dd',
+        type: 'date',
+        min: 'new Date()',//设置min默认最小值
+        theme: '#539fff',
+        istime: true,  
+	     istoday: false,  
+        done: function(value,date){
+        	if(value!=null && value!=''){
+       		 	startDate.config.max={
+                    year:date.year,
+                    month:date.month-1,//关键
+                    date: date.date,
+                    hours: 0,
+                    minutes: 0,
+                    seconds : 0
+                }
+	       	 }else{
+	       		 var maxDate = new Date("2099-12-31");
+	       		 var maxYear = maxDate.getFullYear();
+	       		 var maxMonth = maxDate.getMonth();
+	       		 var maxDate = maxDate.getDate();
+	       		 startDate.config.max={
+	       		     year : maxYear,
+	      				 month: maxMonth,
+	       		     date : maxDate,
+	                    hours: 0,
+	                    minutes: 0,
+	                    seconds : 0 
+	                }
+	       	 }
+        }
+    });
+    //日期范围
+    var startDate=laydate.render({
+        elem: '#validStartTime',
+        format: 'yyyy-MM-dd',
+        type: 'date',
+        min: 'new Date()',
+        max:"2099-12-31",//设置一个默认最大值
+        theme: '#539fff',
+        istime: true,  
+	     istoday: false,  
+        done: function(value, date){
+        	if(value!=null && value!=''){
+	             endDate.config.min ={
+	                 year:date.year,
+	                 month:date.month-1, //关键
+	                 date: date.date,
+	                 hours: 0,
+	                 minutes: 0,
+	                 seconds : 0
+	             };
+	       	 }else{
+	       		 var maxDate = new Date();
+	       		 var maxYear = maxDate.getFullYear();
+	       		 var maxMonth = maxDate.getMonth();
+	       		 var maxDate = maxDate.getDate();
+	       		 endDate.config.min={
+	       		     year : maxYear,
+	      				 month: maxMonth,
+	       		     date : maxDate,
+	                    hours: 0,
+	                    minutes: 0,
+	                    seconds : 0 
+	             }
+	       	 }
+        }
+    });
+	
+});
+	
+	function changeClass(value){
+		if(value==1){
+			$('#noticeLevelDiv').find('.layui-unselect').removeClass("o2 o3 o4 o5");
+			$('#noticeLevelDiv').find('.layui-unselect').addClass("o1");
+		}else if(value==2){
+			$('#noticeLevelDiv').find('.layui-unselect').removeClass("o1 o3 o4 o5");
+			$('#noticeLevelDiv').find('.layui-unselect').addClass("o2");
+		}else if(value==3){
+			$('#noticeLevelDiv').find('.layui-unselect').removeClass("o1 o2 o4 o5");
+			$('#noticeLevelDiv').find('.layui-unselect').addClass("o3");
+		}else if(value==4){
+			$('#noticeLevelDiv').find('.layui-unselect').removeClass("o1 o2 o3 o5");
+			$('#noticeLevelDiv').find('.layui-unselect').addClass("o4");
+		}else if(value==5){
+			$('#noticeLevelDiv').find('.layui-unselect').removeClass("o1 o2 o3 o4");
+			$('#noticeLevelDiv').find('.layui-unselect').addClass("o5");
+		}
+	}
+	
+	function changeColor(color){
+		var col = color;
+		$('#title').css("color",color);
+		$("#titleColor").attr("value",col)
+	}
+
+	function cleanColor(){
+		$('#title').css("color","#000");
+		$("#titleColor").attr("value","#000")
+	}
+
+	function initSelect(){
+		var o1 = 'dd[lay-value=1]';
+		var o2 = 'dd[lay-value=2]';
+		var o3 = 'dd[lay-value=3]';
+		var o4 = 'dd[lay-value=4]';
+		var o5 = 'dd[lay-value=5]';
+		var d1 = $('#noticeLevel').siblings("div.layui-form-select").find('dl').find(o1);
+		var d2 = $('#noticeLevel').siblings("div.layui-form-select").find('dl').find(o2);
+		var d3 = $('#noticeLevel').siblings("div.layui-form-select").find('dl').find(o3);
+		var d4 = $('#noticeLevel').siblings("div.layui-form-select").find('dl').find(o4);
+		var d5 = $('#noticeLevel').siblings("div.layui-form-select").find('dl').find(o5);
+		d1.addClass("o1");
+		d2.addClass("o2");
+		d3.addClass("o3");
+		d4.addClass("o4");
+		d5.addClass("o5");
+	}
+	
+	function init (level) {
+		layui.use(['form','laytpl'],function() {
+			var form = layui.form, 
+			laytpl = layui.laytpl;
+			var data = { //数据
+			  "title":"<@spring.message 'versionNotice.recommendLevel'/>"
+			  ,"list":level
+			}
+			var getTpl = dictSelect.innerHTML
+			,view = document.getElementById('noticeLevelDiv');
+			laytpl(getTpl).render(data, function(html){
+			  view.innerHTML = html;
+			});
+			form.render();
+			var lvSel = $('#noticeLevel option:selected').val();
+			changeClass(lvSel);
+			initSelect();
+			//触发选择事件
+		});
+	}
+	
+	function check() {
+		var everChoice = $("input:checkbox[name='isForEver']:checked").val();
+		if(everChoice==1){
+			var selectors = ["#title"];
+		}else{
+			var selectors = ["#title","#validStartTime","#validEndTime"];
+		}
+		var result = true;
+		$.each(selectors,function(index, rec){
+			if (!checkField(rec)) {
+				result = false;
+				return false;//调出循环
+			}
+			
+		});
+  		return result;
+  	}
+  	
+  	function checkField(selector){
+  		var value = $(selector).val();
+  		if (value==null || value == '') {
+  			$(selector).addClass("layui-form-danger");
+  			$(selector).focus();
+  			layer.tips('<@spring.message "tips.inputSome"/>', selector);
+  			return false;
+  		} else {
+  			return true;
+  		}
+  	}
+	
+	function getData(){
+		if (check()) { 
+			var checkVlaue = $(':radio[name="type"]:checked').val();
+			var content;
+			if(checkVlaue==1){
+				content = ue.getContent();;
+				console.log(content);
+				if (content!=null && content!='') {
+					$('#content').val(content);
+				}else{
+					layer.tips('<@spring.message "tips.inputSome"/>', '#contentDiv');
+		  			return null;
+				}
+			}else{
+				var linkUrl = $('#linkUrl').val();
+				if(linkUrl==null || linkUrl==''){
+					layer.tips('<@spring.message "tips.inputSome"/>', '#linkUrl');
+		  			return null;
+				}
+			}
+			return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+  	}
+	
+	
+</script>

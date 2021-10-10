@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xin.portal.system.mapper.JobAndTriggerMapper">
+
+	<select id="getJobAndTriggerDetails" resultType="com.xin.portal.system.model.JobAndTrigger">
+		select
+		qrtz_job_details.job_name jobName,
+		qrtz_job_details.job_group jobGroup,
+		qrtz_job_details.job_class_name jobClassName,
+		qrtz_triggers.trigger_name triggerName,
+		qrtz_triggers.trigger_group triggerGroup,
+		qrtz_triggers.trigger_state triggerState,
+		qrtz_cron_triggers.cron_expression cronExpression,
+		qrtz_cron_triggers.time_zone_id timeZoneId,
+		qrtz_triggers.next_fire_time nextFireTime,
+		qrtz_triggers.prev_fire_time prevFireTime,
+		qrtz_triggers.start_time startTime,
+		qrtz_triggers.end_time endTime
+
+		from
+		qrtz_job_details left join qrtz_triggers on qrtz_job_details.job_name=qrtz_triggers.job_name and qrtz_job_details.job_group=qrtz_triggers.job_group
+		left join qrtz_cron_triggers on qrtz_job_details.job_name = qrtz_triggers.job_name
+			and qrtz_triggers.trigger_name = qrtz_cron_triggers.trigger_name
+			and qrtz_triggers.trigger_group = qrtz_cron_triggers.trigger_group
+	</select>
+
+</mapper>

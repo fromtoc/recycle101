@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<#include "common/common_ztree.html" />
+<link rel="stylesheet" href="${basePath}/plugins/font-awesome-4.7.0/css/font-awesome.css" media="all">
+<script type="text/javascript">
+
+	var dictInputType = '${inputType!}';
+	var dictInputTypeArr = [];
+	var dictInputTypeData = JSON.parse(dictInputType);
+	$.each(dictInputTypeData,function(i,rec){
+		dictInputTypeArr[rec.itemValue]=rec.itemName;
+	});
+
+	layui.use([ 'form','element'],function() {
+		var form = layui.form, 
+			layer = layui.layer,
+			element = layui.element;
+		$('#btn_add_prompt').on('click',function(data){
+			addPrompt();
+		});
+	})
+	
+ 	var zTree;
+ 	var roleTree;
+    var resourceTreeSetting = {
+        check: {
+            enable: false
+        },
+        view: {
+        	addHoverDom:addHoverDom,
+        	removeHoverDom:removeHoverDom,
+            dblClickExpand: false,
+            showLine: true,
+            selectedMulti: false,
+        },
+        data: {
+            simpleData: {
+                enable:true,
+                idKey: "id",
+                pIdKey: "parentId",
+                rootPId: "0"
+            }
+        },
+        async: {
+			enable: true,
+			contentType: "application/json",
+			url: "${basePath}/resource/list",
+		},
+        callback: {
+            onClick: zTreeOnClick,
+            onAsyncSuccess: onResourceTreeAsyncSuccess
+        }
+    };
+    
+    var roleTreeSetting = {
+        check: {
+            enable: true,
+            chkStyle: "checkbox",
+            chkboxType: { "Y": "ps", "N": "ps" }
+        },
+        view: {
+            dblClickExpand: false,
+            showLine: true,
+            selectedMulti: false
+        },
+        data: {
+            simpleData: {
+                enable:true,
+                idKey: "id",
+                pIdKey: "parentId",
+            }
+        },
+        async: {
+			enable: true,
+			contentType: "application/json",
+			url: "${basePath}/role/list",
+		},
+		callback: {
+			onAsyncSuccess: onAsyncSuccess,
+			onCheck:onRoleCheck
+		}
+    };
+    
+    var checkedRoleIds = '';
+    function zTreeOnClick(event, treeId, treeNode) {
+    	//$('#table').bootstrapTable('refresh', null);
+    	$('#checkedId').val(treeNode.id),
+    	$.post('${basePath}/roleResource/findIds',{resourceId:treeNode.id},function(ids){
+        	checkedRoleIds = ids;
+        	var roleTree = $.fn.zTree.getZTreeObj("roleTree");
+        	roleTree.checkAllNodes(false);
+        	if (ids!=null && ids.length>0) {
+        		if (ids.length > 0) {
+        			for (var i=0;i<ids.length;i++ ) {
+        				var node = roleTree.getNodeByParam("id", ids[i]);
+        				if (node!=null) 
+        					roleTree.checkNode(node,true,false,false);
+        			}
+        		}
+        	}
+        },'json');
+    	
+    	//如果是MSTR报表，显示提示设置
+    	if (treeNode.type==2) {
+    		$('#tab_prompt').removeClass('layui-hide');
+    		$('#tab_prompt_content').removeClass('layui-hide');
+    		$('#table').bootstrapTable('refresh', null);
+    		$('#table_prompt').bootstrapTable('refresh', {url: "${basePath}/promptRel/findList",query:{resourceId:treeNode.id}});
+    	} else {
+    		$('#tab_1').addClass('layui-this');
+    		$('#tab_item_1').addClass('layui-show');
+    		$('#tab_prompt').addClass('layui-hide');
+    		$('#tab_prompt_content').addClass('layui-hide');
+    	}
+    }
+    
+    function onResourceTreeAsyncSuccess(){
+    	var node = zTree.getNodeByParam('id', 1,null);//获取id为1的点
+    	zTree.expandNode(node, true, false);//指定选中ID节点展开
+    }
+    
+    function onAsyncSuccess(){
+    	$.fn.zTree.getZTreeObj("roleTree").expandAll(true);
+    }
+    
+    function onRoleCheck(event,treeId,treeNode){
+    	var resourceNodes = zTree.getSelectedNodes();
+    	if (resourceNodes.length>0 && resourceNodes[0].state==0 && treeNode.state==0) {
+    		layer.msg('默认权限无法修改!');
+    		return ;
+    	}
+    	
+    	var nodes = roleTree.getCheckedNodes(true);
+    	var checkResId = $('#checkedId').val();
+    	if (checkResId==null || checkResId=='') {
+    		return;
+    	}
+		var ids = '';
+		var delRoleIds = '';
+		if (nodes!=null && nodes!=undefined) {
+			for(var i=0;i<nodes.length;i++) {
+				if (i==0) {
+					ids = nodes[i].id ;
+				}else {
+					ids += ',' + nodes[i].id ;
+				}
+			}
+		}
+		
+		$.each(checkedRoleIds,function(index,ele){
+			var del = true;
+			$.each(nodes,function(index2,n){
+				if (ele==n.id){
+					del = false;
+				}
+			});
+			if (del) {
+				if (delRoleIds==''){
+					delRoleIds = ele ;
+				}else {
+					delRoleIds += ',' + ele ;
+				}
+			} 
+		});
+		var node = treeNode.getParentNode();
+		var allNode = '';//获取当前选中节点
+		getParentNodes(node,allNode);
+		var param = {
+			resId:$('#checkedId').val(),
+			resIds:parentResIds,
+			delRoleIds:delRoleIds,
+			saveRoleIds:ids
+		};
+		$.post('${basePath}/roleResource/saveByResId',param,function(result){
+			if (result.code==0) {
+				layer.msg('保存成功!');
+			}else {
+				layer.msg('保存失败!');
+			}
+		},'json');
+    }
+    
+    var parentResIds='';
+	function getParentNodes(node,allNode){
+		if(node!=null){
+			if (allNode=='') {
+				allNode = node['id'];
+			}else {
+				allNode += ","+node['id'];
+			}
+			curNode = node.getParentNode();
+			getParentNodes(curNode,allNode);
+		}else{
+			//根节点
+			parentResIds = allNode;
+		}
+	}
+    
+    $(function(){
+        $.fn.zTree.init($("#tree"), resourceTreeSetting);
+        zTree = $.fn.zTree.getZTreeObj("tree");
+        $.fn.zTree.init($("#roleTree"), roleTreeSetting);
+        roleTree = $.fn.zTree.getZTreeObj("roleTree");
+        $('#add_permission').on('click',function(){
+        	addPermission();
+        });
+        
+        $('#table_prompt').bootstrapTable({
+	            idField: "id",
+	            pagination: false,
+	            dataType:'json',
+	            showRefresh: false,
+	            search: false,
+	            clickToSelect: false,
+	            columns: [
+	                {
+   	                field: "name",
+   	                title: "提示名称",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	            },
+   	         	{
+   	                field: "code",
+   	                title: "参数名",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	            },
+   	         	{
+   	                field: "type",
+   	                title: "输入类型",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	             	formatter: function(value,row,index) {
+	            	 	return dictInputTypeArr[value];
+	             	}
+   	            },
+   	         	{
+   	                field: "promptType",
+   	                title: "提示类型",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+	   	             formatter: function(value,row,index) {
+		            	 	if (value==1) {
+		            	 		return '值提示';
+		            	 	} else if (value==2){
+		            	 		return '元素提示';
+		            	 	} else if (value==3){
+		            	 		return '对象提示';
+		            	 	}
+		             	}
+   	            },
+   	     		
+   	         	{
+   	                field: "sort",
+   	                title: "排序", 
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	            },
+   	         	{
+   	                field: "hidden",
+   	                title: "显示",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	             	formatter: function(value,row,index) {
+   	            	 	if (value==0) {
+   	            	 		return '显示';
+   	            	 	} else {
+   	            	 		return '隐藏';
+   	            	 	}
+   	             	}
+   	            },
+   	         {
+   	                field: "require",
+   	                title: "必填",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	             	formatter: function(value,row,index) {
+   	            	 	if (value==0) {
+   	            	 		return '必填';
+   	            	 	} else {
+   	            	 		return '非必填';
+   	            	 	}
+   	             	}
+   	            },
+   	         	{
+   	                field: "defaultValue1",
+   	                title: "默认值",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	            },
+   	         	{
+   	                field: "opt",
+   	                title: "操作",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	             	formatter: function(value,row,index) {
+   	             		var v='<div class="layui-btn-group layui-btn-group-xs">'
+                		+'<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="javascript:editPromptRel(\'%\','+row.type+')"><i class="icon-info-sign"></i> 编辑</button>'
+                		+'<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="javascript:delPromptRel(\'%\')"><i class="icon-info-sign"></i> 删除</button>'
+                		+'</div>'; 
+                		return v.replace(new RegExp(/(%)/g),row.id);
+   	             	}
+   	            },
+			]
+		});
+    });
+    
+    function addHoverDom(treeId, treeNode) {
+    	if (treeNode.state==0 && treeNode.id!=1) {
+    		return false;
+    	}
+        var sObj = $("#" + treeNode.tId + "_span");
+        if (sObj[0].innerText.length>20) {
+        	sObj.html(sObj[0].innerText.substring(0, 20) + "...");
+        }
+        
+        if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+        var addStr = "<span class='button add' id='addBtn_" + treeNode.tId
+                + "' title='添加' onfocus='this.blur();'></span>";
+
+        addStr += "<span class='button edit' id='editBtn_" + treeNode.tId + "' title='修改' onfocus='this.blur();'></span>";
+        if (!treeNode.isParent && treeNode.id!=1) {
+	        addStr += "<span class='button remove' id='removeBtn_" + treeNode.tId + "'  title='删除' onfocus='this.blur();'></span>";
+        }
+        sObj.after(addStr);
+        var btn = $("#addBtn_"+treeNode.tId);
+        if (btn) btn.bind("click", function(){
+        	addResource(treeNode);
+        	/* $('#body').load('${basePath}/resource/add',function(){
+        		$('#parentId').val(treeNode.id);
+        		$('#parentName').val(treeNode.name);
+        	}); */
+            return false;
+        });
+        
+        var btn = $("#editBtn_"+treeNode.tId);
+        if (btn) btn.bind("click", function(){
+        	editResource(treeNode);
+            return false;
+        });
+        
+        
+        
+        var btnDel = $("#removeBtn_"+treeNode.tId);
+        if (btnDel) btnDel.bind("click", function(){
+            delResource(treeNode);
+            return false;
+        });
+        
+    };
+    
+    function addResource(treeNode) {
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: '添加菜单',
+			type:2,
+			content:'${basePath}/resource/add',
+			area: ['70%', '80%'],
+			btn:['确定','取消'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				iframeWin.init(treeNode);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath}/resource/save',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('添加失败！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									layer.msg('添加成功！');
+									zTree.addNodes(treeNode, result.data);
+			                		
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+					}else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+    
+    function delResource(treeNode) {
+    	var zTree = $.fn.zTree.getZTreeObj("tree");
+        if (treeNode.isParent) {
+        	parent.layer.alert('该功能包含下级节点,不能删除!');
+         	return;
+        } else {
+        	parent.layer.confirm('删除菜单【'+treeNode.name+'】？', {
+				btn:['确定','取消'],
+				yes: function(index, layero){
+			  		$.post('${basePath}/resource/delete',{id:treeNode.id},function(result){
+			    		if (result.code==0) {
+			    			zTree.removeNode(treeNode);
+			    		} 
+			    		parent.layer.close(index);
+			    		parent.layer.msg(result.msg);
+			    		
+				    });
+		                
+				}
+         	});
+        }
+    }
+    
+    function editResource(treeNode) {
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: '编辑菜单',
+			type:2,
+			content:'${basePath}/resource/edit?id='+treeNode.id,
+			area: ['70%', '80%'],
+			btn:['确定','取消'],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				var parentNodes = zTree.getNodesByParam("id", treeNode.parentId, null);
+				iframeWin.init(parentNodes[0]);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+						$.ajax({
+			                type: "POST",
+			                url:'${basePath}/resource/update',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('编辑失败！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									layer.msg('编辑成功！');
+									treeNode.name = result.data.name;
+									treeNode.title = result.data.name;
+									treeNode.linkUrl = result.data.linkUrl;
+									treeNode.iconName = result.data.iconName;
+									treeNode.linkType = result.data.linkType;
+									treeNode.state = result.data.state;
+									zTree.updateNode(treeNode);
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+					}else {
+						isSubmit = false;
+					}
+				}
+   		    	
+    		}
+		});
+    }
+
+    function removeHoverDom(treeId, treeNode) {
+        $("#addBtn_"+treeNode.tId).unbind().remove();
+        $("#removeBtn_"+treeNode.tId).unbind().remove();
+        $("#editBtn_"+treeNode.tId).unbind().remove();
+    };
+    
+    
+    
+    function queryParams(params) {
+    	params.resourceId = 0;
+    	if (zTree!=null) {
+    	var nodes = zTree.getSelectedNodes();
+	    	if (nodes!=null) {
+				params.resourceId = nodes[0].id;
+	    	}
+    	}
+		return params;
+	}
+    
+    function opeFormatter(value,row,index){
+		var v = '<div class="layui-btn-group layui-btn-group-xs">'
+                        		+'<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="javascript:editPermission(\'%\')"><i class="icon-info-sign"></i> 编辑</button>'
+                        		+'<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="javascript:delPermission(\'%\')"><i class="icon-info-sign"></i> 删除</button>'
+                        		+'</div>'; 
+        return v.replace(new RegExp(/(%)/g),row.id);
+	}
+	
+	function typeFormatter(value,row,index){
+		var v = '按钮';
+		//var value='<input name="open" type="checkbox" checked="" lay-skin="switch" lay-filter="switchTest" lay-text="ON|OFF">';
+        //return value.replace(new RegExp(/(%)/g),row.id);
+        if (value==2) {
+        	v = '链接';
+        }
+        return v;
+	}
+	
+	function stateFormatter(value,row,index){
+		var v = '启用';
+        if (value==0) {
+        	v = '禁用';
+        }
+        return v;
+	}
+	
+	function addPermission(){
+		var nodes = zTree.getSelectedNodes();
+		if (nodes==null || nodes.length==0) {
+			layer.msg('请选择菜单！');
+			return;
+		}
+		var isSubmit = false;
+		parent.layer.open({
+			title: '添加操作',
+			type:2,
+			content:'${basePath}/permission/add',
+			area: ['600px', '500px'],
+			btn:['确定','取消'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				iframeWin.init(nodes[0]);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if(data!=null){
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath}/permission/save',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('添加失败！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									layer.msg('添加成功！');
+									//$('#table').bootstrapTable('refresh', null);
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+					} else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+	}
+	
+	function editPermission(id) {
+		var isSubmit = false;
+    	parent.layer.open({
+			title: '编辑操作',
+			type:2,
+			content:'${basePath}/resource/edit?id='+id,
+			area: ['600px', '500px'],
+			btn:['确定','取消'],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				var parentNodes = zTree.getNodesByParam("id", treeNode.parentId, null);
+				iframeWin.init(parentNodes[0]);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if(data!=null){
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath}/resource/update',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('编辑失败！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									layer.msg('编辑成功！');
+									treeNode.name = result.data.name;
+									treeNode.title = result.data.name;
+									treeNode.linkUrl = result.data.linkUrl;
+									treeNode.iconName = result.data.iconName;
+									treeNode.linkType = result.data.linkType;
+									treeNode.state = result.data.state;
+									zTree.updateNode(treeNode);
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+					} else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+    
+    function delPermission(id) {
+       	layer.confirm('确定删除？', {
+			btn:['确定','取消'],
+			yes: function(index, layero){
+		  		$.post('${basePath}/permission/delete',{id:id},function(result){
+		    		layer.close(index);
+		    		parent.layer.msg(result.msg);
+		    		//$('#table').bootstrapTable('refresh', null);
+			    });
+	                
+			}
+       	});
+    }
+    
+    function addPrompt() {
+    	var isSubmit = false;
+    	var resourceId = $('#checkedId').val();
+    	if (resourceId==null || resourceId=='') {
+    		parent.layer.msg('请选中报表！');
+    		return;
+    	}
+    	parent.layer.open({
+			title: '选择提示',
+			type:2,
+			content:'${basePath}/prompt/select',
+			area: ['70%', '70%'],
+			id:'win_prompt',
+			btn:['确定','取消'],
+			success: function(layero){
+				//var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				//iframeWin.init();
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.selDict();
+					if (data!=null && data.length>0) {
+						
+						var promptRels = [];
+						var sort = $('#table_prompt').bootstrapTable('getOptions').totalRows+1;
+						$.each(data,function(i,rec){
+							var prompt = {
+									promptId:rec.id,
+									resourceId: resourceId,
+									sort: sort+i
+							}
+							promptRels.push(prompt);
+						});
+						$.post('${basePath}/promptRel/saveBatch',{"promptRelsJSON":JSON.stringify(promptRels)},function(result){
+							var resourceId = $('#checkedId').val();
+				  			$('#table_prompt').bootstrapTable('refresh', {url: "${basePath}/promptRel/findList",query:{resourceId:resourceId}});
+				  			parent.layer.close(index);
+						});
+					} else {
+						parent.layer.msg('请至少选择一项！');
+						isSubmit = false;
+					}
+				}
+			}
+		})
+    }
+    
+    function delPromptRel(id) {
+        	parent.layer.confirm('移除提示？', {
+				btn:['确定','取消'],
+				yes: function(index, layero){
+			  		$.post('${basePath}/promptRel/delete',{id:id},function(result){
+			  			var resourceId = $('#checkedId').val();
+			  			$('#table_prompt').bootstrapTable('refresh', {url: "${basePath}/promptRel/findList",query:{resourceId:resourceId}});
+			    		parent.layer.close(index);
+			    		parent.layer.msg(result.msg);
+			    		
+				    });
+		                
+				}
+         	});
+    }
+    function editPromptRel(id,type) {
+    	var isSubmit = false;
+    	var area = ['600px', '500px'];
+    	if (type==3) {
+    		area = ['600px', '500px'];
+    	}
+    	parent.layer.open({
+			title: '编辑提示',
+			type:2,
+			content:'${basePath}/promptRel/edit?id='+id,
+			area: area,
+			btn:['确定','取消'],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				//var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				//var parentNodes = zTree.getNodesByParam("id", treeNode.parentId, null);
+				//iframeWin.init(parentNodes[0]);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+						$.ajax({
+			                type: "POST",
+			                url:'${basePath}/promptRel/update',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('编辑失败！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+			                		var resourceId = $('#checkedId').val();
+						  			$('#table_prompt').bootstrapTable('refresh', {url: "${basePath}/promptRel/findList",query:{resourceId:resourceId}});
+			                		
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+					} else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+	}
+    
+</script>
+
+</head>
+<body>
+	<div class="layui-container">
+		<div class="layui-row">
+		    <div class="layui-col-md3">
+				<ul id="tree" class="ztree" style="overflow:auto;"></ul>
+		    </div>
+		    <div class="layui-col-md9">
+		      	<div class="layui-tab" style="-webkit-box-sizing: initial;">
+				  <ul class="layui-tab-title layui-tab-brief">
+				    <!-- <li class="layui-this" style="-webkit-box-sizing: initial;">基本操作</li> -->
+				    <li class="layui-this" id="tab_1" style="-webkit-box-sizing: initial;">权限分配</li>
+				    <li class="layui-hide" style="-webkit-box-sizing: initial;" id="tab_prompt">提示设置</li>
+				  </ul>
+				  <!-- <div id="toolbar">
+		            <div class="layui-inline">
+				        <button type="button" id="add_permission" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon">&#xe654;</i> 添加</button>
+				    </div>
+		          </div> -->
+				  <div class="layui-tab-content">
+				  <!--
+				    <div class="layui-tab-item layui-show">
+				    	<table id="table"
+				    		   data-toolbar="#toolbar"
+				               data-toggle="table"
+				               data-search="false"
+				               data-pagination="false"
+				               data-query-params-type=""
+				               data-data-type="json"
+				               data-url="${basePath}/permission/list"
+				               data-query-params="queryParams">
+				            <thead>
+				            <tr>
+				                <th data-align="center"
+				                	data-halign="center"
+				                	data-formatter="indexFormatter"
+				                	data-width="1%">序号</th>
+				                <th data-align="center" 
+				                	data-halign="center"
+				                	data-field="name">名称</th>
+				                <th data-align="center" 
+				                	data-halign="center"
+				                	data-field="type"
+				                	data-formatter="typeFormatter" >类型</th>
+				                <th data-align="center"
+				                	data-halign="center"
+				                	data-field="action">动作</th>
+				                <th data-align="center"
+				                	data-halign="center"
+				                	data-field="checked"
+				                	data-formatter="stateFormatter">状态</th>
+				                <th data-align="center"
+				                	data-halign="center"
+				                	data-formatter="opeFormatter" >操作</th>
+				            </tr>
+				            </thead>
+				        </table>
+				    </div> -->
+				    <input type="hidden" id="checkedId" />
+				    <div class="layui-tab-item layui-show" id="tab_item_1">
+				    	
+				    	<ul id="roleTree" class="ztree" style="overflow:auto;"></ul>
+				    </div>
+				    <div class="layui-tab-item layui-hide"  id="tab_prompt_content">
+				    	<div class="layui-form " style="padding-bottom: 5px;">
+					     	<div class="layui-inline">
+					     		<button id="btn_add_prompt" class="layui-btn layui-btn-normal">
+								  <i class="layui-icon">&#xe608;</i> 添加提示
+								</button>
+						    </div>
+					    </div>
+				    	<table id="table_prompt"></table>
+				    </div>
+				  </div>
+				</div>
+		    </div>
+	  </div>
+	</div>
+</body>
+
+</html>

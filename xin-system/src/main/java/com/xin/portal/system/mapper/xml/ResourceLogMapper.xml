@@ -1,0 +1,652 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.ResourceLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.ResourceLog">
+        <id column="id" property="id" />
+        <result column="resource_id" property="resourceId" />
+        <result column="type" property="type" />
+        <result column="creater" property="creater" />
+        <result column="creater_name" property="createrName" />
+        <result column="create_time" property="createTime" />
+        <result column="ip" property="ip" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, resource_id, type, creater, creater_name, create_time, ip
+    </sql>
+
+	<resultMap id="ResourceLogMap" type="com.xin.portal.system.model.ResourceLog">
+		<id column="id" property="id" />
+		<result column="resource_id" property="resourceId" />
+		<result column="type" property="type" />
+		<result column="creater" property="creater" />
+		<result column="creater_name" property="createrName" />
+		<result column="create_time" property="createTime" />
+		<result column="ip" property="ip" />
+		<result column="browser" property="browser" />
+		<result column="num" property="num" />
+		<result column="name" property="name" />
+		<collection property="resource" column="resource_id" select="findResource">
+		</collection>
+	</resultMap>
+
+
+	<select id="findEchartData" resultMap="ResourceLogMap" parameterType="com.xin.portal.system.model.ResourceLog">
+		 SELECT  COUNT(a.id) AS num  ,a.creater_name,a.resource_id,b.name  FROM  t_resource_log  a LEFT JOIN  t_resource  b   ON  a.resource_id=b.id
+		 WHERE  a.creater=#{creater}   <![CDATA[ and a.create_time >= #{createTime}]]>
+		 GROUP BY a.resource_id
+		 ORDER BY  num DESC
+		 LIMIT 0,10
+	</select>
+
+	<select id="findList" resultMap="ResourceLogMap" >
+		select 	rl.id,
+				  rl.resource_id,
+				  rl.type,
+				  rl.creater,
+				  rl.creater_name ,
+				  rl.create_time ,
+				  rl.ip,
+				  rl.browser
+		 from t_resource_log rl
+		left join t_resource r on rl.resource_id = r.id
+		<where>
+			<if test="creater!=null and creater!=''">
+				and rl.creater = #{creater}
+			</if>
+			<if test="type!=null and type!=''">
+				and rl.type = #{type}
+			</if>
+			<if test="resourceType!=null and resourceType!=''">
+				and r.type = #{resourceType}
+			</if>
+			<if test="resourceTypeIn!=null and resourceTypeIn!=''">
+				and r.resource_type1 in (${resourceTypeIn})
+			</if>
+		</where>
+		order by rl.create_time desc
+	</select>
+
+	<select id="findResource" resultMap="com.xin.portal.system.mapper.ResourceMapper.BaseResultMap" >
+		select id, name, link_url, code, status, parent_id, create_time, update_time, icon_name, thumbnail_id, thumbnail, sort, type, link_type, state, lv, introduce, creater, project_id, report_id, type_name, type_value, hidden_sections, view_num, download_num, collect_num, comment_num, path, resource_type1, resource_type2, file_id, tenant_id
+		from t_resource
+		where id = #{resource_id}
+	</select>
+    
+    <select  id="findResourceLog" resultType="com.xin.portal.system.model.ResourceLog">
+    	SELECT 
+			rl.id, 
+			rl.resource_id,  
+			rl.type, 
+			rl.creater,
+			rl.creater_name as createrName,
+			rl.create_time as createTime,
+			rl.ip,
+			r.name,
+			r.resource_type as resourceType,
+			rt.name AS resourceTypeName,
+			r.link_url AS linkUrl,
+			rl.browser
+		FROM t_resource_log rl
+		LEFT JOIN (SELECT 
+					  id,
+					  NAME,
+					  link_url,
+					  CODE,
+					  STATUS,
+					  parent_id,
+					  create_time,
+					  icon_name,
+					  thumbnail_id,
+					  thumbnail,
+					  sort,
+					  TYPE,
+					  link_type,
+					  state,
+					  lv,
+					  introduce,
+					  creater,
+					  project_id,
+					  report_id,
+					  type_name,
+					  type_value,
+					  hidden_sections,
+					  view_num,
+					  download_num,
+					  collect_num,
+					  comment_num,
+					  path,
+					  CASE WHEN resource_type2 IS NOT NULL AND TRIM(resource_type2)!=' '
+					  THEN resource_type2
+					  ELSE resource_type1  END AS resource_type,
+					  file_id 
+					FROM t_resource ) r ON r.id = rl.resource_id
+		LEFT JOIN t_resource_type rt ON r.resource_type = rt.id
+		<where>
+			<if test="type!=null">
+				rl.type = #{type}
+			</if>
+			<if test="resourceId !=null">
+				and rl.resource_id = #{resourceId}
+			</if>
+			<if test="creater !=null and creater !=''">
+				and rl.creater = #{creater}
+			</if>
+			<if test="name!=null and name != ''">
+				<bind name="pattern1" value="'%'+name+'%'"/>
+    			and r.name like #{pattern1}
+			</if>
+			<if test="createrName!=null and createrName !=''">
+				<bind name="pattern2" value="'%'+createrName+'%'"/>
+    			and rl.creater_name like #{pattern2}
+			</if>
+			<if test="createTimeStart!=null">
+    			<![CDATA[ and rl.create_time >= #{createTimeStart}]]>
+    		</if>
+    		<if test="createTimeEnd!=null">
+    			<![CDATA[ and rl.create_time <= #{createTimeEnd}]]>
+    		</if>
+		</where>
+		order by rl.create_time desc
+    </select>
+
+	<select id="selectCountByType" resultType="com.xin.portal.system.model.ResourceLog" databaseId="mysql">
+			SELECT c.id,COUNT(*) AS myCount,c.name  FROM (
+				SELECT a.*,b.name FROM t_resource_log a 
+				LEFT JOIN t_resource b 
+				ON  a.resource_id=b.id 
+			<if test="resourceType!=null and resourceType != ''">
+    			 AND b.type IN(${resourceType}) 
+			</if>
+			<if test="createTime!=null ">
+    			<![CDATA[ and a.create_time LIKE CONCAT('%',date_format(#{createTime}, '%Y-%m-%d'),'%') ]]>
+			</if>
+			<if test="createTimeStart!=null">
+    			<![CDATA[ and a.create_time >= #{createTimeStart}]]>
+    		</if>
+    		<if test="createTimeEnd!=null">
+    			<![CDATA[ and a.create_time <= #{createTimeEnd}]]>
+    		</if>
+    		 AND NAME IS NOT NULL
+			 )c  
+			WHERE NAME IS NOT NULL
+			GROUP BY c.name 
+			ORDER BY myCount DESC
+			LIMIT 0,#{top}
+	</select>
+	
+	<select id="selectCountByType" resultType="com.xin.portal.system.model.ResourceLog" databaseId="oracle">
+		select  id,
+				myCount,
+				name 
+			from (SELECT max(c.id) as id,
+						 COUNT(*) AS myCount,
+						 c.name 
+					FROM (SELECT	a.*,
+									b.name 
+							FROM t_resource_log a 
+		      				LEFT JOIN t_resource b 
+		      					ON  a.resource_id=b.id 
+							    <if test="resourceType!=null and resourceType != ''">
+					    			<!-- AND b.type IN(${resourceType}) -->
+								</if>
+								<if test="createTime!=null ">
+					    			<![CDATA[ and a.create_time LIKE CONCAT('%',date_format(#{createTime}, '%Y-%m-%d'),'%') ]]>
+								</if>
+								<if test="createTimeStart!=null">
+					    			<![CDATA[ and a.create_time >= #{createTimeStart}]]>
+					    		</if>
+					    		<if test="createTimeEnd!=null">
+					    			<![CDATA[ and a.create_time <= #{createTimeEnd}]]>
+					    		</if>
+		         			AND NAME IS NOT NULL
+		      			  ) c  
+		      	  WHERE NAME IS NOT null
+		      	  GROUP BY c.name 
+		      	  ORDER BY myCount desc)
+		where ROWNUM <![CDATA[ <= ]]> #{top}
+	</select>
+	
+	<select id="selectAcitvitySortResLog" resultType="com.xin.portal.system.model.ResourceLog" >
+		SELECT 
+			rnum.rid AS resourceId,
+			rnum.num AS myCount,
+			r.name
+		FROM 
+			(SELECT 
+			    rl.resource_id AS rid,
+			    COUNT(id)AS num
+			FROM t_resource_log rl
+			<where>
+				<if test="record.createTimeStart!=null and record.createTimeStart !='' and record.createTimeEnd!=null and record.createTimeEnd!=''">
+					${ew.sqlSegment}
+				</if>
+				<if test="record.resourceType!=null and record.resourceType!=''">
+					and resource_id in (${record.resourceId})
+				</if>
+			</where>
+			GROUP BY resource_id HAVING COUNT(id) >0) rnum
+		LEFT JOIN t_resource r ON r.id= rnum.rid
+		ORDER BY rnum.num DESC
+	</select>
+	
+	<select id="selectAcitvityResLog" resultType="com.xin.portal.system.model.ResourceLog" >
+		SELECT 
+			rnum.rid AS resourceId,
+			rnum.num AS myCount,
+			rnum.logType AS TYPE,
+			r.name
+		FROM 
+			(SELECT 
+			    rl.type AS logType,
+			    rl.resource_id AS rid,
+			    COUNT(id)AS num
+			FROM t_resource_log rl
+			<where>
+				<if test="record.createTimeStart!=null and record.createTimeStart !='' and record.createTimeEnd!=null and record.createTimeEnd!=''">
+					${ew.sqlSegment}
+				</if>
+				<if test="record.resourceType!=null and record.resourceType!=''">
+					and resource_id in (${record.resourceId})
+				</if>
+			</where>
+			 GROUP BY resource_id,TYPE HAVING COUNT(id) >0) rnum
+		LEFT JOIN t_resource r ON r.id= rnum.rid
+		ORDER BY rnum.num DESC
+	</select>
+	
+	<select id="selectUserActivity" resultType="com.xin.portal.system.model.ResourceLog" >
+		SELECT ua.user_id AS creater,
+	       ua.num AS myCount,
+	       ui.realname AS NAME
+	    FROM (
+				SELECT 	rl.creater AS user_id,
+						COUNT(id)AS num
+				FROM t_resource_log rl
+				<where>
+					<if test="record.createTimeStart!=null and record.createTimeStart !='' and record.createTimeEnd!=null and record.createTimeEnd!=''">
+						${ew.sqlSegment}
+					</if>
+					<if test="record.organization!=null and record.organization!=''">
+						AND  rl.creater IN (SELECT id FROM t_user_info ui WHERE ui.org_code LIKE '${record.organization}%')
+					</if>
+				</where>
+				GROUP BY rl.creater HAVING COUNT(id) >0	
+		) ua
+		LEFT JOIN t_user_info ui ON ui.id=ua.user_id
+		ORDER BY ua.num DESC
+	</select>
+	<select id="resourceClick" resultType="com.xin.portal.system.model.ResourceLog">
+		SELECT r.name AS createrName,COUNT(rl.creater_name) AS hits
+		FROM t_resource_log rl
+		LEFT JOIN t_resource r ON rl.resource_id =r.id
+		WHERE rl.create_time>=#{createTimeStart} AND rl.create_time &lt;=#{createTimeEnd}
+		GROUP BY r.name ORDER BY hits DESC LIMIT 10
+	</select>
+	<select id="resourceClick" resultType="com.xin.portal.system.model.ResourceLog" databaseId="oracle">
+		select 
+			createrName,
+			hits
+		from (
+			SELECT r.name AS createrName,COUNT(rl.creater_name) AS hits
+			FROM t_resource_log rl
+			LEFT JOIN t_resource r ON rl.resource_id =r.id
+			WHERE rl.create_time>=to_date(#{createTimeStart},'yyyy-mm-dd hh24:mi:ss') 
+			AND rl.create_time &lt;=to_date(#{createTimeEnd},'yyyy-mm-dd hh24:mi:ss')
+			GROUP BY r.name ORDER BY hits DESC
+			)
+		where rownum &lt;= 10;
+	</select>
+	<select id="visitUser" resultType="com.xin.portal.system.model.ResourceLog">
+
+		SELECT
+		rl.creater_name AS createrName,
+		COUNT(rl.resource_id) AS hits
+		FROM t_resource_log rl
+		LEFT JOIN t_resource r ON rl.resource_id=r.id
+		WHERE r.name=#{resourName} AND rl.create_time>=#{createTimeStart} AND rl.create_time &lt;=#{createTimeEnd}
+		GROUP BY rl.creater_name ORDER BY hits DESC LIMIT 10
+	</select>
+	<select id="visitUser" resultType="com.xin.portal.system.model.ResourceLog" databaseId="oracle">
+		select 
+			creatername,
+			hits 
+		from(
+		select rl.creater_name as creatername, count(rl.resource_id) as hits
+		  from t_resource_log rl
+		  left join t_resource r on rl.resource_id = r.id
+		 where r.name = #{resourName}
+		   and rl.create_time>=to_date(#{createTimeStart},'yyyy-mm-dd hh24:mi:ss') 
+			AND rl.create_time &lt;=to_date(#{createTimeEnd},'yyyy-mm-dd hh24:mi:ss') group by rl.creater_name order by hits desc 
+		)
+		where  rownum &lt;= 10;
+	</select>
+	<select id="clickTable1" resultType="com.xin.portal.system.model.ResourceLog">
+		SELECT
+		rl.create_time AS createTime,
+		rl.creater_name AS createrName,
+		r.name AS resourName
+		FROM t_resource_log rl
+		LEFT JOIN t_resource r ON r.id=rl.resource_id
+		WHERE r.name=#{resourName} AND rl.create_time>=#{createTimeStart} AND rl.create_time &lt;=#{createTimeEnd}
+		ORDER BY createTime DESC
+	</select>
+	<select id="clickTable1" resultType="com.xin.portal.system.model.ResourceLog" databaseId="oracle">
+		SELECT
+		rl.create_time AS createTime,
+		rl.creater_name AS createrName,
+		r.name AS resourName
+		FROM t_resource_log rl
+		LEFT JOIN t_resource r ON r.id=rl.resource_id
+		WHERE r.name=#{resourName} AND rl.create_time>=to_date(#{createTimeStart,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss') 
+			AND rl.create_time &lt;=to_date(#{createTimeEnd,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')
+		ORDER BY createTime DESC
+	</select>
+	<select id="InactiveResource" resultType="com.xin.portal.system.model.ResourceLog" >
+		SELECT
+		r.id AS id,
+		r.state AS state,
+		r.name AS rdname,
+		IFNULL(rl.hit,0) AS hits,
+		rt.name AS typename
+		FROM t_resource r
+		LEFT JOIN t_resource_type rt ON rt.id=r.type
+		LEFT JOIN(SELECT resource_id,COUNT(resource_id) AS hit
+		FROM t_resource_log WHERE create_time>=DATE_SUB( CURRENT_DATE() , INTERVAL ${monthCount} MONTH ) GROUP BY resource_id HAVING hit &lt;=#{hits}) rl ON rl.resource_id=r.id
+		ORDER BY hits
+
+	</select>
+	
+	<select id="InactiveResource" resultType="com.xin.portal.system.model.ResourceLog" databaseId="oracle">
+		select r.id as id,
+	       r.state as state,
+	       r.name as rdname,
+	       nvl(rl.hit, 0) as hits,
+	       rt.name as typename
+	  from t_resource r
+	  left join t_resource_type rt on rt.id = r.type
+	  left join (select resource_id, count(resource_id) as hit
+	               from t_resource_log
+	              where create_time >= add_months(sysdate, -${monthCount})
+	              group by resource_id
+	             having count(resource_id) &lt;=#{hits}) rl on rl.resource_id = r.id
+	 order by hits
+	</select>
+
+	<select id="activeUser" resultType="com.xin.portal.system.model.ResourceLog">
+		SELECT
+		i.realname AS  rdname,
+		COUNT(rl.resource_id) AS hits
+		FROM  t_user_info i
+		LEFT JOIN t_resource_log rl ON i.realname=rl.creater_name
+		WHERE rl.create_time>=#{createTimeStart} AND rl.create_time &lt;=#{createTimeEnd}
+		GROUP BY rdname ORDER BY  hits DESC LIMIT 20
+	</select>
+	<select id="activeUser" resultType="com.xin.portal.system.model.ResourceLog" databaseId="oracle">
+		select  rdname, hits
+		from (
+		 SELECT
+				i.realname AS  rdname,
+				COUNT(rl.resource_id) AS hits
+				FROM  t_user_info i
+				LEFT JOIN t_resource_log rl ON i.realname=rl.creater_name
+				WHERE rl.create_time>=to_date(#{createTimeStart},'yyyy-MM-dd hh24:mi:ss') 
+				AND rl.create_time &lt;=to_date(#{createTimeEnd},'yyyy-MM-dd hh24:mi:ss')
+				GROUP BY i.realname ORDER BY  hits DESC 
+		)    
+		where  rownum &lt;= 20;
+	</select>
+	<select id="clickTable" resultType="com.xin.portal.system.model.ResourceLog">
+		SELECT rl.create_time AS createTime,
+		rl.creater_name  AS createrName,
+		r.name AS rdname
+		FROM t_resource_log rl
+		LEFT JOIN t_resource r  ON rl.resource_id=r.id
+		WHERE rl.creater_name=#{rdname} AND rl.create_time>=#{createTimeStart} AND rl.create_time &lt;=#{createTimeEnd}
+		ORDER BY createTime DESC
+	</select>
+	<select id="clickTable" resultType="com.xin.portal.system.model.ResourceLog" databaseId="oracle">
+		SELECT rl.create_time AS createTime,
+		rl.creater_name  AS createrName,
+		r.name AS rdname
+		FROM t_resource_log rl
+		LEFT JOIN t_resource r  ON rl.resource_id=r.id
+		WHERE rl.creater_name=#{rdname} AND rl.create_time>=to_date(#{createTimeStart},'yyyy-MM-dd hh24:mi:ss') 
+				AND rl.create_time &lt;=to_date(#{createTimeEnd},'yyyy-MM-dd hh24:mi:ss')
+		ORDER BY createTime DESC
+	</select>
+	<select id="clickRosource" resultType="com.xin.portal.system.model.ResourceLog">
+		SELECT
+		r.name AS rdname,
+		COUNT(rl.resource_id) AS hits
+		FROM t_resource_log rl
+		LEFT JOIN t_resource r ON r.id=rl.resource_id
+		WHERE rl.creater_name=#{rdname} AND rl.create_time>=#{createTimeStart} AND rl.create_time &lt;=#{createTimeEnd}
+		GROUP BY rdname ORDER BY  hits DESC LIMIT 10
+	</select>
+	<select id="clickRosource" resultType="com.xin.portal.system.model.ResourceLog" databaseId="oracle">
+		select rdname, hits from(
+			SELECT
+				r.name AS rdname,
+				COUNT(rl.resource_id) AS hits
+				FROM t_resource_log rl
+				LEFT JOIN t_resource r ON r.id=rl.resource_id
+				WHERE rl.creater_name=#{rdname} AND rl.create_time>=to_date(#{createTimeStart},'yyyy-mm-dd hh24:mi:ss') AND rl.create_time &lt;=to_date(#{createTimeEnd},'yyyy-mm-dd hh24:mi:ss')
+		    GROUP BY r.name ORDER BY  hits DESC)
+    	where rownum &lt;= 10;
+	</select>
+	<select id="dormancyUser" resultType="com.xin.portal.system.model.ResourceLog">
+		SELECT
+		rs.id AS id,
+		rs.state AS  state,
+		rs.createrName AS createrName,
+		IFNULL(rl.hit,0) AS hits,
+		rs.codename AS codename
+		FROM(SELECT u.id AS id, u.state AS  state,i.realname AS createrName,o.name AS codename
+		FROM t_user u
+		LEFT JOIN t_user_info i ON i.id= u.id
+		LEFT JOIN t_organization o ON i.org_code=o.code WHERE u.is_delete='0') rs
+		LEFT JOIN (SELECT creater,COUNT(resource_id) AS hit FROM t_resource_log WHERE  create_time>=DATE_SUB( CURRENT_DATE() , INTERVAL ${monthCount} MONTH )GROUP BY creater HAVING  hit &lt;=#{hits}) rl ON rl.creater=rs.id
+		ORDER BY hits
+	</select>
+	<select id="dormancyUser" resultType="com.xin.portal.system.model.ResourceLog" databaseId="oracle">
+		select rs.id as id,
+       rs.state as state,
+       rs.creatername as creatername,
+       NVL(rl.hit,0) as hits,
+       rs.codename as codename
+	   from (select u.id       as id,
+	               u.state    as state,
+	               i.realname as creatername,
+	               o.name     as codename
+	          from t_user u
+	          left join t_user_info i on i.id = u.id
+	          left join t_organization o on i.org_code = o.code
+	         where u.is_delete = '0') rs
+	   left join (select max(creater) as creater, count(resource_id) as hit
+	               from t_resource_log
+	              where create_time >= add_months(sysdate, -${monthCount})
+	              group by creater
+	             having count(resource_id) &lt;= #{hits}) rl on rl.creater = rs.id
+	   order by hits
+	</select>
+	<select id="dateRange" resultType="com.xin.portal.system.model.ResourceLog">
+		SELECT  COUNT(rl.resource_id) AS hits,DATE_FORMAT(rl.create_time,'%Y-%m-%d') AS createTime
+		FROM t_resource_log rl
+		WHERE rl.create_time>=#{createTimeStart} AND rl.create_time  &lt;=#{createTimeEnd}
+		GROUP BY createTime
+	</select>
+	<select id="dateRange" resultType="com.xin.portal.system.model.ResourceLog" databaseId="oracle">
+		SELECT  COUNT(rl.resource_id) AS hits,
+			to_date(to_char(rl.create_time,'yyyy-MM-dd'),'yyyy-MM-dd') AS createTime
+	    FROM t_resource_log rl
+	    WHERE rl.create_time >= to_date(#{createTimeStart,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss') AND rl.create_time  &lt;= to_date(#{createTimeEnd,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss')
+	    GROUP BY to_char(rl.create_time,'yyyy-MM-dd')
+	    order by to_char(rl.create_time,'yyyy-MM-dd')
+	</select>
+
+	<select id="clickHour" resultType="com.xin.portal.system.model.ResourceLog">
+
+		SELECT  COUNT(rl.resource_id) AS hits,
+		rl.create_time AS createTime
+		FROM t_resource_log rl
+		WHERE DATE_FORMAT(rl.create_time,'%Y-%m-%d')=#{timeHour}
+		GROUP BY DATE_FORMAT(rl.create_time,'%Y-%m-%d %H')
+	</select>
+	
+	<select id="clickHour" resultType="com.xin.portal.system.model.ResourceLog" databaseId="oracle">
+		SELECT 
+		  COUNT(rl.resource_id) AS hits,
+		  to_timestamp(to_char(rl.create_time,'yyyy-MM-dd HH24'),'yyyy-MM-dd HH24:mi:ss') AS createTime 
+		FROM
+		  t_resource_log rl 
+		WHERE to_char(rl.create_time, 'yyyy-MM-dd') = to_char(to_date(#{timeHour,jdbcType=VARCHAR},'yyyy-MM-dd'), 'yyyy-MM-dd')
+		GROUP by to_char(rl.create_time,'yyyy-MM-dd HH24')
+		order by to_char(rl.create_time,'yyyy-MM-dd HH24')
+	</select>
+	
+	<select id="dateStatisticsUv" resultType="com.xin.portal.system.model.ResourceLog">
+		SELECT  COUNT(  DISTINCT rl.creater_name) AS hits,
+		DATE_FORMAT( rl.create_time,'%Y-%m-%d') AS createTime
+		FROM t_resource_log rl
+		WHERE  rl.create_time>=#{createTimeStart} AND  rl.create_time  &lt;=#{createTimeEnd}
+		GROUP BY createTime
+	</select>
+
+	<select id="dateStatisticsUv" resultType="com.xin.portal.system.model.ResourceLog" databaseId="oracle">
+		SELECT 
+		  COUNT(DISTINCT rl.creater_name) AS hits,
+		  to_date(to_char(rl.create_time,'yyyy-mm-dd'),'yyyy-mm-dd') AS createTime 
+		FROM
+		  t_resource_log rl 
+		WHERE rl.create_time >= to_date(#{createTimeStart,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss') AND rl.create_time  &lt;= to_date(#{createTimeEnd,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')
+		GROUP BY to_char(rl.create_time,'yyyy-mm-dd')
+		order by to_char(rl.create_time,'yyyy-mm-dd')
+	</select>
+
+	<select id="clickHourUv" resultType="com.xin.portal.system.model.ResourceLog">
+		SELECT  COUNT(DISTINCT rl.creater_name) AS hits,  rl.create_time AS createTime
+		FROM t_resource_log rl
+		WHERE DATE_FORMAT(rl.create_time,'%Y-%m-%d')=#{timeHour}
+		GROUP BY DATE_FORMAT(rl.create_time,'%Y-%m-%d %H')
+	</select>
+	
+	<select id="clickHourUv" resultType="com.xin.portal.system.model.ResourceLog" databaseId="oracle">
+		select count(distinct rl.creater_name) as hits,
+	       to_timestamp(to_char(rl.create_time,'yyyy-MM-dd HH24'),'yyyy-MM-dd HH24:mi:ss') AS createTime 
+	  	from t_resource_log rl
+	 	where to_char(rl.create_time, 'yyyy-MM-dd') = #{timeHour}
+		group by to_char(rl.create_time,'yyyy-MM-dd HH24')
+		order by to_char(rl.create_time,'yyyy-MM-dd HH24')
+	</select>
+	
+	<select id="findRecentsResourceLog" resultType="com.xin.portal.system.model.ResourceLog" parameterType="java.lang.String">
+		SELECT  t.id,
+		  	t.resource_id AS resourceId,
+		  	t.type,
+		  	t.create_time AS createTime,
+		  	t.name AS resourName,
+		  	COUNT(t.resource_id) AS num 
+		FROM (
+		 	SELECT 
+				rl.id,
+		  		rl.resource_id,
+		  		rl.type,
+		  		rl.create_time,
+		  		r.name
+			FROM
+		  		t_resource_log rl 
+		  		LEFT JOIN t_resource r 
+		    		ON r.id = rl.resource_id
+				WHERE rl.creater = #{userId}
+		  		AND rl.type = 1 
+		  		AND r.id IN (
+		  			SELECT DISTINCT rp.resource_id FROM t_role_permission rp
+		 			LEFT JOIN t_role_user ru ON ru.role_id = rp.role_id
+		 			WHERE ru.user_id = #{userId}
+		 			AND rp.code = 'view'
+		 		)
+				ORDER BY rl.create_time DESC ) t
+		GROUP BY t.resource_id
+		HAVING COUNT(t.resource_id) > 0 
+		ORDER BY t.create_time DESC
+	</select>
+	
+	<select id="findRecentsResourceLog" resultType="com.xin.portal.system.model.ResourceLog" parameterType="java.lang.String" databaseId="oracle">
+		SELECT  
+	        max(t.id) as id,
+	        t.resource_id AS resourceId,
+	        max(t.type) as type,
+	        max(t.create_time) AS createTime,
+	        max(t.name) AS resourName,
+	        COUNT(t.resource_id) AS num 
+	    FROM (
+	       SELECT 
+	        rl.id,
+	          rl.resource_id,
+	          rl.type,
+	          rl.create_time,
+	          r.name
+	      FROM
+	          t_resource_log rl 
+	          LEFT JOIN t_resource r 
+	            ON r.id = rl.resource_id
+	        WHERE rl.creater = #{userId}
+	          AND rl.type = 1 
+	          AND r.id IN (
+	            SELECT DISTINCT rp.resource_id FROM t_role_permission rp
+	           LEFT JOIN t_role_user ru ON ru.role_id = rp.role_id
+	           WHERE ru.user_id = #{userId}
+	           AND rp.code = 'view'
+	         )
+	        ORDER BY rl.create_time DESC ) t
+	    GROUP BY t.resource_id
+	    HAVING COUNT(t.resource_id) > 0 
+	    ORDER BY max(t.create_time) desc
+	</select>
+	
+	<select id="findHotAccessResourceLog" resultType="com.xin.portal.system.model.ResourceLog" parameterType="java.lang.String">
+		SELECT 
+			rl.id,
+			rl.resource_id as resourceId,
+			rl.type,
+			rl.create_time as createTime,
+			r.name as resourName,
+			COUNT(rl.resource_id) AS num 
+		FROM t_resource_log rl 
+		LEFT JOIN t_resource r ON r.id = rl.resource_id
+		LEFT JOIN t_role_permission rp ON rl.resource_id = rp.resource_id
+		LEFT JOIN t_role_user ru ON ru.role_id = rp.role_id
+		LEFT JOIN t_resource_type rt ON r.resource_type1 = rt.id
+		WHERE 1=1
+		AND rl.type = 1
+		AND rt.code != '1'
+		AND rp.code = 'view' AND ru.user_id = #{userId}
+		GROUP BY rl.resource_id HAVING COUNT(rl.resource_id) >0
+		ORDER BY num DESC , rl.create_time DESC
+	</select>
+	
+	<select id="findHotAccessResourceLog" resultType="com.xin.portal.system.model.ResourceLog" parameterType="java.lang.String" databaseId="oracle">
+		SELECT 
+	      max(rl.id) as id,
+	      rl.resource_id as resourceId,
+	      max(rl.type),
+	      max(rl.create_time) as createTime,
+	      max(r.name) as resourName,
+	      COUNT(rl.resource_id) AS num 
+	    FROM t_resource_log rl 
+	    LEFT JOIN t_resource r ON r.id = rl.resource_id
+	    LEFT JOIN t_role_permission rp ON rl.resource_id = rp.resource_id
+	    LEFT JOIN t_role_user ru ON ru.role_id = rp.role_id
+	    LEFT JOIN t_resource_type rt ON r.resource_type1 = rt.id
+	    WHERE 1=1
+	    AND rl.type = 1
+	    AND rt.code != '1'
+	    AND rp.code = 'view' AND ru.user_id = #{userId}
+	    GROUP BY rl.resource_id HAVING COUNT(rl.resource_id) >0
+	    ORDER BY num DESC , createTime DESC
+	</select>
+</mapper>

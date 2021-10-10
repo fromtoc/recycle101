@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.NoticeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.Notice">
+        <id column="id" property="id" />
+        <result column="title" property="title" jdbcType="VARCHAR"/>
+        <result column="title_color" property="titleColor" jdbcType="VARCHAR"/>
+        <result column="content" property="content" javaType="java.lang.String" jdbcType="VARBINARY"/>
+        <result column="publisher" property="publisher" jdbcType="VARCHAR"/>
+        <result column="publisher_name" property="publisherName" jdbcType="VARCHAR"/>
+		<result column="avatar" property="avatar" jdbcType="VARCHAR"/>
+        <result column="publish_time" property="publishTime"  javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="create_time" property="createTime" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="creater" property="creater" jdbcType="VARCHAR"/>
+        <result column="creater_name" property="createrName" jdbcType="VARCHAR"/>
+        <result column="notice_level" property="noticeLevel" jdbcType="VARCHAR"/>
+        <result column="noticeLevelName" property="noticeLevelName" jdbcType="VARCHAR"/>
+        <result column="state" property="state" jdbcType="INTEGER"/>
+        <result column="org_code" property="orgCode" jdbcType="VARCHAR"/>
+        <result column="valid_start_time" property="validStartTime" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="valid_end_time" property="validEndTime" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result column="sort" property="sort" jdbcType="INTEGER"/>
+        <result column="read_num" property="readNum" jdbcType="INTEGER"/>
+        <result column="updater" property="updater" jdbcType="VARCHAR"/>
+        <result column="updater_name" property="updaterName" jdbcType="VARCHAR"/>
+        <result column="update_time" property="updateTime" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    	<result column="type" property="type" jdbcType="INTEGER"/>
+    	<result column="is_for_ever" property="isForEver" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        n.id, n.title, n.title_color, n.content, n.publisher, uip.realname as publisher_name, n.publish_time , n.create_time , n.creater, uic.realname as creater_name, n.notice_level, n.state, n.org_code, 
+        n.valid_start_time, n.valid_end_time, n.sort, n.read_num, n.updater, uiu.realname as updater_name, n.update_time, n.type, n.is_for_ever  
+    </sql>
+    
+   <update id="publish" parameterType="com.xin.portal.system.model.Notice">
+   	update t_notice set publish_time=#{publishTime,jdbcType=TIMESTAMP},publisher=#{publisher,jdbcType=VARCHAR},state=#{state} 
+   	where id = #{id,jdbcType=VARCHAR}
+   </update>
+   
+   <update id="update" parameterType="com.xin.portal.system.model.Notice">
+   	UPDATE t_notice SET title=#{title,jdbcType=VARCHAR} ,title_color=#{titleColor,jdbcType=VARCHAR} ,content=#{content,jdbcType=VARCHAR} ,
+   	notice_level=#{noticeLevel,jdbcType=VARCHAR} ,valid_start_time=#{validStartTime,jdbcType=TIMESTAMP} ,
+   	valid_end_time=#{validEndTime,jdbcType=TIMESTAMP} ,sort=#{sort,jdbcType=INTEGER} ,
+   	updater=#{updater,jdbcType=VARCHAR} ,update_time=#{updateTime,jdbcType=TIMESTAMP} ,
+   	TYPE=#{type,jdbcType=INTEGER} ,is_for_ever=#{isForEver,jdbcType=INTEGER} 
+   	WHERE id = #{id,jdbcType=VARCHAR}
+   </update>
+   
+   <select id="findList" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.Notice">
+   	select  n.id, n.title,n.title_color,n.content, n.publisher, uip.realname as publisher_name,uip.avatar AS avatar, n.publish_time , n.create_time , n.creater, uic.realname as creater_name, n.notice_level, n.state, n.org_code,
+    n.valid_start_time, n.valid_end_time, n.sort, n.read_num, n.updater, uiu.realname as updater_name, n.update_time, n.type, n.is_for_ever
+    from t_notice n
+    left join t_user_info uip on uip.id = n.publisher
+   	left join t_user_info uic on uic.id = n.creater
+   	left join t_user_info uiu on uiu.id = n.updater
+   	<where >
+   		<if test="state!=null and state!=''">
+		state = #{state}
+		</if>
+		<if test="title!=null and title!=''">
+		and title  like  concat(concat('%',#{title}),'%')
+		</if>
+		<if test="nowDate!=null">
+			and (#{nowDate} >= valid_start_time and valid_end_time >= #{nowDate} OR is_for_ever = 1)
+		</if>
+   	</where>
+   	order by sort asc, create_time desc 
+   </select>
+
+
+	<select id="findListRead" resultMap="BaseResultMap" parameterType="java.util.Map">
+		  select  n.id, n.title,n.title_color,n.content, n.publisher, uip.realname as publisher_name,uip.avatar as avatar, n.publish_time , n.create_time , n.creater, uic.realname as creater_name, n.notice_level, n.state, n.org_code,
+			n.valid_start_time, n.valid_end_time, n.sort, n.read_num, n.updater, uiu.realname as updater_name, n.update_time, n.type, n.is_for_ever
+			from t_notice n
+			left join t_user_info uip on uip.id = n.publisher
+			left join t_user_info uic on uic.id = n.creater
+			left join t_user_info uiu on uiu.id = n.updater
+			left join t_notice_already_read r on  n.id = r.notice_id
+        WHERE
+        	n.tenant_id = #{tenantId} and
+        	r.user_id = #{userId} and
+        	n.state = '1' and
+        	(#{nowDate} >= valid_start_time and valid_end_time >= #{nowDate} OR is_for_ever = 1)
+		order by sort asc, create_time desc
+	</select>
+
+	<select id="findListUnread" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select  n.id, n.title,n.title_color,n.content, n.publisher, uip.realname as publisher_name,uip.avatar as avatar, n.publish_time , n.create_time , n.creater, uic.realname as creater_name, n.notice_level, n.state, n.org_code,
+		n.valid_start_time, n.valid_end_time, n.sort, n.read_num, n.updater, uiu.realname as updater_name, n.update_time, n.type, n.is_for_ever
+		from t_notice n
+		left join t_user_info uip on uip.id = n.publisher
+		left join t_user_info uic on uic.id = n.creater
+		left join t_user_info uiu on uiu.id = n.updater
+		WHERE
+		n.tenant_id = #{tenantId} and
+		n.state = '1' and
+		(#{nowDate} >= valid_start_time and valid_end_time >= #{nowDate} OR is_for_ever = 1) and
+		n.id not in (select notice_id from t_notice_already_read where user_id =#{userId} and tenant_id = #{tenantId})
+		order by sort asc, create_time desc
+	</select>
+   
+   
+   <select id="findAllList" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.Notice">
+   	select <include refid="Base_Column_List"></include> from t_notice n
+   	left join t_user_info uip on uip.id = n.publisher
+   	left join t_user_info uic on uic.id = n.creater
+   	left join t_user_info uiu on uiu.id = n.updater
+   	<where >
+   		<if test="state!=null and state!=''">
+		state = #{state}
+		</if>
+		<if test="title!=null and title!=''">
+		and title  like  concat(concat('%',#{title}),'%')
+		</if>
+		<if test="nowDate!=null">
+			and (#{nowDate} >= valid_start_time and valid_end_time >= #{nowDate} OR is_for_ever = 1)
+		</if>
+   	</where>
+   	order by sort asc, create_time desc
+   </select>
+   
+    <select id="findListByNum" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.Notice" databaseId="mysql">
+   	select  n.id, n.title,n.title_color,n.content, n.publisher, uip.realname as publisher_name, n.publish_time , n.create_time , n.creater, uic.realname as creater_name, n.notice_level, n.state, n.org_code, 
+    n.valid_start_time, n.valid_end_time, n.sort, n.read_num, n.updater, uiu.realname as updater_name, n.update_time, n.type, n.is_for_ever
+    from t_notice n
+    left join t_user_info uip on uip.id = n.publisher
+   	left join t_user_info uic on uic.id = n.creater
+   	left join t_user_info uiu on uiu.id = n.updater
+   	<where >
+   		<if test="state!=null and state!=''">
+		state = #{state}
+		</if>
+		<if test="title!=null and title!=''">
+		and title  like  concat(concat('%',#{title}),'%')
+		</if>
+		<if test="nowDate!=null">
+			and (#{nowDate} >= valid_start_time and valid_end_time >= #{nowDate} OR is_for_ever = 1)
+		</if>
+   	</where>
+   	order by sort asc, create_time desc
+   	<if test="topNum!=null and topNum!=0">
+			  	LIMIT 0,#{topNum}
+	</if>
+   </select>
+   
+   <select id="findListByNum" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.Notice" databaseId="oracle">
+   	select * from(
+	   	select  n.id, n.title,n.title_color,n.content, n.publisher, uip.realname as publisher_name, n.publish_time , n.create_time , n.creater, uic.realname as creater_name, n.notice_level, n.state, n.org_code, 
+	    n.valid_start_time, n.valid_end_time, n.sort, n.read_num, n.updater, uiu.realname as updater_name, n.update_time, n.type, n.is_for_ever
+	    from t_notice n
+	    left join t_user_info uip on uip.id = n.publisher
+	   	left join t_user_info uic on uic.id = n.creater
+	   	left join t_user_info uiu on uiu.id = n.updater
+	   	<where >
+	   		<if test="state!=null and state!=''">
+			state = #{state}
+			</if>
+			<if test="title!=null and title!=''">
+			and title  like  concat(concat('%',#{title}),'%')
+			</if>
+			<if test="nowDate!=null">
+				and (to_date(#{nowDate},'yyyy-mm-dd hh24:mi:ss') >= valid_start_time and valid_end_time >= to_date(#{nowDate},'yyyy-mm-dd hh24:mi:ss') OR is_for_ever = 1)
+			</if>
+	   	</where>
+	   	order by n.sort asc, n.create_time desc)
+	   	<if test="topNum!=null and topNum!=0">
+			where rownum &gt;0 and rownum &lt;=#{topNum}
+		</if>
+   </select>
+   
+   <select id="findOneNotice" resultMap="BaseResultMap" parameterType="java.lang.String">
+   	select <include refid="Base_Column_List"></include>,d.item_name AS noticeLevelName from t_notice n
+   	left join t_user_info uip on uip.id = n.publisher
+   	left join t_user_info uic on uic.id = n.creater
+   	left join t_user_info uiu on uiu.id = n.updater
+   	left join t_dict d on d.item_value = n.notice_level and d.dict_code = 'notice_level'
+   	where n.id=#{id,jdbcType=VARCHAR}
+   </select>
+   
+   <select id="selectAllNoticeNotReadAndValidByUserId" resultMap="BaseResultMap">
+   SELECT * FROM t_notice
+		WHERE id IN 
+		  (SELECT 
+		    pub.id 
+		  FROM
+		    (SELECT 
+		      * 
+		    FROM
+		      t_notice n
+		    WHERE state = 1 
+		      AND (
+		        #{nowDate} >= n.valid_start_time 
+		        AND n.valid_end_time >= #{nowDate} 
+		        OR n.is_for_ever = 1
+		     )
+		  ) pub)
+		  AND id NOT IN (SELECT allread.notice_id FROM (SELECT * FROM t_notice_already_read WHERE user_id=#{userId}) allread)
+   </select>
+   
+   <update id="updateNum" parameterType="java.lang.String">
+   	update t_notice SET read_num = read_num + 1 
+		where id = #{id,jdbcType=VARCHAR}  
+   </update>
+
+</mapper>

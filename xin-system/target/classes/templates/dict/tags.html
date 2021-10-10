@@ -1,0 +1,25 @@
+<div class="admin-content-body" style="padding:10px">
+	<form action="javascript:query();"  id="form_select" class="layui-form">
+       	<#if tags?? >
+       	<#list tags as rec>
+       	<input type="checkbox" name="tag" value="${(rec.itemName)!}_${(rec.itemValue)!}" title="${(rec.itemName)!}">
+      	</#list>
+		</#if>
+    </form>
+</div>
+
+<#include "common/common.html"/>
+<#include "common/common_table.html"/>
+<script>
+layui.use([ 'form' ],function() {
+	var form = layui.form;
+})
+
+	function init(tagIds){
+		
+	}
+	function getData(){
+		return $('#form_select').serializeObject();
+  	}
+</script>
+

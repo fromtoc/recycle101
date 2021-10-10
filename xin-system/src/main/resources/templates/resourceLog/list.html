@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="keywords" content="">
+    <meta http-equiv="description" content="">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+     <#include "common/common.html" />
+     <#include "common/common_table.html" />
+     
+  </head>
+  <body style="padding:10px;">
+  		<div class="layui-row">
+  		  <div class="layui-col-md4">
+  		  &nbsp;
+  		  </div>
+		  <div class="layui-col-md4">
+		  	 <ul class="layui-timeline" id="log_list">
+			  </ul>
+		  </div>
+		  <div class="layui-col-md4">
+		   &nbsp;
+  		  </div>
+		</div>
+  </body>
+  <script>
+  	
+  	layui.use([ 'form','layer','flow',],function() {
+		var form = layui.form, 
+			layer = layui.layer,
+			flow = layui.flow;
+			  flow.load({
+			    elem: '#log_list' //指定列表容器
+			    ,done: function(page, next){ //到达临界点（默认滚动触发），触发下一页
+			      var lis = [];
+			      //以jQuery的Ajax请求为例，请求下一页数据（注意：page是从2开始返回）
+			      $.get('${basePath}/resourceLog/page?pageNumber=1&pageSize=10', function(res){
+			        //假设你的列表返回在data集合中
+			        layui.each(res.rows, function(index, item){
+			          var item_html = '<li class="layui-timeline-item">'
+								 +'   <i class="layui-icon layui-timeline-axis">&#xe63f;</i>'
+								 +'   <div class="layui-timeline-content layui-text">'
+								 +'     <h3 class="layui-timeline-title">'+item.createrName+' 在  <i style="font-size: 12px;">'+utils.tmDate.getFormatDateByLong(item.createTime,'yyyy-MM-dd HH:mm:ss')+'</i> '+item.typeName+' 了该资源</h3>'
+								 +'  </div>'
+								 +'</li>';
+			          lis.push(item_html);		 
+			          
+			        }); 
+			        
+			        //执行下一页渲染，第二参数为：满足“加载更多”的条件，即后面仍有分页
+			        //pages为Ajax返回的总页数，只有当前页小于总页数的情况下，才会继续出现加载更多
+			        next(lis.join(''), page < res.total/10);    
+			      });
+			    }
+			  });
+		
+		
+  	});
+  	
+  	function init(id,logType){
+  		//resourceId = id;
+  		//type = logType;
+  		//$('#table').bootstrapTable('refresh',{url: '${basePath!}/resourceLog/page'});
+  	}
+  	
+  </script>
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="keywords" content="">
+    <meta http-equiv="description" content="">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+     <#include "common/common.html" />
+     <#include "common/common_table.html" />
+  </head>
+  <body style="padding:10px;">
+  	<div>
+	  	 <div >
+	     	<div class="layui-inline">
+	     		<button id="btn_add_userReport" class="layui-btn layui-btn-sm layui-btn-normal">
+				  <i class="layui-icon">&#xe654;</i> <@spring.message 'resource.new-build'/>
+				</button>
+		    </div>
+	    </div>
+	    <div  id="content" isAuto="true">
+		      
+		</div>
+	</div>
+	<div>
+		
+	</div>
+  </body>
+  <script id="itemContent" type="text/html">
+  {{#  layui.each(d.rows, function(index, item){ }}
+  {{#  if(index%3==0){ }}
+	  <div class="layui-row">
+  {{#  } }} 
+			    <div class="layui-col-md4 md" >
+			    	<div class="item" >
+					  <div>
+			      	  	<div class="item-left">
+                          <img src="${basePath}/{{item.imgUrl||'images/course.jpg'}}" alt="{{item.name||''}}" />
+                      	</div>
+						<div class="item-right">
+                          <div class="item-right-title">
+                              <span  class="item-link" onclick="javascript:editMstr({{item.id}},{{item.projectId}},{{item.reportType}},'{{item.reportId}}')">{{item.name||''}}</span>
+							  <i class="fa fa-share-alt icon item-link" onclick="shareReport({{item.id}},'{{item.name}}')"></i>
+                          </div>
+						  
+                          <div class="item-right-desc">
+								简介：{{formatDesc(item.remark||'暂无')}}
+                          </div>
+                      	</div>
+					  </div>
+					  <div class="item-footer">
+                          <span><i class="fa fa-clock-o"></i>&nbsp;&nbsp;{{utils.tmDate.getFormatDateByLong(item.createTime,'yyyy-MM-dd')}}</span>
+						  <span class="footer-viewinfo" ><i class="fa fa-thumbs-o-up"></i>&nbsp;&nbsp;{{item.readNum||0}}</span>
+                          <span class="footer-viewinfo view" ><i class="fa fa-eye"></i>&nbsp;&nbsp;{{item.readNum||0}}</span>
+                      </div>
+                      </div>
+			    </div>
+	{{#  if(index%3==2){ }}
+	  </div>
+	  {{#  } }} 
+	{{#  }); }}
+
+  </script>
+  <script>
+  	
+  	layui.use([ 'form','flow','laytpl','layer'],function() {
+		var form = layui.form, 
+			$ = layui.jquery, //不用额外加载jQuery，flow模块本身是有依赖jQuery的，直接用即可。
+			flow = layui.flow,
+			layer = layui.layer,
+			laytpl = layui.laytpl;
+		
+		$('#btn_add_userReport').on('click',function(data){
+			addUserReport();
+		});
+		
+		flow.load({
+		    elem: '#content', //指定列表容器
+		    //scrollElem:'#',
+		    isAuto:true,
+		    done: function(page, next){ //到达临界点（默认滚动触发），触发下一页
+		      var lis = [];
+		      //以jQuery的Ajax请求为例，请求下一页数据（注意：page是从2开始返回）
+		      var params = {
+		    		  pageNumber:page,
+		    		  pageSize:24,
+		    		  userId:'${user.id!}',
+		      }
+		      $.post('${basePath}/userReport/page',params, function(res){
+		    	  console.log(res);
+		        //假设你的列表返回在data集合中
+		        var getTpl = itemContent.innerHTML;
+		        var tplHtml = laytpl(getTpl).render(res);
+		        next(tplHtml, page < res.total/res.pageSize); 
+		        
+		        
+		        /* $('.item').off('mouseover').on('mouseover',function(){
+		        	console.log(res);
+					console.log(this);
+					
+				}); */
+		      });
+		    }
+		  });
+		
+	  	
+	  	
+  	});
+  	
+  	function queryParams (params) {
+  		var param = {
+                pageSize: params.pageSize,
+                pageNumber: params.pageNumber,
+            };
+  		return param;
+  	}
+  	
+  	function opeFormatter(value,row,index){
+		var v = '<div class="layui-btn-group">'
+                        		+'<button class="layui-btn layui-btn-normal layui-btn-sm btn-opt" data-tip="编辑" onclick="javascript:editUserReport(\'%\')"><i class="layui-icon">&#xe642;</i></button>'
+                        		+'<button class="layui-btn layui-btn-normal layui-btn-sm btn-opt" data-tip="删除" onclick="javascript:delUserReport(\'%\')"><i class="layui-icon">&#xe640;</i></button>'
+                        		+'</div>'; 
+        return v.replace(new RegExp(/(%)/g),row.id);
+	}
+	
+  	function addUserReport() {
+  		var isSubmit = false;
+    	parent.layer.open({
+			title: '新建',
+			type:2,
+			content:basePath + '/userReport/add',
+			area: ['40%', '50%'],
+			btn:['确定','取消'],
+			success: function(layero){
+				//var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				//iframeWin.init(tplHtml);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+						$.ajax({
+			                type: "POST",
+			                url:basePath+'/userReport/save',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('添加失败！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('添加成功！');
+									reloadTable();
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+					}else{
+						isSubmit = false;
+					}
+				}
+   		    	
+    		}
+		});
+    }
+  	
+  	function editMstr(id,projectId,reportType,reportId) {
+  		$.get('${basePath}/userReport/show/edit',{id:id,projectId:projectId,reportType:reportType,reportId:reportId},function(result){
+  			//console.log(result.data);
+	  		//window.open(result.data);
+	  		location.href=result.data;	
+  		});
+  	}
+    
+    function delUserReport(id,name) {
+        parent.layer.confirm('删除课件？', {
+			btn:['确定','取消'],
+			yes: function(index, layero){
+		  		$.post(basePath + '/userReport/delete',{id:id},function(result){
+		    		if(result.code==0){
+                		parent.layer.close(index);
+						reloadTable();
+                	}else{
+                		parent.layer.msg(result.msg);
+                	}
+		    		
+			    });
+	                
+			}
+        });
+    }
+    
+    
+    function editUserReport(id) {
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: '编辑',
+			type:2,
+			content:basePath+'/userReport/edit?id='+id,
+			area: ['40%', '50%'],
+			btn:['确定','取消'],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init(courseType, courseTypeCase);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+		   		    	$.ajax({
+			                type: "POST",
+			                url:basePath+'/userReport/update',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('编辑失败！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('编辑成功！');
+									reloadTable();
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+		            }else{
+		            	isSubmit = false;
+		            }
+				}
+    		}
+		});
+    }
+    
+    function shareReport(id,name) {
+    	var resourceType = 2;//我的报表（1.菜单）
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: '分享',
+			type:2,
+			content:basePath+'/userShare/add?id='+id,
+			area: ['40%', '50%'],
+			btn:['确定','取消'],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init(id,resourceType);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+		   		    	$.ajax({
+			                type: "POST",
+			                url:basePath+'/userShare/save',
+			                data:data,
+			                error: function(request) {
+			                    parent.layer.msg('分享失败！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('分享成功！');
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+		            }else{
+		            	isSubmit = false;
+		            }
+				}
+    		}
+		});
+    }
+    
+    function formatDesc(description){
+			if (description.length>80) {
+				return description.substr(0,60) + '...';
+			} else {
+				return description;
+			}
+	}
+  </script>
+   <style>
+  .type-case-name {
+  font-size: 18pt;
+    padding-bottom: 11px;
+  }
+  .md {
+  	padding:16px;
+  }
+.item {
+  	margin-bottom:15px;
+    box-shadow: 0 2px 10px 0 rgba(0,0,0,.1);
+    padding: 10px;
+    min-height: 140px;
+    position: relative;
+}
+.item:hover {
+	 box-shadow: 2px 2px 10px 2px #a4dac4;
+	 transform:scale(1.0);
+	 transition:all 0.5s;
+	 -webkit-transform: scale(1.00);
+	 z-index:999;
+	 background-color: #fff;
+	 
+}
+.item-link {
+	cursor: pointer;
+}
+.item-link:hover {
+	 transform:scale(1.0);
+	 transition:all 0.5s;
+	 -webkit-transform: scale(1.00);
+	 z-index:999;
+	 font-weight:bold;
+}
+.item-left {
+    float: left;
+    width: 25%;
+}
+.item-left > img {
+width: 100%;
+    height: auto;
+    display: inline-block;
+    border: none;
+    min-height: 120px;
+}
+.item-right {
+width: 73%;
+    float: right;
+    padding-left: 2%;
+    min-height: 120px;
+}
+.item-right-title {
+	font-size: 18px;
+	
+}
+.item-right-title span{
+	display: inline-block;
+    word-break: keep-all;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 80%;
+}
+.item-right-title .icon{
+	float: right;
+    margin-top: 5px;
+    margin-right: 11px;
+}
+.item-right-desc {
+font-size: 14px;
+    display: block;
+    margin-top: 10px;
+    text-indent: 2em;
+    color: #cecece;
+}
+.item-footer {
+	 margin-top: 10px;
+    font-size: 13px;
+    padding: 2px;
+    color: #a6a6a6;
+    position: absolute;
+    width: 68%;
+    right: 10px;
+    bottom: 9px;
+}
+.item-footer > span {
+	   padding-right: 3%;
+}
+
+.footer-author {
+display: inline;
+}
+.footer-viewinfo {
+	display: inline;
+    float: right;
+}
+
+.download:hover {
+	cursor: pointer;
+}
+.read:hover {
+	cursor: pointer;
+}
+.clear {
+clear: both;
+
+}
+  </style>
+</html>

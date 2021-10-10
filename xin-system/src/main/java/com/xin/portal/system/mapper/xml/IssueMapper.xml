@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.IssueMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.Issue">
+        <id column="id" property="id" />
+        <result column="code" property="code" />
+        <result column="title" property="title" />
+        <result column="lv" property="lv" />
+		<result column="is_reply" property="isReply" />
+        <result column="ip" property="ip" />
+        <result column="creater" property="creater" />
+        <result column="org_id" property="orgId" />
+        <result column="create_time" property="createTime" />
+        <result column="state" property="state" />
+        <result column="updater" property="updater" />
+        <result column="update_time" property="updateTime" />
+        <result column="content" property="content" />
+        <result column="sys_impower" property="sysImpower" />
+        <result column="sys_version" property="sysVersion" />
+        <result column="browser_version" property="browserVersion" />
+        <result column="resolution" property="resolution" />
+        <result column="tenant_id" property="tenantId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, code, title, lv, ip, creater, org_id, create_time, state, updater, update_time, content, sys_impower, sys_version, browser_version, resolution, tenant_id
+    </sql>
+	
+	<select id="findPageList" parameterType="com.xin.portal.system.model.Issue" resultMap="BaseResultMap">
+		SELECT
+			i.id,
+			i.code,
+			uic.org_code as orgCode,
+			i.title,
+			i.lv,
+			i.is_reply,
+			i.ip,
+			i.creater,
+			uic.realname AS createName,
+			i.org_id,
+			i.create_time,
+			i.state,
+			i.updater,
+			uiu.realname AS updateName,
+			i.update_time,
+			i.content,
+			i.sys_impower,
+			i.sys_version,
+			i.browser_version,
+			i.resolution
+		FROM t_issue i
+		LEFT JOIN t_user_info uic ON uic.id=i.creater
+		LEFT JOIN t_user_info uiu ON uiu.id=i.updater
+		<where>
+			<if test="code!=null and code!=''">
+				<bind name="pattern2" value="'%'+code+'%'"/>
+				i.code like #{pattern2}
+			</if>
+		  	<if test="title!=null and title!=''">
+			  	<bind name="pattern1" value="'%'+title+'%'"/>
+				AND i.title like #{pattern1}
+			</if>
+		  	<if test="states!=null and states.size()>0">
+		  		AND state IN 
+		  		<foreach collection="states" item="item" index="index" open="(" close=")" separator=",">
+	  				#{item}
+				</foreach>
+			</if>
+			<if test="creater!=null and creater!=''">
+		  		AND i.creater =#{creater}
+			</if>
+		</where>
+		ORDER BY i.create_time DESC
+	</select>
+	
+	<select id="selectByQuery" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.Issue">
+		SELECT 
+			i.id,
+			i.code,
+			i.title,
+			i.lv,
+			i.ip,
+			i.is_reply,
+			i.creater,
+			uic.realname AS createName,
+			i.org_id,
+			uic.org_code as orgCode,
+			i.create_time,
+			i.state,
+			i.updater,
+			uiu.realname AS updateName,
+			i.update_time,
+			i.content,
+			i.sys_impower,
+			i.sys_version,
+			i.browser_version,
+			i.resolution
+		FROM t_issue i
+		LEFT JOIN t_user_info uic ON uic.id=i.creater
+		LEFT JOIN t_user_info uiu ON uiu.id=i.updater
+		<where>
+			<if test="id!=null and id!=''">
+				i.id=#{id}
+			</if>
+			<if test="code!=null and code!=''">
+				<bind name="pattern2" value="'%'+code+'%'"/>
+				i.code like #{pattern2}
+			</if>
+		  	<if test="title!=null and title!=''">
+			  	<bind name="pattern1" value="'%'+title+'%'"/>
+				AND i.title like #{pattern1}
+			</if>
+			<if test="lv!=null">
+		  		AND i.lv =#{lv}
+			</if>
+		  	<if test="state!=null">
+		  		AND i.state =#{state}
+			</if>
+			<if test="ip!=null and ip!=''">
+		  		AND i.ip =#{ip}
+			</if>
+			<if test="creater!=null and creater!=''">
+		  		AND i.creater =#{creater}
+			</if>
+			<if test="updater!=null and updater!=''">
+		  		AND i.updater =#{updater}
+			</if>
+		</where>
+		ORDER BY i.create_time DESC
+	</select>
+
+	<update id="updateByIssue" parameterType="com.xin.portal.system.model.Issue">
+		update t_issue  set
+			updater=#{updater},
+			update_time=#{updateTime},
+			title=#{title},
+			lv=#{lv},
+			content=#{content}
+		where  id=#{id}
+	</update>
+	
+	
+</mapper>

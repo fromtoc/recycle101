@@ -1,0 +1,727 @@
+ <#include "common/common.html" />
+ <#include "common/common_table.html" />
+ <script type="text/javascript" src="${basePath}/js/system.js"></script>
+ <style>
+#thumbnail_img{
+	width:200px;
+}
+.btn-blockquote{
+	display: inline-block;
+    border-left: 5px solid #539fff;
+    line-height: 0px;
+    font-size: 10pt;
+}
+</style>
+ <div class="layui-tab">
+  <ul class="layui-tab-title">
+    <li class="layui-this"><@spring.message 'resource.Basic_information'/></li>
+    <li><@spring.message 'resource.Screening_conditions'/></li>
+  </ul>
+  <div class="layui-tab-content">
+    <div class="layui-tab-item layui-show">
+    	<form id="form_add" class="layui-form" action=""
+			style="padding-top:10px;">
+			<div style="margin-left:100px;">
+				<input type="hidden" name="id" id="id" value="${(record.id)!}">
+				<input type="hidden" name="resourceType1" id="resourceType1" value="${(record.resourceType1)!}">
+				<input type="hidden" name="parentId" id="parentId">
+				<!-- <input type="hidden" name="linkUrl" id="linkUrl" value="${(record.linkUrl)!}"> -->
+				<input type="hidden" name="path" id="path" value="${(record.path)!}">
+				<input type="hidden" name="serverId" id="serverId" value="${(record.serverId)!}">
+				<input type="hidden" name="projectId" id="projectId" value="${(record.projectId)!}">
+				<input type="hidden" name="reportId" id="reportId" value="${(record.reportId)!}">
+				<input type="hidden" name="typeName" id="typeName" value="${(record.typeName)!}">
+				<input type="hidden" name="typeValue" id="typeValue" value="${(record.typeValue)!}">
+				<input type="hidden" name="type" id="type" value="${(record.type)!}">
+				<div class="layui-form-item">
+					<label class="layui-form-label label-required-diy"><@spring.message 'resource.Resource_type'/></label>
+					<div class="layui-input-block">
+						<span  id="resourceType1Name" class="form-info">
+						</span>
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label"><@spring.message 'resource.Resource_classification'/></label>
+					<div class="layui-input-block">
+						<select id="resourceType2" name="resourceType2" value="${(record.resourceType2)!} " lay-verify="required">
+					        <option value=""></option>
+					        <#if resourceType2List??>
+					        <#list resourceType2List as rec>
+					        <option value="${rec.id}" ${(record.resourceType2==rec.id)?string('selected','')}>${rec.name}</option>
+					        </#list>
+					        </#if>
+					      </select>
+					</div>
+				</div>
+				<div class="layui-form-item" id="name_div">
+					<label class="layui-form-label label-required-diy"><@spring.message 'comment.Resource_name'/></label>
+					<div class="layui-input-inline" style="width:40%!important">
+						<input type="text" name="name" id="recordname" value="${(record.name)!}" lay-verify="required" placeholder="<@spring.message 'userInfo.Please_enter_a_name'/>"
+							autocomplete="off" class="layui-input">
+						<div>
+						<button type="button" class="layui-btn layui-btn-sm layui-btn-normal " style="margin-top: 5px;"  id="resource_sel" ><@spring.message 'resource.Choose'/></button>
+						</div>
+					</div>
+					<label class="layui-form-label"><@spring.message 'resource.Everyone_can_see_it'/></label>
+					<div class="layui-input-inline" style="width:30%;">
+						<input type="checkbox" name="everyone" lay-skin="switch" lay-text="YES|NO" <#if record.everyone=='on'>checked</#if>>
+					</div>
+				</div>
+				<div class="layui-form-item" id="code_div">
+					<label class="layui-form-label"><@spring.message 'resource.Shortcut_code'/></label>
+					<div class="layui-input-block" >
+						<input type="text" name="code" id="code" value="${(record.code)!}"  placeholder="<@spring.message 'tips.inputSome'/>"
+							autocomplete="off" class="layui-input">
+					</div>
+				</div>
+				<div class="layui-form-item layui-hide" id="reports_div">
+					<label class="layui-form-label"><@spring.message 'BI.report'/></label>
+					<div class="layui-input-block" style="width:60%;">
+						<textarea  placeholder="<@spring.message 'tips.inputSome'/>" class="layui-textarea" readonly id= "reports_name" >
+						</textarea>
+					</div>
+				</div>
+				<div class="layui-form-item" >
+					<label class="layui-form-label"><@spring.message 'resource.original_path'/></label>
+					<div class="layui-input-block" >
+						<span  id="pathInfo" class="form-info">${(record.path)!}
+						</span>
+					</div>
+				</div>
+				<div class="layui-form-item" >
+					<label class="layui-form-label label-required-diy"><@spring.message 'BI.report'/>ID</label>
+					<div class="layui-input-block">
+						<span  id="reportIdInfo" class="form-info">${(record.reportId)!}
+						</span>
+						<input type="hidden" name="linkUrl" id="linkUrl" value="${(record.linkUrl)!}">
+					</div>
+				</div>
+				<div class="layui-form-item" >
+					<label class="layui-form-label"><@spring.message 'resource.Explain'/></label>
+					<div class="layui-input-block" >
+						<textarea placeholder="<@spring.message 'tips.inputSome'/>" class="layui-textarea" name="introduce" id= "introduce" >${(record.introduce)!}</textarea>
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label"><@spring.message 'list.order'/></label>
+					<div class="layui-input-block">
+						<input type="number" name="sort"  min="1" max="100" value="${(record.sort)!1}"
+							placeholder="<@spring.message 'resource.please_enter_value'/>" autocomplete="off" class="layui-input">
+					</div>
+				</div>
+				
+				<div class="layui-form-item">
+					<label class="layui-form-label label-required-diy"><@spring.message 'resource.Open_with'/></label>
+					<div class="layui-input-block">
+						<input type="radio" name="linkType" value="1" title="<@spring.message 'resource.Current_page'/>" ${(record.linkType!=2)?string("checked","")} />
+						<input type="radio" name="linkType" value="2" title="<@spring.message 'resource.New_tab_page'/>" ${(record.linkType==2)?string('checked','')} />
+					</div>
+				</div>
+				<div class="layui-form-item">
+					 <label class="layui-form-label label-required-diy"><@spring.message'resource.is_mobile'/></label>
+					 <div class="layui-input-block">
+						 <input type="radio" name="isMobile" value="0" title="<@spring.message'tips.no'/>" ${(record.isMobile!=1)?string("checked","")} />
+						 <input type="radio" name="isMobile" value="1" title="<@spring.message'tips.yes'/>" ${(record.isMobile==1)?string('checked','')} />
+					 </div>
+				 </div>
+				 <div class="layui-form-item">
+						<div class="layui-inline">
+							<label class="layui-form-label"><@spring.message'resource.autoRefreshtime'/></label>
+							<div class="layui-input-block">
+								<input type="number" name="autoRefreshtime" step="0.1" min="0"
+									style="width: 100px" value="${(record.autoRefreshtime)!0}"
+									autocomplete="off" class="layui-input">
+							</div>
+						</div>
+						<div class="layui-inline">
+							<blockquote class="layui-elem-quote btn-blockquote"><@spring.message'resource.default_value_is_0_and_not_auto_refresh'/></blockquote>
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label label-required-diy"><@spring.message'resource.showTools'/></label>
+						<div class="layui-input-block">
+							<input type="radio" name="showTools" value="1"
+								title="<@spring.message'tips.yes'/>"
+								${(record.showTools!=0)?string( 'checked','')} /> <input
+								type="radio" name="showTools" value="0"
+								title="<@spring.message'tips.no'/>"
+								${(record.showTools==0)?string( "checked","")} />
+						</div>
+					</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label"><@spring.message 'resource.Icon'/></label>
+					<div class="layui-input-block">
+						<input type="hidden" name="iconName" id="iconName"  value="${(record.iconName)!}"
+							placeholder="<@spring.message 'resource.please_enter_value'/>" autocomplete="off" class="layui-input">
+						<button type="button" class="layui-btn layui-btn-sm layui-btn-normal "  id="icon_sel" ><@spring.message 'resource.Choose'/></button>
+						<i class="fa fa-2x ${(record.iconName)!'fa-bar-chart-o'}" id="icon_img"></i>
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label"><@spring.message 'resource.thumbnail'/></label>
+					<div class="layui-input-block">
+						<input type="hidden" name="thumbnailId" id="thumbnailId" value="${(record.thumbnailId)!}">
+						<input type="hidden" name="thumbnail" id="thumbnail"  value="${(record.thumbnail)!'/images/thumbnail.png'}"
+							placeholder="<@spring.message 'resource.please_enter_value'/>" autocomplete="off" class="layui-input">
+						<#if record.thumbnail?default("")?trim?length gt 1>
+							<img src="${basePath}${record.thumbnail}" id="thumbnail_img" />
+						
+						<#else>
+							<img src="${basePath}/images/thumbnail.png" id="thumbnail_img" />
+						</#if>
+						<button type="button" class="layui-btn layui-btn-sm layui-btn-normal "  id="thumbnail_sel" ><@spring.message 'action.upload'/></button>
+						<button id="select_pic" type="button" class="layui-btn layui-btn-sm layui-btn-normal" ><@spring.message 'wechat.Select_pictures'/></button>
+						<blockquote class="layui-elem-quote btn-blockquote"><@spring.message 'resource.Please_upload_more_than_400*200_pictures'/></blockquote>
+						<button type="button" class="layui-hide"  id="resource_img_upload" ><@spring.message 'action.upload'/>Action</button>
+						
+					</div>
+				</div>
+				<div class="layui-form-item" id="hiddenSecDiv">
+				    <label class="layui-form-label"><@spring.message 'resource.Report_Hidden_Area'/></label>
+				    <div class="layui-input-block" lay-filter="hiddenSections">
+				    <#if record??>
+				      <input type="checkbox" name="hiddenSections" value="header" title="header" ${(record.hiddenSections?index_of('header')!=-1)?string('checked','')}>
+				      <input type="checkbox" name="hiddenSections" value="footer" title="footer" ${(record.hiddenSections?index_of('footer')!=-1)?string('checked','')}>
+				      <input type="checkbox" name="hiddenSections" value="path" title="path" ${(record.hiddenSections?index_of('path')!=-1)?string('checked','')}>
+				      <input type="checkbox" name="hiddenSections" value="dockTop" title="dockTop" ${(record.hiddenSections?index_of('dockTop')!=-1)?string('checked','')}>
+				      <input type="checkbox" name="hiddenSections" value="dockLeft" title="dockLeft" ${(record.hiddenSections?index_of('dockLeft')!=-1)?string('checked','')}>
+				    <#else>
+				      <input type="checkbox" name="hiddenSections" value="header" title="header" checked>
+				      <input type="checkbox" name="hiddenSections" value="footer" title="footer" checked>
+				      <input type="checkbox" name="hiddenSections" value="path" title="path" checked>
+				      <input type="checkbox" name="hiddenSections" value="dockTop" title="dockTop" checked>
+				      <input type="checkbox" name="hiddenSections" value="dockLeft" title="dockLeft" checked>
+				    </#if>
+				    </div>
+				</div>
+			</div>
+		</form>
+		<!-- 弹窗 -->
+			<div id="iconSelDialog" style="display:none">
+				<#include "resource/icon_select.html" />
+			</div>
+    </div>
+    <div class="layui-tab-item">
+    	<div class="layui-form-item" >
+				<div class="layui-form " style="padding-bottom: 5px;">
+			     	<div class="layui-inline">
+						<#if record??>
+							<button id="btn_add_prompt" class="layui-btn layui-btn-sm layui-btn-normal ">
+								<i class="layui-icon">&#xe608;</i> <@spring.message 'BIPrompt.add'/>
+							</button>
+							<#else>
+								<button id="btn_add_prompt" class="layui-btn layui-btn-sm layui-btn-normal layui-btn-disabled ">
+									<i class="layui-icon">&#xe608;</i> <@spring.message 'BIPrompt.add'/>
+								</button>
+						</#if>
+				    </div>
+			    </div>
+		    	<table id="table_prompt"></table>
+			</div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+	function init (type1Node,type2Node) {
+		var resourceTypeName = type1Node.name;
+		$('#resourceType1').val(type1Node.id);
+		if (type2Node!=null) {
+			$('#resourceType2').val(type2Node.id);
+		}
+		$('#resourceType1Name').html(type1Node.name);
+		layui.form.render();
+	}
+
+	function uploadImg(){
+		$('#resource_img_upload').click();
+  	}
+	
+	function getData(){
+		if (check()) {
+	        var form = $('#form_add')[0];
+	        var data = new FormData(form);
+			return data;
+			//return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+  	}
+  	
+	function check() {
+  		var selectors = ["#recordname","#linkUrl"];
+		var result = true;
+		$.each(selectors,function(index, rec){
+			if (!checkField(rec)) {
+				result = false;
+				return false;//调出循环
+			}
+		});
+		return result;
+  	}
+  	
+  	function checkField(field){
+		var value = $(field).val();
+  		if (value == null || value == '') {
+  			if(field == '#linkUrl'){
+  	  			layer.tips('<@spring.message "tips.choos"/>', '#resource_sel');
+  			}else{
+  				$(field).addClass("layui-form-danger");
+  	  			$(field).focus();
+  	  			layer.tips('<@spring.message "tips.inputSome"/>', field);	
+  			}
+  			return false;
+  		}
+  		return true;
+  	}
+	
+	layui.use([ 'form','layer','layedit', 'element','upload' ],function() {
+		var form = layui.form, 
+			layer = layui.layer, 
+			layedit = layui.layedit, 
+			element = layui.element,
+			upload = layui.upload;
+		initResourceSel(form);
+		initIconSel(layer);
+		initPromptTable();
+		$('#btn_add_prompt').on('click',function(data){
+            addPrompt();
+        });
+		
+		//普通图片上传
+		upload.render({
+		  elem: '#thumbnail_sel'
+		  ,accept:'images'
+		  ,acceptMime:'image/jpg, image/png, image/gif'
+		  ,auto: false //选择文件后不自动上传
+		  ,bindAction: '#resource_img_upload' //指向一个按钮触发上传
+		  ,field:'thumbFile'  //后端接收字段
+		  ,choose: function(obj){
+		    //将每次选择的文件追加到文件队列
+		    files = obj.pushFile();
+		    //预读本地文件，如果是多文件，则会遍历。(不支持ie8/9)
+		    obj.preview(function(index, file, result){
+		    	$('#thumbnail_img').attr('src', result); //图片链接（base64）
+		    });
+		  },
+		  before: function(obj){
+		      this.data = {businessId:$('#id').val()};
+		  },
+		  done: function(res, index, upload){ //上传后的回调
+			  console.log('upload done....');
+			  console.log(res);
+			  $('#thumbnailId').val(res.data.id);
+			  $('#thumbnail').val(res.data.filePathView);
+		  }
+		});
+		
+		$('#select_pic').on('click',function () {
+			parent.layer.open({
+				title: '<@spring.message "wechat.Image_selection"/>',
+				type:2,
+				content:'${basePath!}/scheduleTask/select/img',
+				btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+				area: ['60%', '70%'],
+				success: function(layero){
+					var iframeWin = top.window[layero.find('iframe')[0]['name']];
+					iframeWin.init();
+				},
+				yes:function(index,layero){
+					var iframeWin = top.window[layero.find('iframe')[0]['name']];
+					var data = iframeWin.getData();
+					if (data!=null) {
+						var imgSrc = data[0].querySelector('img').getAttribute('src');
+						var fileId = data[0].querySelector('img').getAttribute('id')
+						var src = imgSrc.substring('${basePath!}'.length,imgSrc.length);
+						$('#thumbnailId').val(fileId);
+						$('#thumbnail').val(src);
+						$('#thumbnail_img').attr('src', imgSrc);
+						parent.layer.close(index);
+					}
+				}
+			});
+		});
+	})
+	
+	
+	function initResourceSel(form){
+		$("#resource_sel").on('click',function(){
+			var resourceType1 = $('#resourceType1').val();
+			var isSubmit = false;
+				parent.layer.open({
+					title: '<@spring.message "resource.Select_Report"/>',
+					type:2,
+					content:'${basePath}/biProject/select/1',
+					area: ['800px', '500px'],
+					btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+					success: function(layero){
+					},
+					yes:function(index,layero){
+						if(!isSubmit){
+							isSubmit = true;
+			    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+							var data = iframeWin.getData();
+							console.log(data);
+							if (data!=null && data.length>0) {
+								if (data.length>1) {
+									$('#btn_add_prompt').removeClass('layui-btn-disabled');
+									var reports = JSON.stringify(data);
+									$('#reports').val(reports);
+									console.log($('#reports').val());
+									var names = '';
+									$.each(data,function(i,rec){
+										names += rec.name + ',';
+									});
+									$('#reports_name').val(names);
+									$('#name_div').addClass('layui-hide');
+									$('#linkUrl_div').addClass('layui-hide');
+									$('#reports_div').removeClass('layui-hide');
+								} else {
+									$('#name').val(data[0].name);
+									$('#serverId').val(data[0].serverId);
+									$('#projectId').val(data[0].projectId);
+									$('#reportId').val(data[0].reportId);
+									$('#typeName').val(data[0].typeName);
+									$('#typeValue').val(data[0].typeValue);
+									$('#linkUrl').val(data[0].linkUrl);
+									$('#path').val(data[0].path);
+									$('#pathInfo').html(data[0].path);
+									$('#reportIdInfo').html(data[0].reportId);
+									$('#reports_name').val(names);
+									$('#reports_div').addClass('layui-hide');
+									$('#name_div').removeClass('layui-hide');
+									$('#linkUrl_div').removeClass('layui-hide');
+								}
+								
+								//$('#btn_add_prompt').removeClass('layui-btn-disabled');
+								parent.layer.close(index);
+								syncPrompts(data[0].serverId,data[0].projectId,data[0].reportId);
+							} else {
+								isSubmit = false;
+								parent.layer.msg('<@spring.message "resource.Please_select_the_report_form"/>！');
+							}
+						}
+		    		}
+				});
+				$("#hiddenSecDiv input[type='checkbox']").prop("checked",true);
+				form.render('checkbox');
+				$('#hiddenSecDiv').removeClass('layui-hide');
+				form.render();
+		}); 
+	}
+
+	function syncPrompts(serverId,projectId,reportId) {
+		$.get('${basePath}/biServer/'+serverId+'/'+projectId+'/'+reportId+'/prompts', function (result) {
+			console.log(result)
+			if (result.code === 0 && result.list.length > 0) {
+
+			}
+		});
+	}
+	
+	function initIconSel(layer){
+		var iconSelContent = $('#iconSelDialog').html();
+		$('#icon_sel').on('click',function(){
+			 var indexSel = layer.open({
+				title: '<@spring.message "resource.Select_Icon"/>',
+				type:1,
+			    content: iconSelContent,
+			    area: ['70%', '80%'],
+			    success: function(layero){
+					$('.site-doc-icon li').on('click',function(e){
+						$('#icon').val($(this).find('.doc-icon-code').text());
+						//$('#icon_img').text($(this).find('.doc-icon-code').text());
+						$('#icon_img').removeClass().addClass('fa fa-2x ').addClass($(this).find('.doc-icon-code').text());
+						$('#iconName').val($(this).find('.doc-icon-code').text());
+						layer.close(indexSel);
+					    
+					})
+				}
+			}); 
+		});
+	}
+	
+	
+	function initPromptTable(){
+		$('#table_prompt').bootstrapTable({
+				url:'${basePath}/promptRel/findList?resourceId=${(record.id)!}',
+	            idField: "id",
+	            pagination: false,
+	            dataType:'json',
+	            showRefresh: false,
+	            search: false,
+	            clickToSelect: false,
+	            uniqueId:'id',
+	            undefinedText:'',
+	            columns: [
+					{
+					    field: "id",
+					    title: "id",
+					 	align: 'center',
+					 	halign: 'center',
+					 	valign: 'middle',
+					 	visible:false
+					},
+					{
+					    field: "promptId",
+					    title: "promptId",
+					 	align: 'center',
+					 	halign: 'center',
+					 	valign: 'middle',
+					 	visible:false
+					},
+					{
+					    field: "resourceId",
+					    title: "resourceId",
+					 	align: 'center',
+					 	halign: 'center',
+					 	valign: 'middle',
+					 	visible:false
+					},
+	                {
+		                field: "name",
+		                title: "<@spring.message 'prompt.screen_name'/>",
+		             	align: 'center',
+		             	halign: 'center',
+		             	valign: 'middle',
+		             	titleTooltip: '12345'
+		            },
+		         	{
+		                field: "code",
+		                title: "<@spring.message 'BIUser.paramName'/>",
+		             	align: 'center',
+		             	halign: 'center',
+		             	valign: 'middle',
+		            },
+		            {
+		                field: "type",
+		                title: "<@spring.message 'BIPrompt.inputType'/>",
+		             	align: 'center',
+		             	halign: 'center',
+		             	valign: 'middle',
+		             	visible:false,
+		             	formatter: formatterType
+		            },
+		         	{
+		                field: "promptType",
+		                title: "<@spring.message 'BIPrompt.promptType'/>",
+		             	align: 'center',
+		             	halign: 'center',
+		             	valign: 'middle',
+	   	             formatter: function(value,row,index) {
+		            	 	if (value==1) {
+		            	 		return '<@spring.message "BIPrompt.valuePrompt"/>';
+		            	 	} else if (value==2){
+		            	 		return '<@spring.message "BIPrompt.elementPrompt"/>';
+		            	 	} else if (value==3){
+		            	 		return '<@spring.message "BIPrompt.ObjPrompt"/>';
+		            	 	} else if (value==4){
+		            	 		return '<@spring.message "BIUser.orgPermissionPrompt"/>';
+		            	 	}
+		             	}
+		            },
+		     		
+		         	{
+		                field: "sort",
+		                title: "<@spring.message 'list.order'/>",
+		             	align: 'center',
+		             	halign: 'center',
+		             	valign: 'middle',
+		            },
+		         	{
+		                field: "hidden",
+		                title: "<@spring.message 'BIPrompt.show'/>",
+		             	align: 'center',
+		             	halign: 'center',
+		             	valign: 'middle',
+		             	formatter: function(value,row,index) {
+		            	 	if (value==0) {
+		            	 		return '<@spring.message "BIPrompt.show"/>';
+		            	 	} else {
+		            	 		return '<@spring.message "BIPrompt.hide"/>';
+		            	 	}
+		             	}
+		            },
+		         {
+		                field: "require",
+		                title: "<@spring.message 'prompt.Must_fill'/>",
+		             	align: 'center',
+		             	halign: 'center',
+		             	valign: 'middle',
+		             	formatter: function(value,row,index) {
+		            	 	if (value==0) {
+		            	 		return '<@spring.message "prompt.Must_fill"/>';
+		            	 	} else {
+		            	 		return '<@spring.message "prompt.No_Must_fill"/>';
+		            	 	}
+		             	}
+		            },
+		         	{
+		                field: "defaultValue1",
+		                title: "<@spring.message 'BIPrompt.defaultValue'/>",
+		             	align: 'center',
+		             	halign: 'center',
+		             	valign: 'middle',
+		            },
+		         	{
+		                field: "opt",
+		                title: "<@spring.message 'comment.operation'/>",
+		             	align: 'center',
+		             	halign: 'center',
+		             	valign: 'middle',
+		             	formatter: function(value,row,index) {
+		             		var v='<div class="layui-btn-group layui-btn-group-xs">'
+	            		+'<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="javascript:editPromptRel(\'%\','+row.type+','+index+')"><i class="icon-info-sign"></i> <@spring.message "action.edit"/></button>'
+	            		+'<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="javascript:delPromptRel(\'%\')"><i class="icon-info-sign"></i><@spring.message "action.delete"/> </button>'
+	            		+'</div>'; 
+	            		return v.replace(new RegExp(/(%)/g),row.id);
+		             	}
+		            },
+			]
+		});
+	}
+
+	function formatterType(value,row,index){
+		return top.window.system.dict.get('input_type',value);
+	}
+
+
+
+    function addPrompt() {
+        if ($('#btn_add_prompt').hasClass('layui-btn-disabled')) {
+            return;
+        }
+        var isSubmit = false;
+        var reportId = $('#reportId').val();
+        if (reportId==null || reportId=='') {
+            parent.layer.msg('<@spring.message "prompt.No_report_information_was_obtained"/>！');
+            return;
+        }
+        parent.layer.open({
+            title: '<@spring.message "prompt.Select_prompt"/>',
+            type:2,
+            content:'${basePath}/prompt/select',
+            area: ['70%', '85%'],
+            id:'win_prompt',
+            btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+            success: function(layero){
+                //var iframeWin = top.window[layero.find('iframe')[0]['name']];
+                //iframeWin.init();
+            },
+            yes:function(index,layero){
+                if(!isSubmit){
+                    isSubmit = true;
+                    var iframeWin = top.window[layero.find('iframe')[0]['name']];
+                    var data = iframeWin.selDict();
+                    if (data!=null && data.length>0) {
+                        console.log(data);
+                        var promptRels = [];
+                        var sort = $('#table_prompt').bootstrapTable('getOptions').totalRows+1;
+                        $.each(data,function(i,rec){
+                            rec.promptId=rec.id;
+                            rec.resourceId= '${(record.id)!}';
+                            rec.sort=sort+i;
+                            rec.typeName=top.window.system.dict.get('input_type',rec.type);
+                            rec.hidden=0;//显示
+                            rec.required=1;//否
+                            delete rec.id;
+                            $('#table_prompt').bootstrapTable('insertRow', {index: sort, row: rec});
+                        });
+                        $.post('${basePath}/promptRel/saveBatch',{resourceId:'${(record.id)!}',"promptRelsJSON":JSON.stringify(data)},function(r){
+                            parent.layer.close(index);
+                            parent.layer.msg("<@spring.message 'result.success'/>");
+                            $('#table_prompt').bootstrapTable('refresh');
+                            isSubmit = false;
+                        });
+                    } else {
+                        parent.layer.msg('<@spring.message "prompt.Please_choose_at_least_one"/>！');
+                        isSubmit = false;
+                    }
+                }
+            }
+        })
+    }
+	function promptRels(){
+		return  $('#table_prompt').bootstrapTable('getData');
+	}
+	
+	function editPromptRel(id,type,tableIndex) {
+		var record = $('#table').bootstrapTable('getRowByUniqueId',id);
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message "BIPrompt.editPrompt"/>',
+			type:2,
+			content:'${basePath}/promptRel/edit?id='+id,
+			area: ['600px', '500px'],
+            btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init(record);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+						$.post("${basePath}/promptRel/update",data,function(result){
+						    if(result.code=="0"){
+                                parent.layer.close(index);
+							}else{
+                                parent.layer.msg("<@spring.message 'result.fail'/>");
+                                parent.layer.close(index);
+							}
+						})
+                        $('#table_prompt').bootstrapTable('updateRow', {index: tableIndex, row: data});
+						/*$.ajax({
+			                type: "POST",
+			                url:'${basePath}/promptRel/update',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('编辑失败！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+			                		var resourceId = $('#checkedId').val();
+						  			$('#table_prompt').bootstrapTable('refresh', {url: "${basePath}/promptRel/findList",query:{resourceId:resourceId}});
+			                	}else{
+			                		parent.layer.msg(result.msg+"result.code"+result.code);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });*/
+
+					} else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+	}
+	
+	function delPromptRel(id) {
+    	parent.layer.confirm('<@spring.message "prompt.Remove_prompt"/>？', {title:'<@spring.message "action.info"/>',
+            btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+			yes: function(index, layero){
+                $.ajax({
+                    type: "POST",
+                    url: '${basePath}/promptRel/delete',
+                    data: "id="+id,
+                    async: false,
+                    error: function (request) {
+                        parent.layer.msg('<@spring.message "result.deleteFail"/>！');
+                        isSubmit = false;
+                    }
+                });
+				$('#table_prompt').bootstrapTable('removeByUniqueId', id);
+				parent.layer.close(index);
+			}
+     	});
+}
+	
+		
+
+</script>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="keywords" content="">
+    <meta http-equiv="description" content="">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+     <#include "common/common.html" />
+     <#include "common/common_table.html" />
+  </head>
+  <body style="padding:10px;">
+    <table id="table"></table>
+  </body>
+  <script>
+  	
+  	layui.use([ 'form','layer'],function() {
+		var form = layui.form, 
+			layer = layui.layer;
+		
+		
+		
+		
+	  	$('#table').bootstrapTable({
+            //url: '${basePath!}/resourceLog/page',         //请求后台的URL（*）
+            contentType : 'application/x-www-form-urlencoded',
+            method: 'get',                      //请求方式（*）
+            striped: false,                      //是否显示行间隔色
+            cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+            pagination: true,                   //是否显示分页（*）
+            sortable: true,                     //是否启用排序
+            sortOrder: "desc",                   //排序方式
+            queryParamsType:"",
+            queryParams: queryParams,//传递参数（*）
+            sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+            pageNumber: 1,                       //初始化加载第一页，默认第一页
+            pageSize: 10,                       //每页的记录行数（*）
+            uniqueId:'id',
+            columns: [{
+                field:'',
+                title:'<@spring.message"list.serialNum"/>',
+                width:'5px',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:indexFormatter
+            }, 
+            {
+                field: 'createTime',
+                title: '<@spring.message"resource.Time"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:dateTimeFormatter
+            },
+            {
+                field: 'createrName',
+                title: '<@spring.message"list.actionMan"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'typeName',
+                title: '<@spring.message"resource.Record_type"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            
+            {
+                field: 'ip',
+                title: 'ip',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'browser',
+                title: '<@spring.message"resource.Operation_terminal"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            ],
+        });
+	  	
+  	});
+  	
+  	var resourceId;
+	var type;
+  	function init(id,logType){
+  		resourceId = id;
+  		type = logType;
+  		$('#table').bootstrapTable('refresh',{url: '${basePath!}/resourceLog/page'});
+  	}
+  	
+  	function queryParams (params) {
+  		params.resourceId = resourceId;
+  		params.type = type;
+  		return params;
+  	}
+  	
+  	function opeFormatter(value,row,index){
+  		var v = '<div class="layui-btn-group layui-btn-group-xs" >'
+  				+ '<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" title="<@spring.message "action.edit"/>" onclick="javascript:editResourceLog(\'%\')"><i class="layui-icon layui-icon-edit"></i></button>'
+  				+ '<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" title="<@spring.message "action.delete"/>" onclick="javascript:deleteResourceLog(\'%\')" ><i class="layui-icon layui-icon-delete"></i></button>'
+  			  + '</div>';
+  		return v.replace(new RegExp(/(%)/g),row.id);
+		
+  	} 
+	
+  	function addResourceLog() {
+  		var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message "resource.new-build"/>',
+			type:2,
+			content:'${basePath!}/resourceLog/add',
+			area: ['60%', '70%'],
+            btn:['<@spring.message"action.ok"/>','<@spring.message"action.cancel"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init();
+			},
+			yes:function(index,layero){
+				if (!isSubmit) {
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+						$.ajax({
+			                type: "POST",
+			                url:'${basePath!}/resourceLog/save',
+			                data:data,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message "result.addFail"/>！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('<@spring.message "result.addSuccess"/>！');
+									reloadTable();
+			                	}else{
+                                    parent.layer.msg('<@spring.message "result.addFail"/>！');
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+					} else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+    
+    function editResourceLog(id) {
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message "action.edit"/>',
+			type:2,
+			content:'${basePath!}/resourceLog/edit',
+			area: ['60%', '70%'],
+            btn:['<@spring.message"action.ok"/>','<@spring.message"action.cancel"/>'],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init($('#table').bootstrapTable('getRowByUniqueId',id));
+			},
+			yes:function(index,layero){
+				if (!isSubmit) {
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath!}/resourceLog/update',
+			                data:data,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message "result.updateFail"/>！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('<@spring.message "result.updateSuccess"/>！');
+									reloadTable();
+			                	}else{
+                                    parent.layer.msg('<@spring.message "result.updateFail"/>！');
+			                		isSubmit = false;
+			                	}
+			                	
+			                }
+			            });
+		            } else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+    
+    function deleteResourceLog(id){
+		parent.layer.confirm('<@spring.message "comment.Confirm_delete"/>？',{title:'<@spring.message "action.info"/>',
+            btn:['<@spring.message"action.ok"/>','<@spring.message"action.cancel"/>'],
+			yes : function(index,layero) {
+				$.ajax({
+						url : '${basePath!}/resourceLog/delete/'+id,
+						type : 'DELETE',
+						success : function(result) {
+							if (result.code == 0) {
+								parent.layer.msg('<@spring.message "result.deleteSuccess"/>');
+								reloadTable();
+							} else {
+								parent.layer.msg('<@spring.message "result.deleteFail"/>');
+							}
+							layer.close(index);
+						}
+				});
+			}
+		});
+	}
+    
+    function reloadTable() {
+    	$('#table').bootstrapTable('refresh', {pageNumber:1});
+    }
+  </script>
+</html>

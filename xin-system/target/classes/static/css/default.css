@@ -1,0 +1,75 @@
+/*主页头部背景*/
+.layui-layout-admin .layui-header {
+	background-color:#fff!important;
+	border-bottom: 1px solid #dfdfdf;;
+	color: #000;
+}
+/*头部菜单链接*/
+.layui-nav .layui-nav-item a {
+    color: rgba(0, 0, 0, 0.7);
+    font-size:10pt;
+}
+.layui-nav .layui-nav-item a:hover {
+    color: rgba(0, 0, 0, 1);
+}
+.layui-nav-child {
+    border: 1px solid #707482;
+    background-color: #fff;
+}
+ .layui-header .layui-nav .layui-nav-child dd.layui-this a,.layui-header .layui-nav-child dd.layui-this {
+    background-color: #f2f2f2;
+    color:rgba(0, 0, 0, 1);
+}
+/*左侧菜单*/
+.layui-nav-tree .layui-nav-child dd.layui-this, .layui-nav-tree .layui-nav-child dd.layui-this a, .layui-nav-tree .layui-this, .layui-nav-tree .layui-this>a, .layui-nav-tree .layui-this>a:hover {
+    background-color: #ffffff;
+}
+
+.layui-nav {
+    background-color: #fff!important;
+}
+/*左侧菜单选中背景色*/
+.layui-nav-tree .layui-nav-child dd.layui-this, .layui-nav-tree .layui-nav-child dd.layui-this a, .layui-nav-tree .layui-this, .layui-nav-tree .layui-this>a, .layui-nav-tree .layui-this>a:hover {
+    background-color: #fff!important;
+    color: #4a8dbf;
+}
+.layui-nav-itemed>a, .layui-nav-tree .layui-nav-title a, .layui-nav-tree .layui-nav-title a:hover {
+    color: #000!important;
+}
+.layui-nav-tree .layui-nav-item a:hover{background-color:#fff!important;color:#000}
+
+.layui-side-scroll {
+	border-right: 1px solid #dfdfdf;
+}
+
+.layui-nav .layui-nav-mored, .layui-nav-itemed .layui-nav-more {
+	border-top-color: rgba(0, 0, 0, 0.7);
+	border-color: transparent transparent #c2c2c2;
+}
+.layui-nav-itemed .layui-nav-child {
+    display: block;
+    padding: 0;
+    background-color: rgba(255, 255, 255, 0.3)!important;
+    text-align: center;
+}
+.layui-form-checked span, .layui-form-checked:hover span {
+    background-color: #1E9FFF!important;
+}
+.layui-form-checked i, .layui-form-checked:hover i {
+    color: #1E9FFF!important;
+}
+/*下拉选项颜色*/
+.layui-form-select dl dd.layui-this {
+    background-color: #1E9FFF!important;
+    color: #fff;
+}
+.layui-form-onswitch {
+    border-color: #d2d2d2;
+    background-color: #539fff;
+}
+
+.layui-form-radio i:hover, .layui-form-radioed i {
+    color: #539fff;
+}
+
+	

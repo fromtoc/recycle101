@@ -1,0 +1,90 @@
+ <#include "common/common.html" />
+ <style>
+ 	.my-label {
+ 		width:100px!important;
+ 	}
+ 	.wide-input {
+ 		width:85%;
+ 	}
+ </style>
+
+<form id="form_add" class="layui-form" action=""
+	style="padding-top:10px;">
+	<div>
+		<div class="layui-form-item">
+			<label class="layui-form-label"><@spring.message 'dataPermissionType.last_type_name'/></label>
+		    <div class="layui-input-inline" >
+		    	<input type="hidden" name="parentId" id="parentId">
+		      	<input type="text" id="parentName" name="parentName" readonly
+						class="layui-input">
+		    </div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label label-required-diy" style="width:100px"><@spring.message 'dataPermissionType.data_per_type_name'/></label>
+		    <div class="layui-input-inline" >
+		      <input type="text" id="name" name="name" lay-verify="required|length" lay-verType="tips" autocomplete="off" class="layui-input">
+		    </div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label label-required-diy"><@spring.message 'dataPermissionType.data_per_type_code'/></label>
+		    <div class="layui-input-inline" >
+				<input type="text" id="extcode" name="extcode" lay-verify="required|length" lay-verType="tips" autocomplete="off" class="layui-input">
+		    </div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label label-required-diy"><@spring.message 'list.order'/></label>
+		    <div class="layui-input-inline" >
+				<input  type="number" id="sort" name="sort" min="1" max="99999999" value="1" lay-verify="required" class="layui-input">
+		    </div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label" style="width:100px"><@spring.message 'list.remark'/></label>
+		    <div class="layui-input-inline" style="width: 340px;">
+		    	<textarea placeholder="<@spring.message 'tips.inputSome'/>" class="layui-textarea" lay-verify="textarea" lay-verType="tips" name="remark" id= "remark" ></textarea>
+		    </div>
+		</div>
+	</div>
+	<button class="layui-hide" lay-submit  id="btn_submit" lay-filter="btn_submit"><@spring.message 'action.save'/></button>
+</form>
+
+<script type="text/javascript">
+	var is_verify = false;
+	layui.use([ 'form', 'layedit', 'laydate' ],function() {
+		var form = layui.form, 
+			layer = layui.layer, 
+			layedit = layui.layedit, 
+			laydate = layui.laydate;
+		form.verify({
+			length: function(value,item){
+				if(value.length > 80){
+					return '<@spring.message "tips.lengthNoMore"/> 80 <@spring.message "tips.lengthChar"/>！';
+				}
+			},
+			textarea: function(value,item){
+				if(value.length>250){
+					return '<@spring.message "biMapping.Length_should_not_exceed_250"/>';
+				}
+			},
+		});  
+		
+		form.on('submit(btn_submit)', function(data){
+			is_verify = true;
+			return false;
+		});
+		
+	});
+	
+	function init (parentNode) {
+		$('#parentName').val(parentNode.name);
+		$('#parentId').val(parentNode.id);
+	}
+	
+	function getData(){
+		$('#btn_submit').click();
+		if (is_verify) {
+			return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+  	};
+</script>

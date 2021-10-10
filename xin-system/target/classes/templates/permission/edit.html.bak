@@ -1,0 +1,74 @@
+<#include "common/common.html" />
+<form id="form_edit" lay-filter="form_edit" class="layui-form " action="">
+	<input type="hidden" name="id" id="id"/>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message "resource.Resource_type"/>id</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="resourceTypeId" name="resourceTypeId"  lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message "wechat.Resources"/>id</label>
+		<div class="layui-input-block" >
+			<input type="text" id="resourceId" name="resourceId"  lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message "permission.Name_of_permission"/></label>
+		<div class="layui-input-block" >
+			<input type="text" id="name" name="name"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message "permission.Permission_encoding"/></label>
+		<div class="layui-input-block" >
+			<input type="text" id="code" name="code"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+		</div>
+	</div>
+	<button class="layui-hide" lay-submit  id="btn_submit" lay-filter="btn_submit"><@spring.message "action.save"/></button>
+</form>
+
+<script type="text/javascript">
+	var is_verify = false;
+	layui.use([ 'form'],function() {
+		var form = layui.form;
+		form.verify({
+			  length: function(value,item){
+				  if(value.length<2 || value.length>30){
+				      return '<@spring.message "biMapping.please_enter_2_to_30_characters"/>';
+				  }
+			  },
+			  textarea: function(value,item){
+				  if(value.length>250){
+				      return '<@spring.message "biMapping.Length_should_not_exceed_250"/>';
+				  }
+			  }
+			})  
+		form.on('submit(btn_submit)', function(data){
+			is_verify = true;
+			return false;
+		})
+	});
+	
+	function init (record) {
+		/* 
+		$.get('/permission/info/'+record.id,function(result){
+			layui.form.val('form_edit',result.data);
+		});
+		 */
+		var obj = Object.assign({}, record); 
+		layui.form.val('form_edit',obj);
+	}
+	
+  	
+	function getData(){
+		$('#btn_submit').click();
+		if (is_verify) {
+			return $('#form_edit').serialize();
+		} else {
+			return null;
+		}
+  	}
+	
+	
+</script>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.ImportLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.ImportLog">
+        <result column="template_name" property="templateName" />
+        <result column="table_name" property="tableName" />
+        <result column="create_time" property="createTime" />
+        <result column="creater" property="creater" />
+        <result column="data_time" property="dataTime" />
+        <result column="data_size" property="dataSize" />
+        <result column="state" property="state" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        template_name AS templateName, table_name AS tableName, create_time AS createTime, creater, data_time AS dataTime, data_size AS dataSize, state
+    </sql>
+
+</mapper>

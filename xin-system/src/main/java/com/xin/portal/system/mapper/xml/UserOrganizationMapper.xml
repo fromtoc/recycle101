@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xin.portal.system.mapper.UserOrganizationMapper" >
+  <resultMap id="BaseResultMap" type="com.xin.portal.system.model.UserOrganization" >
+  	<id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="org_id" property="orgId" jdbcType="VARCHAR" />
+    <result column="is_deputy" property="isDeputy" jdbcType="INTEGER" />
+    <result column="tenant_id" property="tenantId" jdbcType="VARCHAR" />
+  </resultMap>
+  
+	<sql id="coll_Column_List">
+		id, user_id, org_id, is_deputy, tenant_id
+	</sql>
+  
+	<select id="selectOrgbyUserId" resultType="com.xin.portal.system.model.Organization" parameterType="java.lang.String">
+		SELECT 
+			o.id,
+			o.parent_id as parentId,
+			o.code,
+			o.name,
+			o.create_time as createTime,
+			o.update_time as updateTime,
+			o.status ,
+			o.remark,
+			o.ext_code as extCode,
+			o.state,
+			o.sort,
+			o.ext_id as extId,
+			uo.is_deputy as isDeputy,
+			uo.tenant_id as tenantId
+			FROM t_user_organization uo 
+		LEFT JOIN t_organization o ON o.id = uo.org_id
+		WHERE user_id = #{userId} ORDER BY uo.is_deputy , o.sort
+	</select>
+	
+	<delete id="deleteDeputyOrgByUserId" >
+  		DELETE FROM t_user_organization 
+  		<where>
+  			<if test="userId!=null and userId!=''">
+  				AND user_id = #{userId,jdbcType=VARCHAR}
+  			</if>
+  			<if test="isDeputy!=null">
+  				AND is_deputy = #{isDeputy,jdbcType=INTEGER}
+  			</if>
+  		</where>
+	</delete>
+	
+	<insert id="insertUserOrganizationForNewTenant" parameterType="com.xin.portal.system.model.UserOrganization" 
+		useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO t_user_organization (
+			id,
+			user_id,
+			org_id,
+			is_deputy,
+			tenant_id
+		) 
+		VALUES
+		(
+			#{id,jdbcType=VARCHAR},
+		    #{userId,jdbcType=VARCHAR},
+		    #{orgId,jdbcType=VARCHAR},
+		    #{isDeputy,jdbcType=INTEGER},
+		    #{tenantId,jdbcType=VARCHAR}
+		)
+	</insert>
+
+</mapper>

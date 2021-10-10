@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.PromptMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.Prompt">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="code" property="code" />
+        <result column="dict_code" property="dictCode" />
+        <result column="type" property="type" />
+        <result column="prompt_type" property="promptType" />
+        <result column="object_type" property="objectType" />
+        <result column="special" property="special" />
+        <result column="cascade_code" property="cascadeCode" />
+        <result column="update_time" property="updateTime" />
+        <result column="remark" property="remark" />
+        <result column="require" property="require" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, code, dict_code AS dictCode, type, prompt_type as promptType, object_type as objectType,
+        special,cascade_code,update_time, remark, require
+    </sql>
+    
+    <select id="findDictByDictCode" resultType="com.xin.portal.system.model.Prompt" parameterType="java.lang.String">
+    	SELECT p.name as name, d.dict_name as dictName, p.code FROM t_prompt p
+	 	LEFT JOIN (select * from t_dict WHERE item_name is null) d ON d.dict_code = p.dict_code
+	 	WHERE p.dict_code = #{dictCode} AND (p.dict_code IS NOT NULL OR p.dict_code != '')
+	 	AND (d.dict_name IS NOT NULL OR d.dict_name != '')
+    </select>
+</mapper>

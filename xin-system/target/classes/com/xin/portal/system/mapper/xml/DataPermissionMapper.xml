@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xin.portal.system.mapper.DataPermissionMapper">
+	<resultMap id="BaseResultMap" type="com.xin.portal.system.model.DataPermission">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="dpname" property="dpname" jdbcType="VARCHAR" />
+		<result column="type_id" property="typeId" jdbcType="VARCHAR" />
+		<result column="sort" property="sort" jdbcType="VARCHAR" />
+		<result column="extcode" property="extcode" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="tenant_id" property="tenantId" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<select id="findPageList" resultType="com.xin.portal.system.model.DataPermission"
+							  parameterType="com.xin.portal.system.model.DataPermission">
+		SELECT 
+		  dp.id,
+		  dp.dpname,
+		  dp.type_id,
+		  dp.sort,
+		  dp.extcode,
+		  dp.remark,
+		  dpt.name as dptype
+		FROM
+		  t_data_permission dp
+		left join t_data_permission_type dpt on dpt.id = dp.type_id
+		<where>
+			<if test="dpname!=null and dpname!=''">
+				<bind name="pattern1" value="'%'+dpname+'%'"/>
+				and dp.dpname like #{pattern1}
+			</if>
+			<if test="dptype!=null and dptype!=''">
+				and dpt.extcode = #{dptype}
+			</if>
+			<if test="extcode!=null and extcode!=''">
+				<bind name="pattern2" value="'%'+extcode+'%'"/>
+				and dp.extcode like #{pattern2}
+			</if>
+			<if test="typeId!=null and typeId!=''">
+				and dp.type_id = #{typeId}
+			</if>
+			<if test="orgId!=null and orgId!=''">
+				and dp.id not in (
+					SELECT DISTINCT 
+					  odp.dp_id 
+					FROM
+					  t_org_data_permission odp
+					WHERE odp.org_id = #{orgId} 
+				)
+			</if>
+			<if test="userId!=null and userId!=''">
+				and dp.id not in (
+					SELECT DISTINCT
+						udp.dp_id
+					FROM
+					 t_user_data_permission udp
+					WHERE udp.user_id = #{userId} 
+				)
+			</if>
+		</where>
+		order by dpt.sort,dp.sort
+	</select>
+	
+	<select id="findPageListByOrg" resultType="com.xin.portal.system.model.OrgDataPermission" 
+								   parameterType="com.xin.portal.system.model.OrgDataPermission">
+		SELECT 
+		  odp.id,
+		  odp.dp_id as dpId,
+		  dp.dpname,
+		  dp.type_id as typeId,
+		  dpt.name as dptype,
+		  dp.extcode,
+		  dp.sort,
+		  odp.org_id as orgId,
+		  o.name as orgName
+		FROM
+		  t_org_data_permission odp 
+		  LEFT JOIN t_data_permission dp
+		    ON dp.id = odp.dp_id 
+		  LEFT JOIN t_organization o 
+		    ON o.id = odp.org_id
+		  LEFT JOIN t_data_permission_type dpt 
+		  	ON dp.type_id = dpt.id 
+		<where>
+			<if test="orgId!=null and orgId!=''">
+				and odp.org_id = #{orgId}
+			</if>
+			<if test="dpname!=null and dpname!=''">
+				<bind name="pattern1" value="'%'+dpname+'%'"/>
+				and dp.dpname like #{pattern1}
+			</if>
+			<if test="typeId!=null and typeId!=''">
+				and dp.type_id = #{typeId}
+			</if>
+			<if test="dptype!=null and dptype!=''">
+				and dpt.extcode = #{dptype}
+			</if>
+			<if test="extcode!=null and extcode!=''">
+				<bind name="pattern2" value="'%'+extcode+'%'"/>
+				and dp.extcode like #{pattern2}
+			</if>
+		</where>
+		order by dpt.sort, dp.sort
+	</select>
+	
+	<select id="findList" resultType="com.xin.portal.system.model.DataPermission" 
+								   parameterType="java.lang.String">
+		SELECT 
+		  dp.id,
+		  dp.dpname,
+		  dpt.name as dptype,
+		  dp.extcode,
+		  dp.sort
+		FROM
+		  t_org_data_permission odp 
+		  LEFT JOIN t_data_permission dp
+		    ON dp.id = odp.dp_id 
+		  LEFT JOIN t_data_permission_type dpt 
+		  	ON dp.type_id = dpt.id 
+		<where>
+			<if test="orgId!=null and orgId!=''">
+				and odp.org_id = #{orgId}
+			</if>
+			<if test="dpname!=null and dpname!=''">
+				<bind name="pattern1" value="'%'+dpname+'%'"/>
+				and dpname like #{pattern1}
+			</if>
+			<if test="dptype!=null and dptype!=''">
+				and dpt.extcode = #{dptype}
+			</if>
+			<if test="typeId!=null and typeId!=''">
+				and dp.type_id = #{dptype}
+			</if>
+		</where>
+		order by dpt.sort, dp.sort
+	</select>
+	
+	<select id="selectDPByUserId" resultType="com.xin.portal.system.model.DataPermission" 
+								   parameterType="java.lang.String">
+		select dp.id,
+			dp.dpname,
+			dp.extcode,
+			odp.org_id as orgId,
+			udp.user_id as userId,
+			dp.type_id as typeId,
+			dp.sort 
+		from t_data_permission dp
+		left join t_user_data_permission udp on dp.id = udp.dp_id
+		left join t_org_data_permission odp on dp.id = odp.dp_id
+		where (udp.user_id = #{userId} or odp.org_id IN (SELECT org_id FROM t_user_organization WHERE user_id = #{userId}))
+		and dp.type_id = #{typeId}
+		order by dp.sort asc
+	</select>
+
+	<select id="selectDPByUserIdWithTenantId" resultType="com.xin.portal.system.model.DataPermission" 
+								   parameterType="java.lang.String">
+		select dp.id,
+			dp.dpname,
+			dp.extcode,
+			odp.org_id as orgId,
+			udp.user_id as userId,
+			dp.type_id as typeId,
+			dp.sort 
+		from t_data_permission dp
+		left join t_user_data_permission udp on dp.id = udp.dp_id
+		left join t_org_data_permission odp on dp.id = odp.dp_id
+		where (udp.user_id = #{userId} or odp.org_id IN (SELECT org_id FROM t_user_organization WHERE user_id = #{userId}))
+		and dp.type_id = #{typeId}
+		and dp.tenant_id = #{tenantId}
+		order by dp.sort asc
+	</select>
+</mapper>

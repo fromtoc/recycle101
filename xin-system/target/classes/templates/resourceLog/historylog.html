@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="keywords" content="">
+    <meta http-equiv="description" content="">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <#include "common/common.html" />
+  </head>
+  <body style="padding-top:20px;">
+    <div class="layui-container">
+    	<h1><@spring.message 'moContent.Last100'/></h1>
+		<ul class="layui-timeline">
+		<#if (log?? && log?size>0)>
+			<#list log as rec>
+				<li class="layui-timeline-item" style="padding-bottom: 2px;">
+			    	<i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+			    	<div class="layui-timeline-content layui-text">
+			     		<div class="layui-timeline-title">${(rec.createTime?string("MM-dd  HH:mm"))!},<a href="${basePath}/resource/view/${rec.id}">${rec.name}</a><i style="font-size: 12px;"></i></div>
+			    	</div>
+			  	</li>
+			</#list>
+		</#if>
+		</ul>  	
+    </div>
+  </body>
+</html>

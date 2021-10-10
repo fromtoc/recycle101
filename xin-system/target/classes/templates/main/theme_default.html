@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+
+<html style="overflow: hidden;height:100%">
+
+<head>
+	<meta charset="utf-8">
+	<title>${SYS_NAME!'系统主页'}</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport"
+		  content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
+	<#include "common/common.html" />
+	<script type="text/javascript" src="${basePath}/js/system.js"></script>
+	<link rel="stylesheet" href="${basePath}/css/theme_default.css" media="all">
+	<link rel="stylesheet" href="${basePath}/css/loading.css" media="all">
+	<script type="text/javascript" src="${basePath}/js/index.js"></script>
+	<script type="text/javascript" src="${basePath}/js/comments.js"></script>
+</head>
+<style>
+
+	.messageContent{
+		width:257px;
+		overflow: hidden;
+		text-overflow:ellipsis;
+		white-space: nowrap;
+		font-size: 11px;
+		position: relative;
+		left: -29px;
+	}
+	.messageTitle{
+		display:inline-block;
+		width: 227px;
+		height:25px;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		margin-bottom: 0px;
+		position: relative;
+		left: -16px;
+	}
+
+	body{
+		background-image: linear-gradient(to right, #F0FAFE,#E0EAF7);
+	}
+
+	.layui-tab-title li{
+		color:#000;
+		width: 38%;
+	}
+	.layui-zeroMarge{
+		margin:0;
+	}
+	.layui-unpadding{
+		padding: 0;
+	}
+	.layui-noticeBottomDiv{
+		height: 41px;
+		color: #001;
+		line-height: 46px;
+		text-align: center;
+		border-top: 1px solid #e8e8e8;
+		border-radius: 0 0 4px 4px;
+		transition: all .3s;
+		width: 260px;
+	}
+	.layui-noticeRead{
+		display: inline-block;
+		width: 50%;
+		cursor: pointer;
+		transition: all .3s;
+		user-select: none;
+	}
+	.layui-noticeMore{
+		display: inline-block;
+		width: 50%;
+		cursor: pointer;
+		transition: all .3s;
+		user-select: none;
+		border-left: 1px solid #e8e8e8;
+	}
+	.layui-tab-title .layui-this:after {
+		position: absolute;
+		left: 0;
+		top: 37px !important;
+		content: '';
+		width: 100%;
+		height: 41px;
+		border-width: 1px;
+		border-style: solid;
+		border-bottom-color: #fff;
+		border-radius: 2px 2px 0 0;
+		box-sizing: border-box;
+		pointer-events: none;
+	}
+	.layui-lineDiv{
+		display: flex;
+		flex: 1 1;
+		align-items: flex-start;
+		font-size: 0;
+	}
+	.divHover:hover{
+		background:#e6f7ff;
+	}
+
+</style>
+<body style="height:100%" >
+<div class="layui-layout layui-layout-admin">
+<!--	<div class="layui-header "  style="background-color:${color_header!'#4276aa'}">-->
+	<div class="layui-header "  style="background:linear-gradient(#03b8cf,#39e2d1);">
+		<div class="head head-logo" >
+			<a href="${basePath}/"  title="${SYS_NAME!''}" style="color:#fff">
+				<img src="${basePath}${(SYS_MAIN_LOGO!='')?string('${SYS_MAIN_LOGO}','/images/dataWindow_black.png')}" />&nbsp;${SYS_NAME!''}
+			</a>
+		</div>
+		<div class="head" >
+			<!-- <ul class="layui-nav  admin-header-item layui-nav-left head-menu"> -->
+			<ul class="layui-nav" lay-filter="">
+				<li class="layui-nav-item layui-this">
+					<a class="portal-menu" href="javascript:openHome()"style="font-size:14px;font-weight:bold;color:#0a5465">${SYS_HOME_PAGE_NAME}</a>
+				</li>
+				<#if (user_menus?? && user_menus?size>0)>
+					<#list user_menus as rec>
+						<li class="layui-nav-item ">
+							<#if (rec.children?? && rec.children?size>0)>
+								<a class="portal-menu" data-id="${rec.id}" href="javascript:" style="font-size:14px;font-weight:bold;color:#0a5465">${rec.name}</a>
+								<dl class="layui-nav-child">
+									<#list rec.children as child>
+										<dd><a  class="portal-menu" data-id="${child.id}" href="javascript:openMenu('${child.id}','${child.linkType}')">${(child.name)!}</a></dd>
+									</#list>
+								</dl>
+								<#else>
+									<a class="portal-menu" data-id="${rec.id}" href="javascript:openMenu('${rec.id}','${rec.linkType}')" style="font-size:14px;font-weight:bold;color:#0a5465">${rec.name}</a>
+							</#if>
+						</li>
+					</#list>
+				</#if>
+			</ul>
+		</div>
+		<div class="head head-user" id="head"  lay-filter="head">
+			<#include "main/theme_default_head.html"/>
+		</div>
+	</div>
+	<div class="layui-body main-body"
+		 id="admin-body">
+		<div id="load" class="spinner">
+			<div class="rect1"></div>
+			<div class="rect2"></div>
+			<div class="rect3"></div>
+			<div class="rect4"></div>
+			<div class="rect5"></div>
+		</div>
+		<iframe id="content_iframe" width="100%;" height="100%" frameborder="0" scrolling="auto" >
+		</iframe>
+	</div>
+
+
+</div>
+<script>
+    src="${basePath}/module/moduleHome/${moduleId}"
+    var preferType = '${preferType!}';
+    var preferValue = '${preferValue!}';
+    var moduleId = '${moduleId!}';
+    var changePWD = '${changePWD!}';
+    var loginPrompt = '${LOGIN_PROMPT}';
+    var lastLoginTime = '${lastLoginTime}';
+    var lastLoginip = '${lastLoginip}';
+    var lastLoginAdress = '${lastLoginAdress}';
+    var pwdUpdateReg = '${PASSWORD_UPDATE_REGULARLY}';
+    var updatePwdPrompt = '${UPDATE_REGULARLY_PROMPT}';
+
+
+    $('#content_iframe').load(function () {
+        document.getElementById("load").style.display='none';
+    });
+
+
+    function openHome(){
+        var url = getHomeUrl(preferType,preferValue,moduleId);
+        $('#content_iframe').attr('src', url);
+    }
+    
+    function openTabUrl(url){
+        $('#content_iframe').attr('src', url);
+    }
+
+    function getHomeUrl(type,value,id){
+        var URL = '';
+        if(type == 'orgHome' || type==null || type=='' || type=='undefined'){
+            URL = '${basePath}/module/moduleHome/'+id;
+        }else if(type == 'favorites'){
+            URL = '${basePath}/collect/index';
+        }else if(type == 'catalogue'){
+            URL = '${basePath}/menu/preferView/'+value;
+        }else if(type == 'personalPage'){
+            URL = '${basePath}/userInfo/personalPage';
+        }else{//docObject
+            URL = '${basePath}/menu/view/'+value;
+        }
+        return URL;
+    }
+
+    function help(){
+        window.open('${basePath}/resource/introduce');
+    }
+
+    function openMenu(id,linkType){
+        if(linkType!==undefined && linkType !==null && linkType !== ""){
+            $('#content_iframe').html('');
+            if (linkType==1) {
+                document.getElementById("load").style.display='block';
+                $('#content_iframe').attr('src', '${basePath}/menu/view/'+id);
+            } else {
+                window.open('${basePath}/menu/view/'+id);
+            }
+        }
+    }
+    function openTab(name,url){
+    	switch(arguments.length){
+	     case 2:
+	    	 $('#content_iframe').html('');
+	         $('#content_iframe').attr('src', arguments[1]);
+	        break;
+	     case 4:
+	    	 $('#content_iframe').html('');
+	         $('#content_iframe').attr('src', arguments[2]);
+	        break;
+	     default:
+	    	 $('#content_iframe').html('');
+         	 $('#content_iframe').attr('src', arguments[1]);
+         	 break;
+     	} 
+    }
+
+    function changePassword(msg) {
+        parent.layer.open({
+            title: '<@spring.message "updatePassword"/>'+ msg,
+            type:2,
+            content:'${basePath}/userInfo/setPassword',
+            area: ['800px', '400px'],
+            btn:['<@spring.message"action.ok"/>','<@spring.message"action.cancel"/>'],
+            success: function(layero){
+            },
+            yes:function(index,layero){
+                var iframeWin = top.window[layero.find('iframe')[0]['name']];
+                var data = iframeWin.getData();
+                if (data!=null) {
+                    $.ajax({
+                        type: "POST",
+                        url:'${basePath}/user/updatePwd',
+                        data:data,
+                        async: false,
+                        error: function(request) {
+                            parent.layer.msg('<@spring.message "result.addFail"/>！');
+                        },
+                        success: function(result) {
+                            if(result.code==0){
+                                parent.layer.close(index);
+                                layer.confirm('<@spring.message "theme.Password_modification_is_successful_please_login_again"/>!', {title:'<@spring.message "action.info"/>',
+                                    btn: ['<@spring.message"action.ok"/>'] //按钮
+                                }, function(indexCon){
+                                    layer.close(indexCon);
+                                    window.location.href = basePath + '/logout';
+                                });
+                            }else{
+                                parent.layer.msg('<@spring.message "result.fail"/>');
+                            }
+                        }
+                    });
+                }
+
+            }
+        });
+    }
+
+    function loginPromptInfo(){
+        var html = '<div style="line-height: 1.8;text-align: left;padding: 0 50px;">'
+            +'<i style="font-size:30px" class="layui-icon">&#xe60e;<i/>'
+            +'<span style="font-size: 16px;vertical-align: text-top;margin-left: 20px;"><@spring.message "theme.Last_login_information"/></span>'
+            +'<div style="font-size: 16px;" ><p style="display: inline-block;width: 39px;"><@spring.message "resource.Time"/></p>：<span>'+lastLoginTime+'</span></div>'
+            +'<div style="font-size: 16px;" ><p style="display: inline-block;width: 39px;">IP</p>：<span>'+lastLoginip+'</span></div>'
+            +'<div style="font-size: 16px;" ><p style="display: inline-block;width: 39px;"><@spring.message "theme.place"/></p>：<span>'+lastLoginAdress+'</span></div>'
+            +'</div>';
+        parent.layer.open({
+            title: '<@spring.message "login.sign"/><@spring.message "action.info"/>',
+            type: 1,
+            offset: 'rb', //右下角弹出
+            area: ['340px', '215px'],
+            shadeClose:true,
+            content: html
+        });
+    }
+
+
+    function promptUpdatePwd(){
+        parent.layer.open({
+            title: '<@spring.message "theme.Regular_password_modification_prompt"/>',
+            type: 1,
+            offset: 'rb', //右下角弹出
+            area: ['340px', '215px'],
+            content: '<div style="padding: 15px;" >'
+            +'<div><span style="font-size: 16px;"><@spring.message "theme.Your_password_has_exceeded_the_time_limit_for_modification_Please_amend_it_in_time"/></span></div>'
+            +'<div style="padding-top: 20px;padding-left: 20px;" ><span style="color: red;">>>></span><a style="cursor:pointer;" id="promptUpdatePwd" ><@spring.message "updatePassword"/></a></div>'
+            +'</div>'
+        });
+    }
+
+    $(document).on('click', '#promptUpdatePwd', function () {
+        changePassword("");
+    });
+
+    layui.use(['element','layer'], function(){
+        var element = layui.element,
+            layer = layui.layer;
+
+
+        window.onload=function (){
+            var url = getHomeUrl(preferType,preferValue,moduleId);
+            $('#content_iframe').attr('src', url);
+            if(loginPrompt=="1"){
+                loginPromptInfo();
+            }
+            if(pwdUpdateReg=="1" && updatePwdPrompt=="1"){
+                promptUpdatePwd();
+            }
+            if(changePWD=="0"){
+                changePassword('('+'<@spring.message"First_login"/>'+')');
+            } else if (updatePwdPrompt=="1" && changePWD=="1"){
+                changePassword('('+'<@spring.message"password_reset"/>'+')');
+            }
+            var url='';
+            var AvatarPath = "${AvatarPath}";
+            if(AvatarPath.length != null && AvatarPath.length < 60){
+                url = "${basePath}"+"/"+AvatarPath;
+            }else{
+                url = AvatarPath;
+            }
+            $('#headPic').attr("src",url);
+
+        }
+
+		/*$('#setPassword').on('click',function(){
+		 changePassword('');
+		 });*/
+		/*$('#setRecord').on('click',function(){
+		 parent.layer.open({
+		 title: '<@spring.message"PersonalPortrait"/>',
+		 type:2,
+		 content:'${basePath}/userInfo/userMessage',
+		 area: ['797px', '567px'],
+		 yes:function(index,layero){
+		 parent.layer.close(index);
+		 }
+		 });
+		 }); */
+    });
+
+    function personalRecord(){
+        parent.layer.open({
+            title: '<@spring.message"PersonalPortrait"/>',
+            type:2,
+            content:'${basePath}/userInfo/userMessage',
+            area: ['777px', '567px'],
+            yes:function(index,layero){
+                parent.layer.close(index);
+            }
+        });
+    }
+
+    function changeFrameHeight(){
+        var ifm= document.getElementById("content_iframe");
+        ifm.height=document.documentElement.clientHeight-60;
+    }
+    window.onresize=function(){
+        changeFrameHeight();
+    }
+
+
+    var isFullScreen="1";//全屏控制标识
+    function fullScreen() {
+        if(isFullScreen=="1"){
+            //开启全屏
+            isFullScreen="0";
+            var elem = document.body;
+            if (elem.webkitRequestFullScreen) {
+                elem.webkitRequestFullScreen();
+            } else if (elem.mozRequestFullScreen) {
+                elem.mozRequestFullScreen();
+            } else if (elem.requestFullScreen) {
+                elem.requestFullscreen();
+            } else {
+                layer.msg('<@spring.message "action.disable"/>！');
+            }
+        }else if(isFullScreen=="0"){
+            //退出全屏
+            isFullScreen="1";
+            var elem=document;
+            if(elem.webkitCancelFullScreen){
+                elem.webkitCancelFullScreen();
+            }else if(elem.mozCancelFullScreen){
+                elem.mozCancelFullScreen();
+            }else if(elem.cancelFullScreen){
+                elem.cancelFullScreen();
+            }else if(elem.exitFullscreen){
+                elem.exitFullscreen();
+            }else {
+                layer.msg('<@spring.message "action.disable"/>！');
+            }
+        }
+        return isFullScreen;
+    }
+
+    window.onresize = function() {
+        var fullscreenElement = document.fullscreenEnabled || document.mozFullscreenElement || document.webkitFullscreenElement;
+        var fullscreenEnabled = document.fullscreenEnabled || document.mozFullscreenEnabled || document.webkitFullscreenEnabled;
+        if (fullscreenElement == null)
+        {
+            isFullScreen="1";
+            $("#isFullScreen").html("<@spring.message 'Full_screen'/>");
+        } else {
+            isFullScreen="0";
+            $("#isFullScreen").html("<@spring.message 'Exit_full_screen'/>");
+        }
+    }
+
+
+
+
+    function setPic(){
+        var url='';
+        var AvatarPath = "${AvatarPath}";
+        if(AvatarPath.length != null && AvatarPath.length < 60){
+            url = "${basePath}"+"/"+AvatarPath;
+        }else{
+            url = AvatarPath;
+        }
+        $('#headPic').attr("src",url);
+    }
+
+    function noticeInfo(id,type) {
+        var title = "<@spring.message 'theme.Notice'/>";
+        var url = '';
+        if(type==1){
+            url = basePath + '/notice/info?id='+id;
+        }else if(type==2){
+            var notice;
+            $.ajax({
+                type: 'post', // 提交方式 get/post
+                async:false,
+                url: '${basePath}/notice/findOneNotice', // 需要提交的 url
+                data:{
+                    'id':id
+                },
+                success: function(res) {
+                    notice = res;
+                }
+            });
+            url = notice.content;
+            title = notice.title;
+        }
+        setreadNum(id);
+        parent.layer.open({
+            type: 2,
+            title: title,
+            shadeClose: true,
+            shade: 0.5,
+            area: ['80%', '70%'],
+            content: url, //iframe的url
+            cancel: function(){
+                $("#head").load("${basePath}/reloadHead", null,function(){
+                    setPic();
+                    layui.use('element', function () {
+                        var element = layui.element;
+                        element.render('nav', 'nav_filter');
+                    })
+                })
+            }
+
+        });
+    }
+
+    function MessageInfo(id){
+        url = basePath + '/messageCenter/info/'+id;
+        updateMessageState(id);
+        parent.layer.open({
+            type: 2,
+            title: '<@spring.message"main.Details_of_the_message"/>',
+            shadeClose: true,
+            shade: 0.5,
+            area: ['80%', '70%'],
+            content: url, //iframe的url
+            cancel: function(){
+                $("#head").load("${basePath}/reloadHead", null,function(){
+                    setPic();
+                    layui.use('element', function () {
+                        var element = layui.element;
+                        element.render('nav', 'nav_filter');
+                    })
+                })
+            }
+
+        });
+    }
+
+    function updateMessageState(id){
+        $.ajax({
+            type: 'post', // 提交方式 get/post
+            url: '${basePath}/messageCenter/update', // 需要提交的 url
+            data:{
+                'id':id ,
+                'isRead':1
+            },
+            async: true,
+            success: function(res) {
+				reloadHeadFun()
+            }
+        });
+    }
+
+    function moreNotice(){
+        parent.layer.open({
+            type: 2,
+            title: '<@spring.message "theme.More_notice"/>',
+            area: ['70%', '70%'],
+            content: "${basePath}/moContent/content_notice_more/null",
+            cancel: function(){
+                $("#head").load("${basePath}/reloadHead", null,function(){
+                    setPic();
+                    layui.use('element', function () {
+                        var element = layui.element;
+                        element.render('nav', 'nav_filter');
+                    })
+                })
+            }
+        });
+    }
+    function setreadNum(id){
+        $.ajax({
+            type: 'post', // 提交方式 get/post
+            url: '${basePath}/notice/updateReadNum', // 需要提交的 url
+            data:{
+                'id':id
+            },
+            async: true,
+            success: function(res) {
+            }
+        });
+    }
+
+
+    function setPreference(id){
+        $('#content_iframe').html('');
+        document.getElementById("load").style.display='block';
+        $('#content_iframe').attr('src', '${basePath}/userInfo/preference/'+id);
+    }
+
+    function reloadHeadFun(){//定义刷新head的方法，方便子页面调用父页面方法。
+        $("#head").load("${basePath}/reloadHead", null,function(){
+            setPic();
+            layui.use('element', function () {
+                var element = layui.element;
+                element.render('nav', 'nav_filter');
+            })
+        })
+    }
+
+    function setAllNoticeRead(){//设置全部通知为已读
+        $.ajax({
+            type: 'post', // 提交方式 get/post
+            url: '${basePath}/notice/setAllNoticeRead', // 需要提交的 url
+            async: false,
+            success: function(res) {
+            }
+        });
+        reloadHeadFun();
+    }
+
+    function setAllMessageRead(){//设置全部消息为已读
+        $.ajax({
+            type: 'post', // 提交方式 get/post
+            url: '${basePath}/messageCenter/setAllRead', // 需要提交的 url
+            async: false,
+            success: function(res) {
+            }
+        });
+        reloadHeadFun();
+    }
+
+    function moreMessage(){//
+        parent.layer.open({
+            type: 2,
+            title: '<@spring.message "main.More_information"/>',
+            area: ['70%', '70%'],
+            content: "${basePath}/moContent/content_message_more",
+            cancel: function(){
+                $("#head").load("${basePath}/reloadHead", null,function(){
+                    setPic();
+                    layui.use('element', function () {
+                        var element = layui.element;
+                        element.render('nav', 'nav_filter');
+                    })
+                })
+            }
+        });
+    }
+
+    function refreshIframe(url){
+        $("#content_iframe").attr("src",url);
+    }
+
+    function historyLog(){
+        top.layer.open({
+            type: 2,
+            title: "<@spring.message 'main.Visiting_History'/>",
+            closeBtn: 1, //不显示关闭按钮
+            shade: [0.2, '#393D49'],
+            area: ['300px', '90%'],
+            shadeClose:true,
+            offset: 'rb', //右下角弹出
+            anim: 2,
+            content: [basePath+'/historyLog'], //iframe的url，no代表不显示滚动条
+            end: function(){ //此处用于演示
+            }
+        });
+    }
+
+    function showTab(id,resourceId,name,linkType){
+        updateMessageState(id);
+		refreshIframe("${basePath!}/resource/view/"+resourceId);
+		comment(resourceId,"<@spring.message 'Comment_area'/>");
+    }
+    
+    function showTab2(id,issueId,title,linkType){
+        updateMessageState(id);
+        if(linkType!=null&&linkType==1){
+            if(this.openTab){
+                reloadHeadFun();
+                openIssesInfo(issueId);
+            }else{
+                reloadHeadFun();
+                openIssesInfo(issueId);
+            }
+        }else{
+            reloadHeadFun();
+            openIssesInfo(issueId);
+        }
+    }
+    
+    function openIssesInfo(id){
+  		var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message"issue.Details_of_the_problem"/>',
+			type:2,
+			content:'${basePath}/issue/info?id='+id,
+			area: ['80%', '600px'],
+			btn:['<@spring.message"issue.quit"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init();
+			},
+			yes:function(index,layero){
+				parent.layer.close(index);
+    		}
+		});
+  	}
+</script>
+</body>
+
+</html>

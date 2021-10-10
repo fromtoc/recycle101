@@ -1,0 +1,83 @@
+ <#include "common/common.html" />
+
+<form id="form_add" class="layui-form" action=""
+	style="padding-top:10px;">
+	<div style="margin-left:100px;">
+		<input type="hidden" name="parentId" id="parentId">
+		<input type="hidden" name="id" id="id" value="${(record.id)!}">
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label label-required-diy"><@spring.message 'role.Superior_role'/></label>
+			<div class="layui-input-inline">
+				<input type="text" id="parentName" name="parentName" readonly value=""
+					class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label label-required-diy"><@spring.message 'role.role_name'/></label>
+			<div class="layui-input-inline">
+				<input type="text" name="name" id="name" value="${(record.name)!}" lay-verify="required" placeholder="<@spring.message 'userInfo.Please_enter_a_name'/>"
+					autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label label-required-diy"><@spring.message 'role.role_code'/></label>
+			<div class="layui-input-inline">
+				<input type="text" name="code" id="code" value="${(record.code)!}" placeholder="<@spring.message 'tips.input'/>" lay-verify="required"
+					autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label"><@spring.message 'list.order'/></label>
+			<div class="layui-input-inline">
+				<input type="number" name="sort" id="sort" value="${(record.sort)!1}" min="1" max="100" value="1"
+					placeholder="<@spring.message 'tips.input'/>" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+	</div>
+</form>
+
+<script type="text/javascript">
+	function init (parentNode) {
+		$('#parentName').val(parentNode.name);
+		$('#parentId').val(parentNode.id);
+	}
+	
+	function getData(){
+		if(check("name") &&　check("code")){
+			return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+  	}
+	
+	function check(id) {
+		var selectors = ["#"+id];
+		var result = true;
+		$.each(selectors,function(index, rec){
+			if (!checkField(rec)) {
+				result = false;
+				return false;//调出循环
+			}
+		});
+  		return result;
+  	}
+  	
+  	function checkField(selector){
+  		var value = $(selector).val();
+  		if (value==null || value == '') {
+  			$(selector).addClass("layui-form-danger");
+  			$(selector).focus();
+  			layer.tips('<@spring.message "tips.inputSome"/>', selector);
+  			return false;
+  		} else {
+  			return true;
+  		}
+  	}
+	
+	layui.use([ 'form', 'layedit', 'laydate' ],function() {
+		var form = layui.form, 
+			layer = layui.layer, 
+			layedit = layui.layedit, 
+			laydate = layui.laydate;
+	})
+</script>

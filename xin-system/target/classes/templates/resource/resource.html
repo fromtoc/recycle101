@@ -1,0 +1,164 @@
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<#include "common/common_ztree.html" />
+<style>
+	.fixed-table-body {
+    	height: auto;
+    }
+</style>
+<div id="body" class="layui-body" style="">
+	<div class="layui-tab" style="-webkit-box-sizing: initial;">
+      <form class="layui-form" action="">
+	    	<div class="">
+	    		 <div class="layui-inline">
+			   		 <label class="layui-form-label"><@spring.message"resource.Resource_type"/></label>
+				    <div class="layui-inline">
+				      <input type="text" id="type" name="type" lay-filter="type"  autocomplete="off" class="layui-input">
+				    </div>
+		 	 	 </div>
+				 <div class="layui-inline">
+				    <label class="layui-form-label"><@spring.message"comment.Resource_name"/></label>
+				    <div class="layui-inline">
+				      <input type="text" id="name" name="name" placeholder="<@spring.message'tips.input'/>" autocomplete="off" class="layui-input">
+				    </div>
+				    <div class="layui-inline">
+			           	<button type="button" id="query" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon">&#xe615;</i> <@spring.message"action.query"/></button>
+				    </div>
+				 </div>
+				 <input id="resourceType1" type="hidden"/>
+				 <input id="resourceType2" type="hidden"/>
+				 <input id="checkedId" type="hidden" value="${listId}"/>
+			</div>
+	  </form>
+	  
+	  
+	  <div class="layui-tab-content">
+	    <div class="layui-tab-item layui-show">
+	    	<table id="table"
+	    		   data-toolbar="#toolbar"
+	    		   data-click-to-select="true"
+	               data-toggle="table"
+	               data-search="false"
+	               data-side-pagination="server"
+	               data-pagination="true"
+	               data-query-params-type=""
+	               data-url="${basePath}/resource/listPage"
+	               data-query-params="queryParams" class="table-condensed">
+	            <thead>
+	            <tr>
+	            	<th data-align="center"
+	                	data-halign="center"
+	                	data-checkbox="true"
+	                	data-width="1%"></th>
+	                <th data-align="center"
+	                	data-halign="center"
+	                	data-formatter="indexFormatter"
+	                	data-width="1%"><@spring.message"list.serialNum"/></th>
+	                <th data-align="left" 
+	                	data-halign="center"
+	                	data-field="name" ><@spring.message"list.name"/></th>
+	                <th data-align="left" 
+	                	data-halign="center"
+	                	data-field="introduce" ><@spring.message"resource.Detailed_description"/></th>
+	            
+	            </tr>
+	            </thead>
+	        </table>
+	    </div>
+	  </div>
+	</div>
+</div>
+<script>
+layui.use([ 'form','element','treeSelect'],function() {
+	var form = layui.form, 
+		element = layui.element,
+		treeSelect = layui.treeSelect;
+		$.ajax({		
+		type:'GET',
+		url:'${basePath}/resourceType/list',
+		success:function(result){
+			var treeData = utils.toTreeData(result.list);
+			treeSelect.render({
+	            // 选择器
+	            elem: '#type',
+	            // 数据
+	            data: treeData,
+	            // 异步加载方式：get/post，默认get
+	            type: 'get',
+	            // 占位符
+	            placeholder: '<@spring.message"banner.Selection_of_resource_types"/>',
+	            // 是否开启搜索功能：true/false，默认false
+	            search: true,
+	            view:{
+	            	showIcon:true,
+	            },
+	            // 点击回调
+	            click: function(d){
+	            	var parentNode = treeSelect.zTree('type').getNodeByParam('id',d.current.parentId);
+	                 if (parentNode!=null) {
+	                	$('#resourceType1').val(parentNode.id);
+	                	$('#resourceType2').val(d.current.id);
+	                } else {
+	                	$('#resourceType1').val(d.current.id);
+	                	$('#resourceType2').val(null);
+	                }	                
+	                $('#type').val(d.current.id);
+	                $('#table').bootstrapTable('refresh');
+	            },
+	            // 加载完成后的回调函数
+	            success: function (d) {
+	            }
+	        });
+		   }
+		})
+	})
+	function typeFormatter(value,row,index){
+		if (resourceTypeArr.length>0) {
+			return resourceTypeArr[value];
+		} else {
+			return value;
+		}
+	}
+	
+	
+	$('#query').on('click',function(){
+        	$('#table').bootstrapTable('refresh');
+    });
+    
+    
+	function init(listId) {
+		$('#checkedId').val(listId);
+	}
+
+	function queryParams(params) {
+		var name =$.trim($('#name').val());
+		var resourceType2 = $('#resourceType2').val();
+    	params.resourceType1 = $('#resourceType1').val();
+    	if (name!='') {
+			params.name = name;
+    	}
+    	if (resourceType2!='') {
+	    	params.resourceType2 = resourceType2;
+    		
+    	}
+    	var listId=$('#checkedId').val();
+    	params.listId=listId;
+		return params;
+	}
+	
+	function getData() {
+		var records = $('#table').bootstrapTable('getSelections');
+		var data=[];
+		if (records!=null && records.length>0) {
+			for(var a=0;a<records.length;a++){
+				data.push(records[a].id)
+			}
+			return data;
+		
+		} else {
+			return null;
+		}
+	}
+	
+	
+</script>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.MoContentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.MoContent">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="url" property="url" />
+        <result column="sort" property="sort" />
+        <result column="x_axis" property="xAxis" />
+        <result column="y_axis" property="yAxis" />
+        <result column="x_num" property="xNum" />
+        <result column="y_num" property="yNum" />
+        <result column="show_type" property="showType" />
+        <result column="content" property="content" />
+        <result column="hidden_more" property="hiddenMore" />
+        <result column="tenant_id" property="tenantId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, url, sort, x_axis, y_axis,content,x_num, y_num,hidden_more,tenant_id
+    </sql>
+	<select id="selectByModuleId" resultMap="BaseResultMap" parameterType="java.lang.String">
+		SELECT * FROM t_mo_content t WHERE t.id IN (SELECT content_id FROM t_module_content
+		WHERE module_id=#{moduleId,jdbcType=VARCHAR}) order by sort
+	</select>
+	<select id="selectMaxSort" resultType="Integer" parameterType="java.lang.String">
+		SELECT MAX(sort) as sort FROM t_mo_content  WHERE id IN(SELECT content_id FROM t_module_content WHERE module_id=#{moduleId,jdbcType=VARCHAR})
+	</select>
+	<delete id="deleteByModuleId">
+		DELETE FROM t_mo_content WHERE id IN (SELECT content_id FROM t_module_content WHERE module_id=#{moduleId,jdbcType=VARCHAR})
+	</delete>
+</mapper>

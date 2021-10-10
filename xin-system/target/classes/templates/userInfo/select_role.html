@@ -1,0 +1,165 @@
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<#include "common/common_ztree.html" />
+<style>
+	.fixed-table-body {
+    	height: auto;
+    }
+    .ztree li{
+    	line-height: 17px !important;
+    }
+</style>
+<div id="body" class="layui-body" style="">
+	<div class="layui-tab" style="-webkit-box-sizing: initial;">
+	  <div id="toolbar" class="layui-form layui-form-pane" action="">
+	  	<input type="hidden" id="orgId" name="orgId" value="${(record.orgId)!}">
+	  	<div class="layui-inline">
+	  	<label class="layui-form-label"><@spring.message 'userInfo.organization'/></label>
+		   <div class="layui-input-inline">
+			<input type="text"  id="orgName"  name="orgName" lay-filter="orgName" autocomplete="off"  class="layui-input"  >
+		</div>
+		</div> 
+		<div class="layui-inline"> 
+	  	<label class="layui-form-label"><@spring.message 'user.username'/></label>
+	  	<div class="layui-input-inline">
+	        <input type="text" id="username" name="username" placeholder="<@spring.message 'tips.input'/>"
+	        autocomplete="off" class="layui-input">
+		</div>
+		</div>
+         <div class="layui-inline">
+           	<button type="button" id="query" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/></button>
+	    </div>
+	    </div>
+	  <div class="layui-tab-content">
+	    <div class="layui-tab-item layui-show">
+	    	<table id="table"
+	    		   data-toolbar="#toolbar"
+	    		   data-click-to-select="true"
+	               data-toggle="table"
+	               data-search="false"
+	               data-side-pagination="server"
+	               data-pagination="true"
+	               data-query-params-type=""
+	               data-url="${basePath}/userInfo/page"
+	               data-query-params="queryParams">
+	            <thead>
+	            <tr>
+	            
+	            	<th data-align="center"
+	                	data-halign="center"
+	                	data-checkbox="true"
+	                	data-width="1%"><@spring.message 'list.serialNum'/></th>
+	                <th data-align="center"
+	                	data-halign="center"
+	                	data-formatter="indexFormatter"
+	                	data-width="1%"><@spring.message 'list.serialNum'/></th>
+	                <th data-align="left" 
+	                	data-width="25%"
+	                	data-halign="center"
+	                	data-field="username"><@spring.message 'user.username'/></th>
+	                <th data-align="left" 
+	                	data-width="10%"
+	                	data-halign="center"
+	                	data-field="realname" ><@spring.message 'user.realname'/></th>
+	                <th data-align="center"
+	                	data-width="20%" 
+	                	data-halign="center"
+	                	data-field="registerTime"
+	                	data-formatter="dateTimeFormatter"><@spring.message 'list.createTime'/></th>
+	            
+	            </tr>
+	            </thead>
+	        </table>
+	    </div>
+	  </div>
+	</div>
+</div>
+<script>
+	$('#query').on('click',function(){
+			var org_id = $("#orgId").val();
+        	var username = $('#username').val();
+        	$('#table').bootstrapTable('refresh', {query: {username: username,orgId: org_id}});
+        	
+    });
+    
+	var controllerData ;
+	var roleId = '${id!-1}';
+	var roleCode = '';
+	
+	function init(role) {
+    	roleCode = role.code;
+	}
+
+	function queryParams(params) {
+    	params.roleIdNot = roleId;
+		return params;
+	}
+	
+	function getData() {
+		var records = $('#table').bootstrapTable('getSelections');
+		if (records!=null && records.length>0) {
+			var userIds = [];
+			for (var i=0;i<records.length;i++) {
+				userIds.push(records[i].id);
+			}
+			var data = {
+				roleId:roleId,
+				roleCode:roleCode,
+				userIds:userIds
+			};
+			return data;
+		
+		} else {
+			return null;
+		}
+	}
+	
+	$(function(){
+		loadTree();
+    }); 
+	
+	function loadTree(){
+		layui.use([ 'form','element','treeSelect'],function() {
+			var form = layui.form,
+			element = layui.element,
+			treeSelect = layui.treeSelect;
+			$.ajax({
+				type:'GET',
+				url:'${basePath}/organization/list',
+				success:function(result){
+					var Datatrees = utils.toTreeData(result); // 1
+					treeSelect.render({
+			        	//选择显示在那
+						elem: '#orgName',
+						//显示的数据
+						data: Datatrees,
+			            type: 'get',
+			            //默认显示
+			            placeholder: '<@spring.message "userInfo.Select_organization"/>',
+			            // 开启搜索
+			            search: true, //2
+			            view:{		//3
+			            	showIcon:false,
+			            },
+			            //点击回调函数
+			            click: function(d){
+			            	//console.log(d)
+			            	$("#orgId").val(d.current.id) //获取当前选择的组织Id
+			            	findUserInfoByorg_id();
+			            },
+			            //加载完成后回调函数
+			            success: function (d) {
+			            	 //console.log(d);
+			            	 //treeSelect.checkNode('orgName',id);
+			            }
+			        });
+				}
+			});
+		})
+    }
+		
+		function findUserInfoByorg_id(){
+	    	var org_id = $("#orgId").val();
+	    	$('#table').bootstrapTable('refresh', {query: {orgId: org_id}});
+	    }
+</script>

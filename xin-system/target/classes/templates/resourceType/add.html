@@ -1,0 +1,81 @@
+<#include "common/common.html" />
+<script type="text/javascript" src="${basePath}/plugins/wangEditor/wangEditor.min.js"></script>
+<form id="form_add" lay-filter="form_add" class="layui-form " action="">
+	<input type="hidden" id="parentCode" name="code"  value=""
+		   class="layui-input" >
+	<div class="layui-form-item">
+		<label class="layui-form-label label-required-diy"><@spring.message'resource.Name_of_superior'/></label>
+	    <div class="layui-input-block" >
+	    	<input type="hidden" name="parentId" id="parentId">
+	      <input type="text" id="parentName" name="parentName" readonly value=""
+					class="layui-input">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label label-required-diy"><@spring.message'resource.type_name'/></label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="name" name="name"  lay-verify="required|length" lay-verType="tips" class="layui-input" placeholder="<@spring.message'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message'list.order'/></label>
+	    <div class="layui-input-block" >
+	      <input type="number" name="sort"  min="1" max="100" value="1"
+					placeholder="<@spring.message'resource.please_enter_value'/>" autocomplete="off" class="layui-input">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message"resource.Explain"/></label>
+	    <div class="layui-input-block" >
+	      <textarea id="remark" name="remark"  lay-verify="textarea" lay-verType="tips" class="layui-textarea" placeholder="<@spring.message'tips.inputSome'/>"></textarea>
+	    </div>
+	</div>
+	<button class="layui-hide" lay-submit  id="btn_submit" lay-filter="btn_submit"><@spring.message'action.save'/></button>
+</form>
+
+<script type="text/javascript">
+	var is_verify = false;
+	var content = '';
+	layui.use([ 'form','layedit'],function() {
+		var form = layui.form,
+			layedit = layui.layedit;
+		
+		form.verify({
+			length: function(value,item){
+				if(value.length < 2 || value.length > 30){
+					return '<@spring.message"biMapping.please_enter_2_to_30_characters"/>';
+				}
+			},
+			textarea: function(value,item){
+				if(value.length>250){
+					return '<@spring.message"biMapping.Length_should_not_exceed_250"/>';
+				}
+			}
+		})  
+		form.on('submit(btn_submit)', function(data){
+			is_verify = true;
+			return false;
+		})
+		
+		
+	});
+	
+	function init (parentNode) {
+		$('#parentName').val(parentNode.name);
+		$('#parentId').val(parentNode.id);
+        $('#parentCode').val(parentNode.code);
+	}
+	
+  	
+	function getData(){
+		$('#btn_submit').click();
+		if (is_verify) {
+			
+			return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+  	}
+	
+	
+</script>

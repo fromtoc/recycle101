@@ -1,0 +1,97 @@
+ <#include "common/common.html" />
+ <style>
+ 	.my-label {
+ 		width:100px!important;
+ 	}
+ 	.wide-input {
+ 		width:85%;
+ 	}
+ </style>
+
+<form id="form_add" class="layui-form" action=""
+	style="padding-top:10px;">
+	<div>
+		<input type="hidden" id="id" name="id" value="${dataPer.id}">
+		<input type="hidden" id="typeId" value="${dataPer.typeId}" >
+		<div class="layui-form-item">
+			<label class="layui-form-label label-required-diy"style="width:100px"><@spring.message 'dataPermission.data_per_type'/></label>
+		    <div class="layui-input-inline" >
+		    	<input type="text" id="typeName" readonly class="layui-input">
+		    </div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label label-required-diy" style="width:100px"><@spring.message 'dataPermission.data_per_name'/></label>
+		    <div class="layui-input-inline" >
+		      <input type="text" id="dpname" name="dpname" lay-verify="required|length" 
+		      	lay-verType="tips" value="${dataPer.dpname}" autocomplete="off" class="layui-input">
+		    </div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label label-required-diy"><@spring.message 'dataPermission.data_per_code'/></label>
+		    <div class="layui-input-inline" >
+				<input type="text" id="extcode" name="extcode" lay-verify="required|length" 
+				 lay-verType="tips" value="${dataPer.extcode}" autocomplete="off" class="layui-input">
+		    </div>
+		</div>
+		<div id="sourceIdDiv" class="layui-form-item">
+			<label class="layui-form-label label-required-diy"><@spring.message 'list.order'/></label>
+		    <div class="layui-input-inline" >
+				<input type="number" id="sort" name="sort" min="1" max="99999999" lay-verify="required" value="${dataPer.sort}" class="layui-input">
+		    </div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label" style="width:100px"><@spring.message 'list.remark'/></label>
+		    <div class="layui-input-inline" style="width: 340px;">
+		    	<textarea placeholder="<@spring.message 'tips.inputSome'/>" class="layui-textarea" 
+		    		lay-verify="textarea" lay-verType="tips" name="remark" id= "remark" >${dataPer.remark}</textarea>
+		    </div>
+		</div>
+	</div>
+	<button class="layui-hide" lay-submit  id="btn_submit" lay-filter="btn_submit"><@spring.message 'action.save'/></button>
+</form>
+
+<script type="text/javascript">
+	var is_verify = false;
+	layui.use([ 'form', 'layedit', 'laydate' ],function() {
+		var form = layui.form, 
+			layer = layui.layer, 
+			layedit = layui.layedit, 
+			laydate = layui.laydate;
+		form.verify({
+			length: function(value,item){
+				if(value.length > 80){
+					return '<@spring.message "tips.lengthNoMore"/> 80 <@spring.message "tips.lengthChar"/>！';
+				}
+			},
+			textarea: function(value,item){
+				if(value.length>250){
+					return '<@spring.message "biMapping.Length_should_not_exceed_250"/>';
+				}
+			},
+			dptype: function(value,item){
+				if(typeof value === 'undefined' || value === null || value.trim() === ""){
+					return '<@spring.message "dataPermission.select_data_type"/>';
+				}
+			},
+		});  
+		
+		form.on('submit(btn_submit)', function(data){
+			is_verify = true;
+			return false;
+		});
+		
+	});
+	
+	function init(nodes){
+		$('#typeName').val(nodes.name);
+	}
+	
+	function getData(){
+		$('#btn_submit').click();
+		if (is_verify) {
+			return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+  	};
+</script>

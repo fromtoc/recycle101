@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+	<title>调度任务</title>
+	<link rel="stylesheet" href="${basePath}/plugins/vue/element-index.css">
+	<script src="${basePath}/plugins/vue/vue.js"></script>
+	<script src="${basePath}/plugins/vue/vue-resource.js"></script>
+	<script src="${basePath}/plugins/vue/element-index.js"></script>
+	<style>      
+	</style>
+	
+</head>
+<body>
+    <div id="content">		        
+
+		<div id="top" v-show="true">
+			<span>
+				<el-button size="small" type="primary" @click="handleUpload" ><@spring.message 'File.files_upload'/></el-button>
+			</span>						
+		</div>	
+				
+        <div style="margin-top:15px">	
+
+		  <el-table
+		    ref="testTable"		  
+		    :data="tableData"
+		    style="width:100%"
+		    border
+		    >
+		    <el-table-column
+		      prop="nameBefore"
+		      label="<@spring.message 'File.filename'/>"
+		      show-overflow-tooltip>
+		    </el-table-column>
+		    <el-table-column
+		      prop="fileSize"
+		      label="<@spring.message 'File.file_size'/>"
+		      :formatter="fileSizeFormatter"
+		      sortable
+		      show-overflow-tooltip>
+		    </el-table-column>
+		    
+		    <el-table-column
+		      prop="fileType"
+		      label="<@spring.message 'File.file_type'/>"
+		      sortable>
+		    </el-table-column>
+		    
+   		    <el-table-column
+		      prop="createTime"
+		      label="<@spring.message 'File.upload_time'/>"
+		      :formatter="dateTimeFormatter"
+		      sortable>
+		    </el-table-column>
+		    
+		    <el-table-column
+		      prop="businessType"
+		      label="<@spring.message 'File.business_type'/>"
+		      sortable>
+		    </el-table-column>
+		    
+		  </el-table>
+		  
+		  <div align="center">
+			  <el-pagination
+			      @size-change="handleSizeChange"
+			      @current-change="handleCurrentChange"
+			      :current-page="currentPage"
+			      :page-sizes="[10, 20, 30, 40]"
+			      :page-size="pagesize"
+			      layout="total, sizes, prev, pager, next, jumper"
+			      :total="totalCount">
+			  </el-pagination>
+		  </div>
+		</div> 
+		<el-dialog title="<@spring.message 'File.files_upload'/>" :visible.sync="dialogFormVisible">
+		  <el-form :model="form" ref="uploadForm" :rules="rules">
+		  	<el-form-item prop="businessType" label="<@spring.message 'File.business_type'/>" label-width="120px" style="width:90%">
+		      <el-select v-model="form.businessType" placeholder="<@spring.message 'tips.choos'/><@spring.message 'File.business_type'/>">
+		      		<el-option v-for="item in fileBusinessTypes" :label="item.itemName" :value="item.itemValue"></el-option>
+			    </el-select>
+		    </el-form-item>	
+		    <el-form-item >  
+		    <el-upload
+			  class="upload-demo"
+			  ref="upload"
+			  :action="form.action+form.businessType"
+			  :auto-upload="false"
+			  :data="form"
+			  :on-success="onUploadSuccess"
+			  :before-upload="onBeforeUpload"
+			  style="margin-left: 120px;">
+			  <el-button slot="trigger" size="small" type="primary"><@spring.message 'File.Select_the_file'/></el-button>
+			</el-upload>
+			</el-form-item>	
+			<el-form-item v-if="form.businessType=='template'" label="<@spring.message 'File.business_type'/>" label-width="120px" style="width:90%">
+				<el-input v-model="form.businessInfo" placeholder="<@spring.message 'tips.choos'/><@spring.message 'File.Database_table_name'/>" auto-complete="off"></el-input>
+			</el-form-item>	  
+		  </el-form>
+		  <div slot="footer" class="dialog-footer">
+		    <el-button @click="dialogFormVisible = false"><@spring.message 'action.cancel'/></el-button>
+		    <el-button type="primary" @click="submitUpload"><@spring.message 'action.ok'/></el-button>
+		  </div>
+		</el-dialog>
+		
+    </div>
+	
+	<script>
+	var vue = new Vue({			
+			el:"#content",
+		    data: {		  
+		    	//表格当前页数据
+		    	tableData: [],
+		    	
+		        //请求的URL
+		        url:'${basePath}/file/page',
+		        
+		        //默认每页数据量
+		        pagesize: 10,		        
+		        
+		        //当前页码
+		        currentPage: 1,
+		        
+		        //查询的页码
+		        start: 1,
+		        
+		        //默认数据总数
+		        totalCount: 1000,
+		        
+		        //添加对话框默认可见性
+		        dialogFormVisible: false,
+		        
+		        //修改对话框默认可见性
+		        updateFormVisible: false,
+		        
+		        fileBusinessTypes:JSON.parse('${fileBusinessTypes!}'),
+		        //提交的表单
+		        form: {
+		        	businessInfo:'',
+		        	businessType:'',
+		        	action:'${basePath}/file/upload/'
+		          },
+		          rules: {
+		        	  businessType: [
+		                { required: true, message:"<@spring.message 'File.Please_select_the_upload_file_type'/>", trigger: 'change' }
+		              ],
+		            }
+
+		          
+		    },
+		    
+		    rules: {
+		    	businessInfo: [
+		            { required: true, message: "<@spring.message 'tips.choos'/><@spring.message 'File.Database_table_name'/>", trigger: 'blur' },
+		          ],
+		    },
+
+		    methods: {
+		    	dateTimeFormatter: function(row, column, value){
+		    		if(value!=null && value!=0){
+		    			return getFormatDate(new Date(value));
+		    		}else{
+		    			return '';
+		    		}
+		    	},
+		    	fileSizeFormatter: function(row, column, value) {
+		    		return value/1000 + ' kb';
+		    	},
+		    	timeOutFormatter: function(row, column, value) {
+		    		if(value!=null && value!=0){
+		    			return value/1000/60 + "<@spring.message 'wechat.minute'/>" ;
+		    		}else{
+		    			return '';
+		    		}
+		    	},
+		    	
+		    	typeChange:function(value){
+		    		//this.form.businessType=value;
+		    	},
+		    	
+		        //从服务器读取数据
+				loadData: function(pageNumber, pageSize){					
+					this.$http.get('${basePath}/file/page?' + 'pageNumber=' +  pageNumber + '&pageSize=' + pageSize).then(function(res){
+						console.log(res)
+                		this.tableData = res.body.rows;
+                		this.totalCount = res.body.total;
+                	},function(){
+                  		console.log('failed');
+                	});					
+				},			    		        
+				      
+		        //单行删除
+			    handleLogout: function(index, row) {
+					this.$http.post('${basePath}/session/logout',{"sessionId":row.sessionId},{emulateJSON: true}).then(function(res){
+						this.loadData( this.currentPage, this.pagesize);
+		            },function(){
+		                console.log('failed');
+		            });
+		        },
+		        
+		        
+		        //搜索
+		        search: function(){
+		        	this.loadData(this.currentPage, this.pagesize);
+		        },
+		        
+		        //弹出对话框
+		        handleUpload: function(){		                
+		            this.dialogFormVisible = true;	              
+		        },
+		        
+		        //添加
+		        submitUpload: function(){
+		        	this.$refs.uploadForm.validate((valid) => {
+		                if (valid) {
+		                	//if (this.$refs.upload.fileList.length>0) {
+			                	this.$refs.upload.submit();
+			                	//this.form.businessInfo='';
+			                	//this.form.businessType='';
+			                	//this.fileList = [];
+		                	//} else {
+		                	//	this.$message.error('请选择文件！');
+		                	//}
+		                } else {
+		                  console.log('error submit!!');
+		                  return false;
+		                }
+		              });
+		        	
+		        },
+		        onUploadSuccess: function() {
+		        	this.dialogFormVisible = false;
+		        	this.loadData(this.currentPage, this.pagesize);
+		        },
+		        
+		        onBeforeUpload:function(file) {
+		            if (file==null) {
+		              this.$message.error("<@spring.message 'File.Upload_profile_picture_size_cannot_exceed'/> 2MB!");
+		              return false
+		            }
+		            return true;
+		          },
+		        
+		        //更新
+		        handleUpdate: function(index, row){
+		        	console.log(row)
+		        	this.updateFormVisible = true;
+		        	this.updateform.jobName = row.jOB_CLASS_NAME;
+		        	this.updateform.jobGroup = row.jOB_GROUP;
+		        },
+		        
+		        //更新任务
+		        update: function(){
+		        	this.$http.post
+		        	('${basePath}/job/reschedulejob',
+		        			{"jobClassName":this.updateform.jobName,
+		        			 "jobGroupName":this.updateform.jobGroup,
+		        			 "cronExpression":this.updateform.cronExpression
+		        			 },{emulateJSON: true}
+		        	).then(function(res){
+		        		this.loadData(this.currentPage, this.pagesize);
+        				this.updateFormVisible = false;
+		        	},function(){
+                        console.log('failed');
+                    });
+		    
+		        },
+		      
+		        //每页显示数据量变更
+		        handleSizeChange: function(val) {
+		            this.pagesize = val;
+		            this.loadData(this.currentPage, this.pagesize);
+		        },
+		        
+		        //页码变更
+		        handleCurrentChange: function(val) {
+		            this.currentPage = val;
+		            this.loadData(this.currentPage, this.pagesize);
+		        },	      
+		        		        
+		    },	    
+		    
+		    
+		  });
+		  //载入数据
+    	  vue.loadData(vue.currentPage, vue.pagesize);
+		  
+    	  function getFormatDate(date, pattern) {
+              if(date == undefined) {
+                  date = new Date();
+              }
+              if(pattern == undefined) {
+                  pattern = "yyyy-MM-dd hh:mm:ss";
+              }
+
+              var o = {
+                  "M+": date.getMonth() + 1,
+                  "d+": date.getDate(),
+                  "h+": date.getHours(),
+                  "m+": date.getMinutes(),
+                  "s+": date.getSeconds(),
+                  "q+": Math.floor((date.getMonth() + 3) / 3),
+                  "S": date.getMilliseconds()
+              };
+              if(/(y+)/.test(pattern)) {
+                  pattern = pattern.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+              }
+
+              for(var k in o) {
+                  if(new RegExp("(" + k + ")").test(pattern)) {
+                      pattern = pattern.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+                  }
+              }
+              return pattern;
+          }
+	</script>  
+	
+</body>
+</html>

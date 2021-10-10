@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xin.portal.system.mapper.BiProjectMapper" >
+  <resultMap id="BaseResultMap" type="com.xin.portal.system.model.BiProject" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="project" property="project" jdbcType="VARCHAR" />
+    <result column="bi_server_id" property="biServerId" jdbcType="VARCHAR" />
+    <result column="param_dossier" property="paramDossier" jdbcType="VARCHAR" />
+    <result column="param_doc" property="paramDoc" jdbcType="VARCHAR" />
+    <result column="param_report" property="paramReport" jdbcType="VARCHAR" />
+    <result column="param_folder" property="paramFolder" jdbcType="VARCHAR" />
+    <result column="bo_authentication" property="boAuthentication"  />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="param" property="param" jdbcType="VARCHAR" />
+    <result column="state" property="state" jdbcType="VARCHAR" />
+    
+    <result column="biServerName" property="biServerName" jdbcType="VARCHAR" />
+    <result column="type" property="type"  />
+    <result column="ip" property="ip" jdbcType="VARCHAR" />
+    <result column="port" property="port" jdbcType="VARCHAR" />
+    <result column="defaultUid" property="defaultUid" jdbcType="VARCHAR" />
+    <result column="defaultPwd" property="defaultPwd" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="server" property="server" jdbcType="VARCHAR" />
+    <result column="paramServer" property="paramServer" jdbcType="VARCHAR" />
+    <result column="is_indepen_pro" property="isIndependPro" jdbcType="INTEGER" />
+    
+  </resultMap>
+  
+   <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+    select  bp.id,
+  			bp.title,
+			bp.project,
+			bp.bi_server_id,
+			bp.param_dossier,
+			bp.param_doc,
+			bp.param_report,
+			bp.param_folder,
+			bp.bo_authentication,
+			bp.remark,
+			bp.param,
+			bp.state,
+			bp.tenant_id,
+			bs.name as biServerName,
+			bs.type,
+			bs.ip,
+			bs.port,
+			bs.default_uid as defaultUid,
+			bs.default_pwd as defaultPwd,
+			bs.url,
+			bs.server,
+			bs.param as paramServer,
+			bp.is_indepen_pro
+		from t_bi_project bp
+		left join t_bi_server bs on bp.bi_server_id = bs.id
+    </sql>
+  
+  <select id="findList" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.BiProject">
+	<include refid="Base_Column_List"></include>
+	order by bs.sort asc
+  </select>
+  
+  <select id="findById" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.BiProject">
+  	<include refid="Base_Column_List"></include>
+	where bp.id = #{id}
+  </select>
+  
+  <update id="updateProjectIndepend" parameterType="java.lang.String">
+  	UPDATE t_bi_project 
+		SET is_indepen_pro =
+		(CASE
+		WHEN id=#{id}
+		THEN 1
+		ELSE 0
+		END)
+  </update>
+  
+  <select id="findByIdWithTenantId" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.BiProject">
+  	<include refid="Base_Column_List"></include>
+	where bp.id = #{id} and bp.tenant_id = #{tenantId}
+  </select>
+  
+</mapper>

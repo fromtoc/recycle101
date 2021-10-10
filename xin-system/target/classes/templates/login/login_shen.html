@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+<meta name="viewport" content="width=device-width, initial-scale=1"> 
+<link href="${basePath}/images/favicon.ico" rel="icon" type="image/x-icon" />
+<title></title>
+<style>
+    *, *:after, *:before {
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    html,body {
+        width: 100%;
+        height: 100%;
+        margin:0;
+        padding: 0;
+        font-family: Microsoft YaHei
+    }
+    div {
+        /*border: 1px solid red;*/
+    }
+    .login-box {
+        
+    }
+    .main-box {
+        position: absolute;
+	    top: 54%;
+	    left: 50%;
+    	transform: translate(-50%, -50%);    /* 50%为自身尺寸的一半 */
+	    background-color: rgba(255, 255, 255, 1);
+	    padding-top: 0;
+	    box-shadow: 0 0 19px #000;
+	    height: 300px;
+	    border-radius: 5px;
+    	width: 49%;
+    	min-width: 816px;
+    }
+    
+    .main-left {
+    	float: left;
+	    height: 100%;
+	    padding: 0;
+	    margin: 0px;
+    }
+    .main-left-img {
+    	height:300px;
+    }
+    .main-right {
+    	float: left;
+    	padding-left:20px;
+    }
+    .login-header {
+        position: absolute;
+	    height: 75px;
+	    z-index: 999;
+	    top: 17%;
+	    position: absolute; 
+	    left: 50%;
+    	transform: translate(-50%, -50%);    /* 50%为自身尺寸的一半 */
+    }
+    .login-header ul {
+    	line-height: 100px;
+   	}
+    
+    .login-header ul li {
+    	float:left; /* 往左浮动 */
+    	list-style:none; /* 将默认的列表符号去掉 */
+		padding:0; /* 将默认的内边距去掉 */
+		margin:0; /* 将默认的外边距去掉 */
+		padding-left: 12px
+    }
+    .login-header img {
+        float: left;
+		height: 100px;
+    }
+
+	.header-split {
+        font-size: 26pt;
+    	color: #1455A7;
+    	    
+    }
+    .header-info {
+        font-size: 24pt;
+    	color: #fff;
+    	    
+    }
+	h3 {
+		text-align:left;
+		border-bottom: 2px solid #fff;
+		line-height: 11px;
+		letter-spacing: 3px;
+		color: #417fcc;
+		font-family: Microsoft YaHei;
+		font-weight: 100;
+		font-size: 16pt;
+		padding-bottom: 7px;
+		margin-bottom: 33px;
+	}
+    .login-main {
+        background: url('${basePath}/images/login_bg_blue.png') no-repeat center;
+		background-size: 100% 100%;
+        height: 100%; 
+        position: absolute;
+        left: 0px;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 998;
+        width: auto;
+        overflow: hidden;
+        overflow-y: auto;
+        box-sizing: border-box;
+        background-color: rgba(0,0,0,0.2);
+    }
+    
+    #loginForm {
+    	width: 93%;
+    }
+    .login-footer {
+        height: 10%;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 7%;
+        height: 44px;
+        line-height: 44px;
+        padding: 0 15px;
+        text-align: center;
+		z-index: 999;
+		color: #fff;
+    }
+
+    .input_outer {
+        height: 46px;
+        padding: 0 5px;
+        margin-bottom: 9px;
+        position: relative;
+        border-bottom: 1px solid #EAEAEA;
+		background: #fff;
+    }
+    .login-input {
+        width: 220px;
+        height: 46px;
+        outline: none;
+        display: inline-block;
+        font: 14px "microsoft yahei",Helvetica,Tahoma,Arial,"Microsoft jhengHei";
+        margin-left: 50px;
+        border: none;
+        background: none;
+        line-height: 46px;
+        color:#000
+    }
+
+    .icon_user {
+        width: 25px;
+        height: 25px;
+        background: url(${basePath}/images/login_ico.png);
+        background-position: -125px 0;
+        position: absolute;
+        margin: 10px 13px;
+    }
+
+    .icon_password {
+        width: 25px;
+        height: 25px;
+        background-image: url(${basePath}/images/login_ico.png);
+        background-position: -125px -34px;
+        position: absolute;
+        margin: 10px 13px;
+    }
+    .icon_checkcode {
+	    width: 25px;
+	    height: 25px;
+	    background-image: url(${basePath}/images/login_ico.png);
+	    background-position: 1px -201px;
+	    position: absolute;
+	    margin: 10px 13px;
+	}
+	.submit-div {
+		height: 70px;
+    	padding-left: 20px;
+	}
+	.forget-pwd {
+		float:left;
+	    text-decoration: none;
+	    font-size: 9pt;
+	}
+	
+	.forget-pwd:hover {
+		text-decoration: underline;
+	}
+	
+    .btn-submit {
+        line-height: 2px;
+	    text-align: center;
+	    font-size: 11pt;
+	    border-radius: 5px;
+	    background: #019FE8;
+	    padding: 15px;
+	    display: block;
+	    text-decoration: none;
+	    margin: 0 auto;
+	    width: 42%;
+	    float:right;
+     
+    }
+	.error-div {height: 27px;}
+    .error_msg {
+        padding-left: 17px;
+        color: #ff0000;
+        font-size:10pt;
+    }
+    .checkcode-input {
+    	position: absolute;
+	    z-index: 100;
+	    width: 70px;
+	    height: 46px;
+	    outline: none;
+	    display: inline-block;
+	    font: 14px "microsoft yahei",Helvetica,Tahoma,Arial,"Microsoft jhengHei";
+	    margin-left: 50px;
+	    border: none;
+	    background: none;
+	    line-height: 46px;
+	    color: #000;
+    }
+    .checkcode-img {
+    	float: right;
+    }
+
+</style>
+</head>
+<body onkeydown="keyLogin();">
+<input type="hidden" value="${basePath}" id="basePath"/>
+        
+    <div class="login-box">
+        <div class="login-header">
+        	<ul>
+                <li><img src="${basePath}${(SYS_LOGO!='')?string('${SYS_LOGO}','/images/dataWindow_white.png')}" onerror="javascript:this.src='${basePath}/images/dataWindow_white.png';"/></li>
+                <li><span  class="header-split" style="display: ${(SYS_LOGIN_NAME!=null && SYS_LOGIN_NAME!='')?string('block','none')};">|</span></li>
+                <li class="header-info">${SYS_LOGIN_NAME!''}</li>
+            </ul>
+        </div>
+        <div class="login-main">
+			
+            <div class="main-box">
+            	<div  class="main-left">
+            	<img class="main-left-img" src="${basePath}/images/login_info.png" />
+            	
+            	</div>
+            	<div class="main-right">
+            		<h3>登录</h3>
+	                <form action="${basePath}/login" id="loginForm" name="f" method="post">
+	                    <div class="input_outer">
+	                        <span class="icon_user"></span>
+	                        <input name="username" class="login-input" value="${username!}"  type="text" placeholder="<@spring.message 'login.Please_enter_your_account'/>">
+	                    </div>
+	                    <div class="input_outer" style="margin-bottom: 9px;">
+	                        <span class="icon_password"></span>
+	                        <input id="passwordInput" class="login-input" style=" position:absolute; z-index:100;"value="" type="password" placeholder="<@spring.message 'please_enter_the_password'/>">
+							<input type="hidden" name="password" lay-verify="title" autocomplete="off" placeholder="<@spring.message 'login.password'/>" class="login-input">
+	                    </div>
+	                    <div  id="check_code_div" class="input_outer" style="margin-bottom: 0px;display:${(SYS_CHECK_CODE=='1')?string('block','none')}">
+	                    	<span class="icon_checkcode"></span>
+	                        <input id="verifyCode" name="verifyCode" class="checkcode-input" value="" type="text" placeholder="<@spring.message 'login.Verification_Code'/>">
+	                        <img src="${basePath}/kaptcha/new" id="checkcode_img" onclick="changeImg()" class="checkcode-img"/>
+	                    </div>
+						<div class="error-div">
+							<span class="error_msg" style="display: ${(message_login!='')?string('block','none')};">${message_login!}</span>
+						</div>
+	                        
+	                    <div class="submit-div">
+	                    	<a class="forget-pwd" style="display: ${(FORGET_PASSWORD_PROMPT!='1')?string('none','block')};" target="_blank" href="${basePath}/userInfo/forget/forgetPwd" style="color: red"><@spring.message 'login.Forget_the_password'/>？</a>
+	                    	<a class="btn-submit" href="javascript:" id="btn_login" style="color: #FFFFFF">登&nbsp;&nbsp;入</a>
+	                    </div>
+	                </form>
+            	</div>
+            </div>
+        </div>
+        <div class="login-footer">
+                ${SYS_COPYRIGHT!''}
+        </div>
+    </div>
+<script type="text/javascript" src="${basePath}/js/jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="${basePath}/js/Barrett.js"></script>
+<script type="text/javascript" src="${basePath}/js/BigInt.js"></script>
+<script type="text/javascript" src="${basePath}/js/RSA.js"></script>   
+<script type="text/javascript" src="${basePath}/js/login.js"></script>    
+</body>
+
+
+</html>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xin.portal.system.mapper.UserCollectMapper" >
+  <resultMap id="BaseResultMap" type="com.xin.portal.system.model.UserCollect" >
+  	<id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="parent_id" property="parentId" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="collect_name" property="collectName" jdbcType="VARCHAR" />
+    <result column="collect_type" property="collectType" jdbcType="VARCHAR" />
+    <result column="resource_id" property="resourceId" jdbcType="VARCHAR" />
+    <result column="col_create_time" property="colCreateTime" jdbcType="TIMESTAMP" />
+    <result column="col_sort" property="colSort" jdbcType="INTEGER" />
+    <result column="tenant_id" property="tenantId" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <sql id="coll_Column_List">
+    uc.id , uc.parent_id , uc.user_id , uc.collect_name, uc.collect_type ,
+    uc.resource_id , uc.col_create_time, uc.col_sort
+  </sql>
+  
+  <sql id="res_Column_List">
+  	uc.id , uc.parent_id ,uc.user_id , uc.collect_name, uc.collect_type ,
+  	uc.resource_id,uc.col_create_time,uc.col_sort , 
+ 	res.name,res.link_url as linkUrl,res.thumbnail_id as thumbnailId,res.thumbnail,
+ 	res.introduce, res.collect_num as collectNum, res.link_type as linkType
+  </sql>
+  
+  <select id="findCollectList" resultMap="BaseResultMap"  parameterType="com.xin.portal.system.model.UserCollect">
+    SELECT 
+    <include refid="res_Column_List" />
+    from t_user_collect uc 
+    LEFT JOIN t_resource res ON res.id=uc.resource_id 
+	<where>
+	<if test="parentId !=null and parentId!=''">
+    uc.parent_id = #{parentId,jdbcType=VARCHAR}
+    </if>
+    <if test="userId !=null and userId!=''">
+    and uc.user_id = #{userId,jdbcType=VARCHAR}
+    </if>
+	</where>
+	order by col_sort asc
+  </select>
+  
+  <select id="selectCollectOne" resultMap="BaseResultMap"  parameterType="com.xin.portal.system.model.UserCollect">
+    SELECT 
+    <include refid="res_Column_List" />
+    from t_user_collect uc
+    LEFT JOIN t_resource res ON res.id=uc.resource_id 
+	where uc.user_id = #{userId,jdbcType=VARCHAR} and uc.id=#{id,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="findCollectListPage" resultMap="BaseResultMap"  parameterType="com.xin.portal.system.model.UserCollect">
+	    SELECT 
+	    <include refid="res_Column_List" />
+	    from t_user_collect uc
+	    LEFT JOIN t_resource res ON res.id=uc.resource_id 
+		where uc.user_id = #{userId,jdbcType=VARCHAR}
+		AND uc.resource_id IS NOT NULL AND uc.resource_id != ''
+  </select>
+  
+  <insert id="createCollectFloder" parameterType="com.xin.portal.system.model.UserCollect" >
+    insert into  t_user_collect (id,parent_id,user_id,name,collect_type,resource_id,create_time,sort)
+    values(#{id,jdbcType=VARCHAR}#{parentId,jdbcType=VARCHAR},#{userId,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},
+    #{collectType,jdbcType=VARCHAR},#{resourceId,jdbcType=VARCHAR},#{createTime,jdbcType=TIMESTAMP},
+    #{colSort,jdbcType=INTEGER})
+  </insert>
+  
+  <update id="modifyCollectFolder" parameterType="com.xin.portal.system.model.UserCollect" >
+    update t_user_collect SET collect_name = #{collectName,jdbcType=VARCHAR}
+ 	where id=#{id,jdbcType=VARCHAR} and user_id=#{userId,jdbcType=VARCHAR} 
+  </update>
+
+</mapper>

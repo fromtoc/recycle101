@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.DatasourceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.Datasource">
+        <id column="id" property="id" />
+        <result column="source_name" property="sourceName" />
+        <result column="is_custom" property="isCustom" />
+        <result column="database_name" property="databaseName" />
+        <result column="database_type" property="databaseType" />
+        <result column="database_path" property="databasePath" />
+        <result column="database_port" property="databasePort" />
+        <result column="database_username" property="databaseUsername" />
+        <result column="database_password" property="databasePassword" />
+        <result column="is_active" property="isActive" />
+        <result column="is_delete" property="isDelete" />
+        <result column="remark" property="remark" />
+        <result column="tenant_id" property="tenantId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, source_name, is_custom, database_name, database_type, database_path, database_port, database_username, database_password, is_active, is_delete, remark, tenant_id
+    </sql>
+    
+    <select id="selectWithTenantId" resultMap="BaseResultMap" parameterType="java.lang.String">
+    	select 
+    		<include refid="Base_Column_List"/>
+    	from t_data_source 
+    	<where>
+    		tenant_id = #{tenantId}
+    		<if test="id!=null and id!=''">
+    			and id = #{id}
+    		</if>
+    	</where>
+    </select>
+</mapper>

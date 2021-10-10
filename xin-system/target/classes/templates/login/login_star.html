@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+<meta name="viewport" content="width=device-width, initial-scale=1"> 
+<title>用户登录</title>
+<link rel="stylesheet" type="text/css" href="${basePath}/plugins/login/css/normalize.css" />
+<link rel="stylesheet" type="text/css" href="${basePath}/plugins/login/css/demo.css" />
+<!--必要样式-->
+<link rel="stylesheet" type="text/css" href="${basePath}/plugins/login/css/component.css" />
+<link href="${basePath}/images/favicon.ico" rel="icon" type="image/x-icon" />
+<style>
+.error_msg {
+	padding-left: 17px;
+    color: #ff0000;
+}
+</style>
+</head>
+<body onkeydown="keyLogin();">
+		<div class="container demo-1">
+			<div class="content">
+				<div id="large-header" class="large-header">
+					<canvas id="demo-canvas"></canvas>
+					<div class="logo_box">
+						<h3>内蒙古人社厅大数据项目</h3>
+						<form action="${basePath}/login" id="loginForm" name="f" method="post">
+							<div class="input_outer">
+								<span class="u_user"></span>
+								<input name="username" class="text" style="color: #FFFFFF !important" type="text" placeholder="<@spring.message 'login.Please_enter_your_account'/>">
+							</div>
+							<div class="input_outer">
+								<span class="us_uer"></span>
+								<input name="password" class="text" style="color: #FFFFFF !important; position:absolute; z-index:100;"value="" type="password" placeholder="<@spring.message 'please_enter_the_password'/>">
+							</div>
+								<span class="error_msg" style="visibility: ${(message_login!='')?string('block','hidden')};">${message_login!}</span>
+							<div class="mb2"><a class="act-but submit" href="javascript:submit();" style="color: #FFFFFF">登录</a></div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div><!-- /container -->
+		<script src="${basePath}/plugins/login/js/TweenLite.min.js"></script>
+		<script src="${basePath}/plugins/login/js/EasePack.min.js"></script>
+		<script src="${basePath}/plugins/login/js/rAF.js"></script>
+		<script src="${basePath}/plugins/login/js/demo-1.js"></script>
+		<script src="${basePath}/js/jquery-2.2.4.min.js"></script>
+	</body>
+	<script type="text/javascript">
+		function submit(){
+			$('#loginForm').submit();
+		}
+		
+		function keyLogin(){
+			if (event.keyCode==13)  //回车键的键值为13
+				 submit(); //调用登录按钮的登录事件
+			}
+	</script>
+</html>

@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xin.portal.system.mapper.UserMapper">
+	<resultMap id="BaseResultMap" type="com.xin.portal.system.model.User">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="username" property="username" jdbcType="VARCHAR" />
+		<result column="password" property="password" jdbcType="CHAR" />
+		<result column="register_time" property="registerTime"
+			jdbcType="TIMESTAMP" />
+		<result column="register_ip" property="registerIp" jdbcType="VARCHAR" />
+		<result column="last_login_time" property="lastLoginTime"
+			jdbcType="TIMESTAMP" />
+		<result column="last_login_ip" property="lastLoginIp" jdbcType="VARCHAR" />
+		<result column="login_count" property="loginCount" jdbcType="INTEGER" />
+		<result column="reset_key" property="resetKey" jdbcType="CHAR" />
+		<result column="reset_pwd" property="resetPwd" jdbcType="VARCHAR" />
+		<result column="error_time" property="errorTime" jdbcType="TIMESTAMP" />
+		<result column="error_count" property="errorCount" jdbcType="INTEGER" />
+		<result column="error_ip" property="errorIp" jdbcType="VARCHAR" />
+		<result column="activation" property="activation" jdbcType="BIT" />
+		<result column="activation_code" property="activationCode"
+			jdbcType="VARCHAR" />
+		<result column="wx_openid" property="wxOpenid" jdbcType="VARCHAR" />
+		<result column="state" property="state" jdbcType="INTEGER" />
+		<result column="activate_start_time" property="activateStartTime"
+			jdbcType="TIMESTAMP" />
+		<result column="activate_end_time" property="activateEndTime"
+			jdbcType="TIMESTAMP" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="tenant_id" property="tenantId" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		u.id, u.username, u.password, u.register_time, u.register_ip,
+		last_login_time,
+		last_login_ip, login_count, reset_key, reset_pwd, error_time, error_count, error_ip,
+		activation, activation_code,state,activate_start_time,activate_end_time,ext_id,status,tenant_id
+	</sql>
+
+	<select id="findByName" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select distinct
+		<include refid="Base_Column_List" />
+		from t_user u
+		where username = #{username,jdbcType=VARCHAR} and u.is_delete=0
+	</select>
+
+	<select id="findList" resultMap="BaseResultMap"
+		parameterType="com.xin.portal.system.dto.UserDto">
+		select distinct
+		<include refid="Base_Column_List" />
+		,o.name as org_name
+		from t_user u
+		<where>
+			<if test="roleId!=null and roleId!=''">
+				and u.id in (select user_id from t_role_user ru where role_id=
+				#{roleId,jdbcType=INTEGER})
+			</if>
+			<if test="roleIdNot!=null and roleIdNot!=''">
+				and u.id not in (select user_id from t_role_user ru where role_id=
+				#{roleIdNot,jdbcType=INTEGER})
+			</if>
+			<if test="username!=null and username!=''">
+				and u.username like '%${username}%'
+			</if>
+		</where>
+	</select>
+
+	<select id="selectPage" resultMap="BaseResultMap">
+		select distinct
+		<include refid="Base_Column_List" />
+		from t_user u
+		<where>
+			<if test="roleId!=null and roleId!=''">
+				and u.id in (select user_id from t_role_user ru where role_id=
+				#{roleId,jdbcType=INTEGER})
+			</if>
+			<if test="roleIdNot!=null and roleIdNot!=''">
+				and u.id not in (select user_id from t_role_user ru where role_id=
+				#{roleIdNot,jdbcType=INTEGER})
+			</if>
+			<if test="username!=null and username!=''">
+				and u.username like '%${username}%'
+			</if>
+			<if test="mstrUserIdNot!=null and mstrUserIdNot!=''">
+				and u.id not in (select distinct user_id from t_user_mapping where
+				type=1 )
+			</if>
+		</where>
+	</select>
+	<update id="updateTimeById"  parameterType="com.xin.portal.system.model.User">
+		update t_user 
+		<trim prefix="set" suffixOverrides=",">
+    		activate_start_time = #{activateStartTime,jdbcType=TIMESTAMP},
+	  		activate_end_time = #{activateEndTime,jdbcType=TIMESTAMP},
+		</trim>
+		where id=#{id}
+	</update>
+
+	<insert id="insertUserAllColunmForNewTenant" parameterType="com.xin.portal.system.model.User"
+	useGeneratedKeys="true" keyProperty="id" >
+		INSERT INTO t_user  
+	 	( id,
+		username,
+		password,
+		register_time,
+		register_ip,
+		last_login_time,
+		last_login_ip,
+		login_count,
+		reset_key,
+		reset_pwd,
+		error_time,
+		error_count,
+		error_ip,
+		activation,
+		activation_code,
+		wx_openid,
+		state,
+		activate_start_time,
+		activate_end_time,
+		is_delete,
+		pwd_expire_time,
+		status,
+		tenant_id
+		 )  VALUES 
+	 	( #{id,jdbcType=VARCHAR},
+		#{username,jdbcType=VARCHAR},
+		#{password,jdbcType=VARCHAR},
+		#{registerTime,jdbcType=TIMESTAMP},
+		#{registerIp,jdbcType=VARCHAR},
+		#{lastLoginTime,jdbcType=TIMESTAMP},
+		#{lastLoginIp,jdbcType=VARCHAR},
+		#{loginCount,jdbcType=INTEGER},
+		#{resetKey,jdbcType=VARCHAR},
+		#{resetPwd,jdbcType=VARCHAR},
+		#{errorTime,jdbcType=TIMESTAMP},
+		#{errorCount,jdbcType=INTEGER},
+		#{errorIp,jdbcType=VARCHAR},
+		#{activation,jdbcType=VARCHAR},
+		#{activationCode,jdbcType=VARCHAR},	
+		#{wxOpenid,jdbcType=VARCHAR},
+		#{state,jdbcType=INTEGER},
+		#{activateStartTime,jdbcType=TIMESTAMP},
+		#{activateEndTime,jdbcType=TIMESTAMP},
+		#{isDelete,jdbcType=INTEGER},
+		#{pwdExpireTime,jdbcType=TIMESTAMP},
+		#{status,jdbcType=INTEGER},
+		#{tenantId,jdbcType=VARCHAR} )
+	</insert>
+	<select id="headCount" resultType="java.lang.Integer">
+		SELECT COUNT(id) FROM t_user
+	</select>
+	<select id="numberActive" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM t_user WHERE DATE(last_login_time) = CURDATE()
+	</select>
+	<select id="numberActive" resultType="java.lang.Integer" databaseId="oracle">
+		SELECT COUNT(*) FROM t_user WHERE to_char(last_login_time,'yyyy-MM-dd') = to_char(sysdate,'yyyy-MM-dd')
+	</select>
+	<select id="monthActive" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM t_user WHERE MONTH(last_login_time)=MONTH(NOW())
+	</select>
+	<select id="monthActive" resultType="java.lang.Integer" databaseId="oracle">
+		SELECT COUNT(*) FROM t_user WHERE to_char(last_login_time,'yyyy-MM')=to_char(sysdate,'yyyy-MM')
+	</select>
+	<select id="dailyActive" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM t_user  WHERE DATE_FORMAT(last_login_time,'%Y-%m')=DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 MONTH),'%Y-%m')
+	</select>
+	<select id="dailyActive" resultType="java.lang.Integer" databaseId="oracle">
+		select count(*)
+		  from t_user
+		 where to_char(last_login_time,'yyyy-MM') =
+		       to_char(LAST_DAY(ADD_MONTHS(SYSDATE, -1)), 'yyyy-MM')
+	</select>
+
+
+	<update  id="updateIsDeleteForTenantDelete" parameterType="java.lang.String" >
+		update t_user set
+		is_delete  = 1
+		where  tenant_id = #{tenantId}
+	</update>
+	<select id="findByUsernameAndTenantIds" resultMap="BaseResultMap">
+		select distinct
+		<include refid="Base_Column_List" />
+		FROM t_user u where username = #{username,jdbcType=VARCHAR} and u.is_delete=0 and tenant_id=#{tenantId,jdbcType=VARCHAR}
+	</select>
+
+	<update  id="updateADUser" parameterType="java.lang.String" >
+		update t_user set
+		password = #{password,jdbcType=VARCHAR}
+		where id = #{userId,jdbcType=VARCHAR}
+	</update>
+
+	<insert id="insertUserTD"  parameterType="com.xin.portal.system.model.User">
+	INSERT INTO t_user (
+			id, 
+			username, 
+			password, 
+			register_time, 
+			register_ip, 
+			last_login_time, 
+			last_login_ip, 
+			login_count, 
+			reset_key, 
+			reset_pwd, 
+			reset_key_lasttime, 
+			error_time, 
+			error_count, 
+			error_ip, 
+			activation, 
+			activation_code, 
+			wx_openid, 
+			state, 
+			activate_start_time, 
+			activate_end_time, 
+			is_delete, 
+			pwd_expire_time, 
+			status, 
+			ext_id, 
+			tenant_id
+			)
+		VALUES (
+			#{id,jdbcType=VARCHAR}, 
+			#{username,jdbcType=VARCHAR}, 
+			#{password,jdbcType=VARCHAR}, 
+			#{registerTime,jdbcType=TIMESTAMP}, 
+			#{registerIp,jdbcType=VARCHAR}, 
+			#{lastLoginTime,jdbcType=TIMESTAMP}, 
+			#{lastLoginIp,jdbcType=VARCHAR}, 
+			#{loginCount,jdbcType=INTEGER}, 
+			#{resetKey,jdbcType=VARCHAR}, 
+			#{resetPwd,jdbcType=VARCHAR}, 
+			#{resetKeyLasttime,jdbcType=TIMESTAMP}, 
+			#{errorTime,jdbcType=TIMESTAMP}, 
+			#{errorCount,jdbcType=INTEGER}, 
+			#{errorIp,jdbcType=VARCHAR}, 
+			#{activation,jdbcType=INTEGER}, 
+			#{activationCode,jdbcType=VARCHAR}, 
+			#{wxOpenid,jdbcType=VARCHAR}, 
+			#{state,jdbcType=INTEGER}, 
+			#{activateStartTime,jdbcType=TIMESTAMP}, 
+			#{activateEndTime,jdbcType=TIMESTAMP}, 
+			#{isDelete,jdbcType=INTEGER}, 
+			#{pwdExpireTime,jdbcType=TIMESTAMP}, 
+			#{status,jdbcType=INTEGER}, 
+			#{extId,jdbcType=VARCHAR}, 
+			#{tenantId,jdbcType=VARCHAR})
+	</insert>
+	
+	<update id="updateByName" parameterType="com.xin.portal.system.model.User">
+  	 update t_user set state = #{state,jdbcType=INTEGER} where username = #{username,jdbcType=VARCHAR}
+    </update>
+
+</mapper>

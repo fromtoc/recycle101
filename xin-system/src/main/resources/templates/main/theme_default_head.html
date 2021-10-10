@@ -1,0 +1,123 @@
+
+	<ul class="layui-nav nav-head" id="nav" lay-filter="nav_filter">
+
+	<!--	<li class="version-info">
+			<span style="font-size: 7px;">工号:20190503</span>
+		</li>-->
+
+		<li class="layui-nav-item">
+			<a href="javascript:void(0)" layadmin-event="message" lay-text="<@spring.message 'main.Message_Center'/>"  style="position: relative;">
+				<i class="fa fa-bell fa-lg"   style="position: relative" >
+					<#if ((unreadNotices && unreadNotices?size>0) || (unreadMessage && unreadMessage?size>0))>
+						<span style="position: relative;top:-13px;left:-13px;border-radius: 7px;padding: 0 5px;font-size: 12px;margin-left: 1px;margin-right: 1px;" class="layui-badge flashing">${((messageCount+noticeCount)>99)?string('99+',(messageCount+noticeCount))}</span>
+					</#if>
+				</i>
+			</a>
+			<dl class="layui-nav-child" >
+				<div class="layui-tab layui-tab-brief layui-zeroMarge" style="width:270px">
+				  <ul class="layui-tab-title">
+				    <li class="layui-this" style="width:104px;"><@spring.message 'theme.Notice'/><span class="${(noticeCount<=0)?string('layui-hide','')}">(${(noticeCount>99)?string('99+',noticeCount)})</span></li>
+				    <li style="width:104px;"><@spring.message 'theme.News'/><span class="${(messageCount<=0)?string('layui-hide','')}" >(${(messageCount>99)?string('99+',messageCount)})</span></li>
+				  </ul>
+				  <div class="layui-tab-content layui-unpadding" style="height: 100%;padding:0 5px 0 5px;">
+					<div class="layui-tab-item layui-show">
+						<#if ((unreadNotices && unreadNotices?size>0) || (readNotices && readNotices?size>0))>
+							<#list unreadNotices as rec>
+								<dd><div class="layui-lineDiv divHover" style="color:${(rec.titleColor==null)?string('#000',rec.titleColor)};position: relative;cursor: pointer;" onclick="noticeInfo('${(rec.id)}','${(rec.type)}');">
+									<div><i class="layui-icon layui-icon-speaker" style="position: relative;font-weight:bold;" ></i></div><div style="position: relative;width: 227px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">${(rec.title)!}</div><div  style="position: relative;top:20px;;" class="layui-badge-dot"></div>
+									</div>
+								</dd>
+							</#list>
+							<#list readNotices as rec>
+								<dd><div class="layui-lineDiv divHover" style="color:${(rec.titleColor==null)?string('#000',rec.titleColor)};position: relative;cursor: pointer;" onclick="noticeInfo('${(rec.id)}','${(rec.type)}');">
+									<div><i class="layui-icon layui-icon-speaker" style="position: relative;font-weight:bold;" ></i></div><div style="position: relative;width: 227px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">${(rec.title)!}</div>
+									</div>
+								</dd>
+							</#list>
+							<div class="layui-noticeBottomDiv">
+								<div class="layui-noticeRead divHover" onclick="setAllNoticeRead()"><@spring.message 'theme.All_Read'/></div>
+								<div class="layui-noticeMore divHover" onclick="moreNotice()"><@spring.message "model.more"/>...</div>
+							</div>
+						<#else>
+							<div style="padding: 73px 0 88px;color: rgba(0,0,0,.45);text-align: center;">
+								<img src="${basePath}/images/haveNoNotice.svg" alt="not found">
+								<div><@spring.message 'theme.No_news_yet'/></div>
+							</div>
+						</#if>
+					</div>
+				    <div class="layui-tab-item">
+				    	<#if (messageList && messageList?size>0)>
+					    	<#list messageList as rec>
+								<dd>
+									<#if (rec.type=='1')>
+										<a href="#" onclick="MessageInfo('${(rec.id)}');" style="width:223px;">
+									<span class="notification-icon bg-success">
+										<i class="layui-icon layui-icon-dialogue" style="position: relative;font-weight:bold;" ></i>
+									</span>
+											<span class="m-left-xs">
+										<p class="messageTitle">${(rec.title)!}</p><#if (rec.isRead==0) ><div style="position: relative;top:-5px;right:47px;" class="layui-badge-dot"></div></#if>
+									</span>
+											<p class="messageContent">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${(rec.content)!}</p>
+											<p style="text-align: right;margin: 0px;font-size:11px;left:-30px;"class="messageContent" >${(rec.createTimeTran)!}</p>
+										</a>
+										<#elseif (rec.type=='2')>
+											<a href="#" onclick="showTab('${(rec.id)}','${(rec.resourceId)}','${(rec.resourceName)}','${(rec.linkType)}');" style="width:223px;">
+												<img src="${rec.avatar}" style="border-radius: 50%;box-shadow: 0px 0px 7px #7E7E7E;width: 30px;height: 30px;position: relative;top: 0px;left:-20px;">
+												<span class="m-left-xs">
+										<p class="messageTitle">${(rec.title)!}</p><#if (rec.isRead==0) ><div style="position: relative;top:-5px;right:47px;" class="layui-badge-dot"></div></#if>
+									</span>
+												<p class="messageContent" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${(rec.content)!}</p>
+												<p style="text-align: right;margin: 0px;font-size:11px;left:-30px;"class="messageContent" >${(rec.createTimeTran)!}</p>
+											</a>
+											<#elseif (rec.type=='4')>
+											<a href="#" onclick="showTab2('${(rec.id)}','${(rec.issueId)}','${(rec.title)}','${(rec.linkType)}');" style="padding: 0 10px 0 10px;border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;">
+												<img src="${rec.avatar}" style="border-radius: 50%;box-shadow: 0px 0px 7px #7E7E7E;width: 30px;height: 30px;">
+												<span class="m-left-xs" style="display: inline-grid;padding-right: 2em;">
+										<p class="messageTitle">${(rec.title)!}</p><#if (rec.isRead==0) ><div style="right: 0px;" class="layui-badge-dot"></div></#if>
+									</span>
+												<p class="messageContent" >${(rec.content)!}</p>
+												<p style="text-align: right;font-size:0.5em;"class="messageContent" >${(rec.createTimeTran)!}</p>
+											</a>
+											<#else>
+												<a href="#" onclick="MessageInfo('${(rec.id)}');" style="width:223px;">
+													<img src="${basePath}/images/sysIcon.jpg" style="border-radius: 50%;box-shadow: 0px 0px 7px #7E7E7E;width: 30px;height: 30px;position: relative;top: 0px;left:-20px;">
+													<span class="m-left-xs">
+											<p class="messageTitle">${(rec.title)!}</p><#if (rec.isRead==0) ><div style="position: relative;top:-5px;right:47px;" class="layui-badge-dot"></div></#if>
+										</span>
+													<p  class="messageContent">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${(rec.content)!}</p>
+													<p style="text-align: right;margin: 0px;font-size:11px;left:-30px;" class="messageContent">${(rec.createTimeTran)!}</p>
+												</a>
+									</#if>
+								</dd>
+							</#list>
+							<div class="layui-noticeBottomDiv">
+								<div class="layui-noticeRead divHover" onclick="setAllMessageRead()" ><@spring.message 'theme.All_Read'/></div>
+								<div class="layui-noticeMore divHover" onclick="moreMessage()"><@spring.message "model.more"/>...</div>
+							</div>
+						<#else>
+							<div style="padding: 73px 0 88px;color: rgba(0,0,0,.45);text-align: center;">
+								<img src="${basePath}/images/haveNoNotice.svg" alt="not found">
+								<div><@spring.message 'theme.No_news_yet'/></div>
+							</div>
+						</#if>
+				    </div>
+				  </div>
+				</div>
+			</dl>
+		</li>
+		<li class="layui-nav-item"  style="margin-left: 2px;">
+			<a href="javascript:historyLog()" lay-text="">
+				<i class="fa fa-history  fa-lg" ></i>
+			</a>
+		</li>
+		<li class="layui-nav-item">
+			<a href="javascript:void(0)" style="padding-left: 10px;font-size:15px;font-weight:700;" >${(user.realname)!} &nbsp;&nbsp;<img id='headPic'src="" height="45px;" width="45px;" style="border-radius:64px;box-shadow:0px 0px 12px #7E7E7E;"></a>
+			<dl class="layui-nav-child">
+				<dd><a href="javascript:"id="setRecord" onclick="openTab('<@spring.message "PersonalPortrait"/>','${basePath}/userInfo/personalRecord/${user.id}')"> <@spring.message "PersonalPortrait"/></a></dd>
+			<!--	<dd><a href="javascript:" id="setPassword" onclick="changePassword('')"><@spring.message 'updatePassword'/></a></dd>-->
+				<dd><a href="javascript:" onclick="setPreference('${(user.id)!}')"><@spring.message 'setPreference'/></a></dd>
+				<!--<dd><a href="javascript:" onclick="fullScreen()" id="isFullScreen"> <@spring.message "Full_screen"/></a></dd>-->
+				<dd><a href="${basePath}/logout"><@spring.message 'logout'/></a></dd>
+			</dl>
+		</li>
+	</ul>

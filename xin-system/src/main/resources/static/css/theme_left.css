@@ -1,0 +1,209 @@
+.head-logo img {
+		background-repeat: no-repeat;
+	    width: 122px;
+	    height: 34px;
+	    background-position: center;
+	    background-size: contain;
+}
+
+.head {
+	display:inline-flex;
+}
+
+.header-left .layui-form-select dl dd.layui-this {
+    background-color: #fff!important;
+}
+.header-left .layui-form-select dl dd {
+    color: #000!important;
+    font-family: '微软雅黑';
+}
+
+.header-left li {
+	float:left;
+	line-height: 60px;
+    color: #fff;
+    font-family: '微软雅黑';
+}
+
+.menu-search .layui-form-select dl dd:hover {
+    background-color: #f2f2f2;
+}
+
+.menu-search .layui-form-select dl dd > .layui-this {
+    background-color: #f2f2f2!important;
+}
+
+#menu_search {
+    display: inline-block;
+    margin-left: 20px;
+    background-color: #cecece;
+    border-radius: 48px;
+}
+
+#menu_search .layui-form-select .layui-input {
+    height: 27px;
+    background-color: #cecece;
+    border-radius: 48px;
+    font-size: 8pt;
+}
+
+
+
+
+.header-left li img {
+	background-repeat: no-repeat;
+    width: 122px;
+    height: 34px;
+    background-position: center;
+    background-size: contain;
+}
+
+.header-left  .logo {
+}
+
+.header-left .system-name {
+    font-size: 18pt;
+}
+.header-left .bars {
+    line-height: 60px;
+    padding-left: 26px;
+    padding-right: 20px;
+}   
+   
+
+@media screen and (min-width: 1024px) {
+    .head-logo {
+	    padding-left: 2px;
+		font-size: 10pt;
+	}
+}
+
+@media screen and (min-width: 1440px) {
+    .head-logo {
+	    padding-left: 10px;
+		font-size: 12pt;
+	}
+}
+
+@media screen and (min-width: 1600px) {
+    .head-logo {
+	    padding-left: 30px;
+	    font-size: 18pt;
+		
+	}
+}
+
+.head-logo {
+    display: inline;
+    line-height: 60px;
+    color:#615d5d!important;
+   	font-family: '微软雅黑';
+	float: left;
+}
+/*图标样式*/
+.head-icon-v {
+    transform: rotate(90deg);
+    transition: all 0.3s linear;
+}
+.head-icon-h {
+    transition: all 0.3s linear;
+}
+.content-left-hide {
+	display: none; 
+	transition: all 0.6s linear;
+}
+.content-left-display {
+	display: block; 
+	transition: all 0.6s linear;
+}
+
+
+.head {
+	display:inline-block;
+    vertical-align: middle;
+}
+.head-user .layui-nav .layui-nav-item {
+    vertical-align: super;
+}
+.head-user {
+	float:right;
+}
+
+.nav-user {
+    border-top-color: rgba(255, 255, 255, 0.7);
+}
+
+.version-info {
+	position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 60px;
+    vertical-align: super;
+    color: rgba(255,255,255,.7);
+}
+
+/*顶部导航bottom 边框*/
+.layui-nav .layui-this:after, .layui-nav-bar, .layui-nav-tree .layui-nav-itemed:after {
+    background-color: #6fb7ff!important;
+}
+
+.layui-elem-quote {
+    border-left: 5px solid #6fb7ff!important;
+}
+
+/*顶部导航二级菜单点击后背景色*/
+.layui-nav .layui-nav-child dd.layui-this a, .layui-nav-child dd.layui-this {
+    background-color: #47494e!important;
+    color: #fff;
+}
+
+.head .layui-nav .layui-nav-child dd.layui-this a, .head .layui-nav-child dd.layui-this {
+    background-color: #f2f2f2!important;
+    color: #000;
+}
+
+/* .layui-nav-child dd {
+    padding-left: 10px;
+} */
+
+.admin-side .layui-nav-child dd:hover {
+	background-color: #4E5465;
+}
+
+.admin-side .layui-nav-tree .layui-nav-child dd.layui-this,
+.admin-side .layui-nav-tree .layui-nav-child dd.layui-this a,
+.admin-side .layui-nav-tree .layui-this,
+.admin-side .layui-nav-tree .layui-this>a,
+.admin-side .layui-nav-tree .layui-this>a:hover {
+    background-color: #47494e!important;
+    color: #fff;
+}
+
+/*左侧菜单图标和文字间距 */
+.layui-nav a cite {
+    margin-left: 5px;
+}
+
+/*右侧内容tab */
+#content_right .layui-tab {
+    margin: 0;
+}
+#content_right .layui-tab-brief>.layui-tab-more li.layui-this:after, .layui-tab-brief>.layui-tab-title .layui-this:after {
+    border-bottom: 2px solid #6fb7ff!important;
+}
+.layui-tab-brief>.layui-tab-title .layui-this {
+    color: #6fb7ff;
+}
+/*显示、隐藏 -- 控制闪烁*/
+@-webkit-keyframes twinkling{
+  0% {
+      opacity: 0; 
+  }
+  100% {
+      opacity: 1; 
+  }
+}
+.flashing {
+    -webkit-animation: twinkling 1.5s infinite ease-in-out; 
+}
+

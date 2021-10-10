@@ -1,0 +1,144 @@
+ <#include "common/common.html" />
+ <style>
+ 	.my-label {
+ 		width:100px!important;
+ 	}
+ 	.wide-input {
+ 		width:85%;
+ 	}
+ </style>
+
+<form id="form_add" class="layui-form" action=""
+	style="padding-top:10px;">
+	<div>
+		<div class="layui-form-item">
+			<label class="layui-form-label label-required-diy" style="width:100px"><@spring.message 'dict.dictName'/></label>
+		    <div class="layui-input-inline" >
+		      <input type="text" id="dictName" name="dictName" lay-verify="required|length" lay-verType="tips" autocomplete="off" class="layui-input">
+		    </div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label label-required-diy"style="width:100px"><@spring.message 'dict.dictCode'/></label>
+		    <div class="layui-input-inline" >
+		      <input type="text" id="dictCode" name="dictCode" lay-verify="required|length" lay-verType="tips" autocomplete="off" class="layui-input">
+		    </div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label label-required-diy"><@spring.message 'dict.dictValue_source'/></label>
+		    <div class="layui-input-inline" >
+				<input type="radio" name="isSource" lay-filter="isSource" value="0" title="<@spring.message 'dict.manual_fill'/>" checked="">
+      			<input type="radio" name="isSource" lay-filter="isSource" value="1" title="<@spring.message 'dict.datasource_sql'/>">
+		    </div>
+		</div>
+		<div id="sourceIdDiv" class="layui-form-item layui-hide">
+			<label class="layui-form-label label-required-diy"><@spring.message 'dict.select_datasource'/></label>
+		    <div class="layui-input-block" >
+				<select id="sourceId" name="sourceId" lay-verify="sourceId" lay-verType="tips" lay-filter="sourceId">
+				</select>
+		    </div>
+		</div>
+		<div id="sourceSqlDiv" class="layui-form-item  layui-hide">
+			<label class="layui-form-label label-required-diy"><@spring.message 'dict.run_sql'/></label>
+		    <div class="layui-input-block" >
+				<textarea placeholder="<@spring.message 'tips.inputSome'/>(<@spring.message 'dict.Dictionary_do_not_input_illegal'/>) &#10;<@spring.message 'wechat.Example'/>SQL：select dict_value , dict_name from table_name" class="layui-textarea" lay-verify="querySql" lay-verType="tips" name="querySql" id= "querySql" ></textarea>
+		    </div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label" style="width:100px"><@spring.message 'list.remark'/></label>
+		    <div class="layui-input-inline" style="width: 340px;">
+		    	<textarea placeholder="<@spring.message 'tips.inputSome'/>" class="layui-textarea" lay-verify="textarea" lay-verType="tips" name="remark" id= "remark" ></textarea>
+		    </div>
+		</div>
+	</div>
+	<button class="layui-hide" lay-submit  id="btn_submit" lay-filter="btn_submit"><@spring.message 'action.save'/></button>
+</form>
+
+<script type="text/javascript">
+	var is_verify = false;
+	
+	layui.use([ 'form', 'layedit', 'laydate' ],function() {
+		var form = layui.form, 
+			layer = layui.layer, 
+			layedit = layui.layedit, 
+			laydate = layui.laydate;
+		
+		form.verify({
+			length: function(value,item){
+				if(value.length<2 || value.length>30){
+					return '<@spring.message "biMapping.please_enter_2_to_30_characters"/>';
+				}
+			},
+			textarea: function(value,item){
+				if(value.length>250){
+					return '<@spring.message "biMapping.Length_should_not_exceed_250"/>';
+				}
+			},
+			sourceId: function(value,item){
+				if($("input[name='isSource']:checked").val() == '1'){
+					if(typeof value === 'undefined' || value === null || value.trim() === ""){
+						return '<@spring.message "dict.please_select_datasource"/>';
+					}
+				}
+			},
+			querySql: function(value,item){
+				if($("input[name='isSource']:checked").val() == '1'){
+					if(typeof value === 'undefined' || value === null || value.trim() === ""){
+						return '<@spring.message "dict.please_input_sql"/>';
+					}else if(value.indexOf('update') > -1 || value.indexOf('delete') > -1
+							 || value.indexOf('drop') > -1 || value.indexOf('alter') > -1
+							 || value.indexOf('truncate') > -1 || value.indexOf('create') > -1
+							 || value.indexOf('grant') > -1 || value.indexOf('revoke') > -1){
+						return '<@spring.message "dict.Dictionary_encoding_already_illegal"/>';
+					}
+				}
+			}
+		});  
+		
+		form.on('submit(btn_submit)', function(data){
+			is_verify = true;
+			return false;
+		});
+		
+		
+		form.on("radio(isSource)", function (data) {
+			var isSource = data.value;
+	        if (isSource == '1') { 
+	            //填充source 下拉框内容
+	            initSourceSelect();
+	            //显示SQL 和source
+	        	$('#sourceIdDiv').removeClass('layui-hide');
+	            $('#sourceSqlDiv').removeClass('layui-hide');
+	        } else if (isSource == '0') { 
+	            $('#sourceIdDiv').addClass('layui-hide');
+	            $('#sourceSqlDiv').addClass('layui-hide');
+	        } 
+		});
+		
+		function initSourceSelect(){
+			$.get('${basePath}/datasource/list',function(result){
+				if (result!=null && result.length>0) {
+					var options = '<option value="" ><@spring.message "tips.choos"/></option>';
+					$.each(result,function(index,record){
+						options += '<option value="'+record.id+'" >'+record.sourceName+'</option>';
+					});
+					$('#sourceId').html(options);
+					form.render();
+				}
+			});
+		}
+		
+	});
+	
+	function init (parentNode) {
+		
+	}
+	
+	function getData(){
+		$('#btn_submit').click();
+		if (is_verify) {
+			return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+  	};
+</script>

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="keywords" content="">
+    <meta http-equiv="description" content="">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+     <#include "common/common.html" />
+     <link rel="stylesheet" href="${basePath}/plugins/zui/zui.min.css">
+	  <link rel="stylesheet" href="${basePath}/plugins/bootstrap/css/bootstrap.css">
+	  <link rel="stylesheet" href="${basePath}/plugins/font-awesome-4.7.0/css/font-awesome.min.css">
+	  <script src="${basePath}/plugins/zui/zui.min.js"></script>
+     <style>
+     .layui-rate{
+      padding:0px
+     }
+
+
+	 .w-e-text-container {
+		 height: 150px !important;
+	 }
+	 .w-e-toolbar{
+		flex-wrap:wrap ;
+	 }
+
+	 .atPerson{
+		 position: relative;
+		 margin: 0 5px 5px 0;
+		 padding: 0 5px 0 5px;
+		 border: 1px solid #aaa;
+		 max-width: 100%;
+		 border-radius: 3px;
+		 background-repeat: repeat-x;
+		 color: #333;
+		 cursor: default;
+		 display: inline-block;
+		 font-size:15px;
+	 }
+     </style>
+
+
+
+  </head>
+  <body style="padding:10px;">
+
+    <textarea id="sessionContent" style="display:none;">
+  	  		<#if user_perms??>
+  			 <#list user_perms as rec>
+  			   ${rec}
+  			 </#list>
+  			</#if>
+  	 </textarea>
+      	<form  id="form_add" class="layui-form " action="return false;">
+		  <!--<div class="form-group">
+		 &lt;!&ndash; 	<textarea id="content" name="content" class="form-control new-comment-text" rows="3" placeholder="<@spring.message 'comment.Write_a_Review'/>..."></textarea>&ndash;&gt;
+			  <span class="col-lg-8" id="content"></span>
+		  </div>-->
+			<div style="text-align:left;">
+				<div id="content" ></div>
+				<div id="atArea">
+
+				</div>
+			</div><!--demo end-->
+
+		  <ul style="padding-left:0px">
+			 <li><div id="score"  ></div></li>
+		  </ul>
+		  <button id="" type="button" class="btn btn-primary" style="float:left" onclick="commentSubmit()"><@spring.message 'comment.submit'/></button>&nbsp;&nbsp;
+		  <input type="hidden" id="myScore"/>
+		</form>
+		</br>
+		</br>
+		<div id="commentDiv" >
+		<#if (comments?? && comments?size>0)> 
+			<#list comments as rec> 	
+				<#if rec.roof == 1>
+				<div id="${rec.id}" class="comment" >
+				  <a href="###" class="avatar">
+				    <#if rec.avatar?length gt 60>
+				    	<img alt="#" src="${rec.avatar}">
+				    <#else>
+				    	<img alt="#" src="${basePath}/${rec.avatar}">
+				    </#if>
+				  </a>
+				  <div class="content">
+				    <div class="pull-right text-muted">${rec.createTime?string("yyyy-MM-dd HH:mm")}</div>
+				    <div><a href="###"><strong>${rec.userName}</strong></a> <span class="text-muted"><font color="#d9d919"><@spring.message 'comment.Top_comments'/></font></span></div>
+				    <div >
+				    	<ul style="padding-left:0px">
+						  <li><div id="score_${rec.id}" class="star" data="${(rec.score)!0}"></div></li>
+						</ul>
+				    </div>
+				    <div class="text">${rec.content}</div>
+				    <div class="actions">
+				    	<#if rec.userId=='${userInfo.id}'>
+				      		<a href="javascrpit:void()" onclick="deleteComment('${rec.id}')"><@spring.message 'action.delete'/></a>
+				      	</#if>
+				    </div>
+				  </div>
+				  <div class="replyContent">
+				  	<#if rec.replyId??>
+						<div style="background-color:#e2e2e2">
+						<div class="pull-right text-muted">${rec.replyTime?string("yyyy-MM-dd HH:mm")}</div>
+				    	<div><a href="null"><strong>${rec.replyName}</strong></a> <span class="text-muted"><@spring.message 'comment.Reply'/></span></div>
+				        <div class="text">${rec.replyContent}</div>
+						</div>
+				  	<#else>
+				  	</#if>
+				  </div>
+			    </div>
+			<#else>
+				<div id="${rec.id}" class="comment">
+				  <a href="###" class="avatar">
+				    <#if rec.avatar?length gt 60>
+				    	<img alt="#" src="${rec.avatar}">
+				    <#else>
+				    	<img alt="#" src="${basePath}/${rec.avatar}">
+				    </#if>
+				  </a>
+				  <div class="content">
+				    <div class="pull-right text-muted">${rec.createTime?string("yyyy-MM-dd HH:mm")}</div>
+				    <div><a href="###"><strong>${rec.userName}</strong></a> <span class="text-muted"><@spring.message 'comment.speak'/></span></div>
+				    <div >
+				    	<ul style="padding-left:0px">
+						  <li><div id="score_${rec.id}" class="star" data="${(rec.score)!0}"></div></li>
+						</ul>
+				    </div>
+				    <div class="text">${rec.content}</div>
+				    <div class="actions">
+				    	<#if rec.userId=='${userInfo.id}'>
+				      		<a href="javascrpit:void()" onclick="deleteComment('${rec.id}')"><@spring.message 'action.delete'/></a>
+				      	</#if>
+				    </div>
+				  </div>
+				  <div class="replyContent">
+				  	<#if rec.replyId??>
+						<div style="background-color:#e2e2e2">
+						<div class="pull-right text-muted">${rec.replyTime?string("yyyy-MM-dd HH:mm")}</div>
+				    	<div><a href="null"><strong>${rec.replyName}</strong></a> <span class="text-muted"><@spring.message 'comment.Reply'/></span></div>
+				        <div class="text">${rec.replyContent}</div>
+						</div>
+				  	<#else>
+				  	</#if>
+				  </div>
+			    </div>
+			</#if>		
+		 	</#list> 
+		</#if>
+	</div>
+	<script src="${basePath}/js/jquery-2.2.4.min.js"></script>
+	<script src="${basePath}/plugins/bootstrap/js/bootstrap.js"></script>
+	<#if SYS_LOCALE=='zh_CN'>
+	 	<script src="${basePath}/plugins/wangEditor/wangEditor.min.js"></script>
+	<#elseif SYS_LOCALE=='zh_TW'>
+		<script src="${basePath}/plugins/wangEditor/wangEditor.min_zh_TW.js"></script>
+	<#elseif SYS_LOCALE=='en_US'>
+		<script src="${basePath}/plugins/wangEditor/wangEditor.min_en_US.js"></script>
+	<#else>
+		<script src="${basePath}/plugins/wangEditor/wangEditor.min.js"></script>
+ 	</#if>
+	
+  </body>
+  <script>
+	  $(function(){
+	      $(".w-e-toolbar").prepend('<div class="w-e-menu" style="z-index:10001;    font-weight: bold;position: relative;top: -2px;" onclick="atPsersons()"><i>@</i></div>');
+	  })
+	  var resourceId = "${resourceId!}"
+      var sel,range;
+      var textContent;
+      var ind;
+
+
+      var E = window.wangEditor
+      var editor = new E('#content')
+      editor.customConfig.uploadImgShowBase64 = true
+     /* // 表情面板可以有多个 tab ，因此要配置成一个数组。数组每个元素代表一个 tab 的配置
+      editor.customConfig.emotions = [
+          {
+              // tab 的标题
+              title: '默认',
+              // type -> 'emoji' / 'image'
+              type: 'image',
+              // content -> 数组
+              content: [
+                  {
+                      alt: '[坏笑]',
+                      src: 'http://img.t.sinajs.cn/t4/appstyle/expression/ext/normal/50/pcmoren_huaixiao_org.png'
+                  },
+                  {
+                      alt: '[舔屏]',
+                      src: 'http://img.t.sinajs.cn/t4/appstyle/expression/ext/normal/40/pcmoren_tian_org.png'
+                  },{
+                      alt: '[草泥马]',
+                      src: "http://img.t.sinajs.cn/t35/style/images/common/face/ext/normal/7a/shenshou_thumb.gif"
+
+                  }
+              ]
+          },
+          {
+              // tab 的标题
+              title: 'emoji',
+              // type -> 'emoji' / 'image'
+              type: 'emoji',
+              // content -> 数组
+
+          }
+      ]*/
+
+      editor.customConfig.menus=[
+          //'head',  // 标题
+          'bold',  // 粗体
+          //'fontSize',  // 字号
+          'fontName',  // 字体
+          'italic',  // 斜体
+          //'underline',  // 下划线
+          // 'strikeThrough',  // 删除线
+          //'foreColor',  // 文字颜色
+          //'backColor',  // 背景颜色
+          // 'link',  // 插入链接
+          // 'list',  // 列表
+          //'justify',  // 对齐方式
+          // 'quote',  // 引用
+          'emoticon',  // 表情
+          'image',  // 插入图片
+          //'table',  // 表格
+          // 'video',  // 插入视频
+          //'code',  // 插入代码
+          'undo',  // 撤销
+          'redo'  // 重复
+      ]
+
+     /* editor.customConfig.onchange = function (html) {
+          var text = editor.txt.text();
+          sel = window.getSelection();
+          range = sel.getRangeAt(0).endOffset;
+          var  lastStr = text.slice(Number(range)-1,range);
+          if(lastStr=="@"){
+              /!*ind  =  parent.layer.open({
+                  type: 2,
+                  title: "权限用户",
+                  closeBtn: 0, //不显示关闭按钮
+                  shade: [0.01, '#393D49'],
+                  shadeClose:true,
+                  area: ['18%', '57%'],
+                  btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+                  offset: ['17%', '62%'], //右下角弹出
+                  anim: 2,
+                  content: [basePath+'/comment/remind/'+resourceId], //iframe的url，no代表不显示滚动条
+                  yes:function(index,layero){
+                      var iframeWin = top.window[layero.find('iframe')[0]['name']];
+                      var data = iframeWin.getData();
+                      if(data){
+                          for(var i=0;i<data.length;i++){
+                            var v = '<span class="atPerson" id='+data[i].id+'>'+data[i].name+'<i class="fa fa-times" style="float:right" onclick="delPerson(this)"></i></span>';
+                            $("#atArea").append(v)
+                          }
+                          var str = text.slice(0,Number(range)-1)+text.slice(range);
+                          setEditorHtml(str);
+                      }
+                      parent.layer.close(index)
+                  }
+              });*!/
+          }
+      }*/
+      editor.create();
+	  function setEditorHtml(html){
+          editor.txt.text(html)
+	  }
+      $("#form_add").on("keydown",function(){
+          parent.layer.close(ind)
+      })
+
+      function delPerson(obj){
+          var span = $(obj).parent();
+          $(span).remove()
+	  }
+
+	  function atPsersons(){
+          ind  =  parent.layer.open({
+              type: 2,
+              title: "<@spring.message 'Authority_user'/>",
+              closeBtn: 0, //不显示关闭按钮
+              shade: [0.01, '#393D49'],
+              shadeClose:true,
+              area: ['18%', '57%'],
+              btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+              offset: ['17%', '62%'], //右下角弹出
+              anim: 2,
+              content: [basePath+'/comment/remind/'+resourceId], //iframe的url，no代表不显示滚动条
+              yes:function(index,layero){
+                  var iframeWin = top.window[layero.find('iframe')[0]['name']];
+                  var data = iframeWin.getData();
+                  if(data){
+                      var atPersonList = $(".atPerson");
+                      for(var i=0;i<data.length;i++){
+                          var isRepeat = 0;//判断@的人是否重复的标识    0没重复     1 重复
+                          if(atPersonList){//判断是否已经选择了一部分要@的人
+                              //循环遍历对比与当前选择的@人是否有重复的
+                              for(var m=0;m<atPersonList.length;m++){
+                                  var id  = $(atPersonList[m]).attr("id");
+									if(id==data[i].id){
+                                        isRepeat=1;
+                                        break;
+									}
+							  }
+							  if(isRepeat==0){
+                                  var v = '<span class="atPerson" id='+data[i].id+'>'+data[i].name+'<i class="fa fa-times" style="float:right" onclick="delPerson(this)"></i></span>';
+                                  $("#atArea").append(v)
+							  }
+						  }else{
+                              var v = '<span class="atPerson" id='+data[i].id+'>'+data[i].name+'<i class="fa fa-times" style="float:right" onclick="delPerson(this)"></i></span>';
+                              $("#atArea").append(v)
+						  }
+                      }
+                  }
+                  parent.layer.close(index)
+              }
+          });
+	  }
+
+      function commentSubmit() {
+          var isSubmit = false;
+          if ((editor.txt.text() == null || editor.txt.text() == "")&&editor.txt.html().replace(/&nbsp;/ig,'') == '<p><br></p>') {
+              layer.msg("<@spring.message 'tips.inputSome'/>！");
+          }
+          else{
+              if (!isSubmit) {
+                  isSubmit = true;
+                  var userIds = $(".atPerson");
+                  var remindUser="";
+				  for(var i=0;i<userIds.length;i++){
+				      if(i==userIds.length-1){
+                          remindUser+=userIds[i].id;
+                      }else{
+                          remindUser =remindUser + userIds[i].id+",";
+					  }
+				  }
+                  $.ajax({
+                      type: "POST",
+                      url:basePath+'/comment/save',
+                      data:{resourceId:'${resourceId}',content:editor.txt.html(),score:$("#myScore").val(),remindUser:remindUser},
+                      async: false,
+                      error: function(request) {
+                          parent.layer.msg('<@spring.message "comment.Comment_failed"/>！');
+                          isSubmit = false;
+                      },
+                      success: function(result) {
+                          if(result.code==0){
+                              var img;
+                              if(result.data.avatar.length != null && result.data.avatar.length < 60){
+                                  img = '${basePath}/'+result.data.avatar;
+                              }else{
+                                  img = result.data.avatar;
+                              }
+                              parent.layer.msg('<@spring.message "comment.Thank_you_for_your_comments"/>！');
+                              var html="<div class='comment' id='"+result.data.id+"' style='display:none'>"+
+                                  "<a href='###' class='avatar'>"+
+                                  "<img alt='#' src='"+img+"'>"+
+                                  "</a>"+
+                                  "<div class='content'>"+
+                                  "<div class='pull-right text-muted'>"+timestampToTime(result.data.createTime)+"</div>"+
+                                  "<div><a href='###'><strong>我</strong></a> <span class='text-muted'><@spring.message 'comment.Reply'/></span></div>"+
+                                  "<div >"+
+                                  "<ul style='padding-left:0px'>"+
+                                  "<li><div id='score_"+result.data.id+"' class='star' ></div></li>"+
+                                  "</ul>"+
+                                  "</div>"+
+                                  "<div class='text'>"+result.data.content+"</div>"+
+                                  "<div class='actions'>"+
+                                  "<a href='javascrpit:void()' onclick='deleteComment(\""+result.data.id+"\")'><@spring.message 'action.delete'/></a>"+
+                                  "</div>"+
+                                  "</div>"+
+                                  "</div>"
+                              if($('#commentDiv:has(div)').length>0){
+                                  $('#commentDiv div:eq(0)').before(html);
+                              }else{
+                                  $('#commentDiv').append(html);
+                              }
+
+                              rate.render({
+                                  elem: "#score_"+result.data.id
+                                  ,value:result.data.score
+                                  ,text: true
+                                  ,readonly: true
+                                  ,setText: function(value){ //自定义文本的回调
+                                      var arrs = {
+                                          '1': '<@spring.message "comment.TooBad"/>'
+                                          ,'2': '<@spring.message "comment.Bad"/>'
+                                          ,'3': '<@spring.message "comment.OK"/>'
+                                          ,'4': '<@spring.message "comment.GOOD"/>'
+                                          ,'5': '<@spring.message "comment.Excellent"/>'
+                                      };
+                                      this.span.text(arrs[value] || ( value + "星"));
+                                  }
+                              })
+                              $("#"+result.data.id).show(800);
+                              editor.txt.html("");
+							  /* $("#content").val("");*/
+                          }else{
+                              parent.layer.msg(result.msg);
+                              isSubmit = false;
+                          }
+                      }
+                  });
+              }
+          }
+
+
+      };
+
+  	var rate;
+  	layui.use([ 'form','layer','rate'],function() {
+		var form = layui.form, 
+			layer = layui.layer;
+			rate=layui.rate;
+		
+		$('#btn_add_comment').on('click',function(data){
+			addComment();
+		});
+		//初始化点评提交表单的星星
+		rate.render({
+		    elem: "#score"
+		    ,value:3
+		    ,text: true
+		    ,setText: function(value){ //自定义文本的回调
+		      var arrs = {
+		        '1': '<@spring.message "comment.TooBad"/>'
+		        ,'2': '<@spring.message "comment.Bad"/>'
+		        ,'3': '<@spring.message "comment.OK"/>'
+		        ,'4': '<@spring.message "comment.GOOD"/>'
+		        ,'5': '<@spring.message "comment.Excellent"/>'
+		      };
+		      this.span.text(arrs[value] || ( value + "星"));
+		      $("#myScore").val(value);
+		    }
+		  })
+	    //批量处理已有评论
+	    $.each($(".star"),function(){
+	    	//console.log($(".star"))
+	    	rate.render({
+		    elem: "#"+$(this).attr("id")
+		    ,value:$(this).attr("data")
+		    ,text: true
+		    ,readonly: true
+		    ,setText: function(value){ //自定义文本的回调
+		      var arrs = {
+                  '1': '<@spring.message "comment.TooBad"/>'
+                  ,'2': '<@spring.message "comment.Bad"/>'
+                  ,'3': '<@spring.message "comment.OK"/>'
+                  ,'4': '<@spring.message "comment.GOOD"/>'
+                  ,'5': '<@spring.message "comment.Excellent"/>'
+		      };
+		      this.span.text(arrs[value] || ( value + "星"));1
+		    }
+		  })
+	    })
+  	});
+    function deleteComment(id){
+		parent.layer.confirm('<@spring.message "comment.Confirm_delete"/>？', {title:'<@spring.message "action.info"/>',
+			btn : ['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>' ],
+			yes : function(index,layero) {
+				$.ajax({
+						url : '${basePath!}/comment/delete/'+id,
+						type : 'DELETE',
+						success : function(result) {
+							if (result.code == 0) {
+								parent.layer.msg('<@spring.message "result.deleteSuccess"/>');
+								$("#"+id).hide(800);
+							} else {
+								parent.layer.msg('<@spring.message "result.deleteFail"/>');
+							}
+							layer.close(index);
+						}
+				});
+			}
+		});
+	}
+
+	function timestampToTime(timestamp) {
+        var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+        Y = date.getFullYear() + '-';
+        M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+        D = (date.getDate()+1 < 10 ? '0'+(date.getDate()+1) : date.getDate()+1) + ' ';
+        h = date.getHours() + ':';
+        m = date.getMinutes() ;
+        s = date.getSeconds();
+        return Y+M+D+h+m;
+    }
+  </script>
+
+</html>

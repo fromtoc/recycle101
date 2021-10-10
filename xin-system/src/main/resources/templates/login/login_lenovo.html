@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+<meta name="viewport" content="width=device-width, initial-scale=1"> 
+<link href="${basePath}/images/favicon.ico" rel="icon" type="image/x-icon" />
+<title></title>
+</head>
+<body  onkeydown="keyLogin();">
+    	<input type="hidden" value="${basePath}" id="basePath"/>
+    	<!--<div style="height:30px;line-height:30px; width:80%">
+    		<a href="${basePath}/login?lang=zh_CN" class="locale ${(Session['SYS_LOCALE']=='zh_CN')?string('hide','show')}">简体中文版 </a>
+    		<a href="${basePath}/login?lang=zh_TW" class="locale ${(Session['SYS_LOCALE']=='zh_TW')?string('hide','show')}">繁体中文版</a>
+    		<a href="${basePath}/login?lang=en_US" class="locale ${(Session['SYS_LOCALE']=='en_US')?string('hide','show')}">English</a>
+    	</div>-->
+        <div class="login-main">
+			<div class="login-main-left">
+                <div class="left-logo"><img src="${basePath}${(SYS_LOGO!='')?string('${SYS_LOGO}','/images/dataWindow_white.png')}" onerror="javascript:this.src='${basePath}/images/dataWindow_white.png';"/></div>
+                <div class="left-code"><img src="${basePath}/images/code.png" /></div>
+                <div class="left-tip"><@spring.message 'welcome'/></div>
+            </div>
+            <div class="login-main-right">
+				<div class="sys-name" >
+					${SYS_LOGIN_NAME!''}
+                    <!-- <img src="${basePath}/images/sys_name.png" /> -->
+                </div>
+                <form action="${basePath}/login" id="loginForm" name="f" method="post">
+                    <div class="input-outer" style="margin-top: ${(SYS_CHECK_CODE=='1')?string('0px','27px')}">
+                        <span class="icon icon-user"></span>
+                        <select id="tenantId"  name="tenantId" style="width: 220px;margin-left: 48px;height: 46px;" onchange="changeTenant()" >
+                            <option  value="1">系统租户</option>
+                            <#if tenantList??&&tenantList?size>0>
+                                <#list tenantList as rec>
+                                    <option value = "${rec.id}"  <#if tenantId==rec.id>selected</#if>>${rec.name}</option>
+                                </#list>
+                            </#if>
+                        </select>
+                    </div>
+                    <div class="input-outer" style="margin-top: ${(SYS_CHECK_CODE=='1')?string('0px','27px')}">
+                        <span class="icon icon-user"></span>
+                        <input name="username" class="login-input"  type="text" placeholder="<@spring.message 'login.username'/>">
+                    </div>
+                    <div class="input-outer" >
+                        <span class="icon icon-password"></span>
+                        <input id="passwordInput" class="login-input" style=" position:absolute; z-index:100;"value="" type="password" placeholder="<@spring.message 'login.password'/>">
+                        <input type="hidden" name="password" lay-verify="title" autocomplete="off" placeholder="<@spring.message 'login.password'/>" class="login-input">
+                    </div>
+                    <div id="check_code_div" class="input-outer input-out-code " style="display:${(SYS_CHECK_CODE=='1')?string('block','none')}" >
+                        <span class="icon icon-check"></span>
+                        <input name="verifyCode" class="login-input input-code" style=" position:absolute; z-index:100;"value="" type="text" placeholder="<@spring.message 'login.Verification_Code'/>">
+                        <img class="check-code" id="check_code" src="${basePath}/kaptcha/new"  title=""/>
+                        <a href="javascript:changeCode();" class="icon icon-refresh" title=""></a>
+                    </div>
+					<div class="error-div">
+						<span class="error_msg" style="visibility: ${(message_login!='')?string('visible','hidden')};">${message_login!}</span>
+					</div>
+                        
+                    <div class="submit-div">
+                        <a href="${basePath}/userInfo/forget/forgetPwd" style="display: ${(FORGET_PASSWORD_PROMPT!='1')?string('none','block')};" class="forget "><@spring.message 'login.Forget_the_password'/>?</a>
+                        <a class="btn-submit" href="javascript:" id="btn_login" ><@spring.message 'login.sign'/></a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="login-footer">
+                ${SYS_COPYRIGHT!''}
+        </div>
+<script>
+    function changeTenant(){
+    var tenantId = $("#tenantId").val();
+    window.location.href="${basePath}/login?tenantId="+tenantId;
+    }
+</script>
+<script type="text/javascript" src="${basePath}/js/jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="${basePath}/js/Barrett.js"></script>
+<script type="text/javascript" src="${basePath}/js/BigInt.js"></script>
+<script type="text/javascript" src="${basePath}/js/RSA.js"></script>   
+<script type="text/javascript" src="${basePath}/js/login.js"></script>   
+</body>
+<!-- <script type="text/javascript">	
+		if(top.window.location.href != window.location.href){
+		    top.location.replace('${basePath}/login');
+		}
+		function submit(){
+			document.getElementById('loginForm').submit();
+		}
+		 
+		function keyLogin(e){
+			var e= e || window.event || arguments.callee.caller.arguments[0]; 
+			var currKey=e.keyCode||e.which||e.charCode; 
+			if (currKey==13)  //回车键的键值为13
+				 submit(); //调用登录按钮的登录事件
+			} 
+		
+		
+		function changeCode(){
+	        var img=document.getElementById("check_code");
+	        img.src='${basePath}/kaptcha/new?tm='+Math.random();
+	    }
+			
+</script> -->
+
+<script type="text/javascript">
+
+    function changeCode(){
+        var img=document.getElementById("check_code");
+        img.src='${basePath}/kaptcha/new?tm='+Math.random();
+    }
+
+</script>
+<style>
+    *, *:after, *:before {
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    html,body {
+        width: 100%;
+        height: 100%;
+        margin:0;
+        padding: 0;
+        font-family: Microsoft YaHei;
+        
+    }
+    body {
+        background: url('${basePath}/images/login_bg.jpg') no-repeat center;
+		background-size: 100% 100%;
+    }
+    .locale {
+    	float:right;margin-left: 5px;text-decoration: none;
+    }
+    .locale:hover {
+    	color: #fff;
+    }
+    .hide {
+    	display:none;
+    }
+    .show {
+    	display:block;
+    }
+    
+    .login-main {
+        position: fixed;
+        left: 0;
+        right: 0;
+        /*width: 50%;*/
+        margin: 0 auto;
+        top: 20%;
+        height: 50%;
+        min-height: 388px;
+        
+    }
+
+    .login-main:after {
+        clear: both;
+    }
+
+    .login-main:after, .login-main:before {
+        display: table;
+        content: " ";
+    }
+
+    @media (min-width: 1200px) {
+        .login-main {
+            width: 960px;
+        }
+
+    }
+    @media (min-width: 992px) {
+        .login-main {
+            width: 970px;
+        }
+
+    }
+    @media (min-width: 768px) {
+        .login-main {
+            width: 750px;
+        }
+
+    }
+
+
+    .login-main-left {
+        border:none;
+        width: 42%;
+        background-color: rgba(66,118,170,0.6);
+        float: left;
+        box-shadow: 0 0 2px #fff;
+        height: 100%;
+    }
+    .login-main-right {
+        background-color: rgba(255, 255, 255, 1);
+        padding: 20px;
+        padding-left: 30px;
+        box-shadow: 0 0 2px #fff;
+        width: 58%;
+		float:right;
+        height: 100%;
+    }
+
+    .left-code {
+        text-align: center;
+        text-align: center;
+        padding-top: 41px;
+    }
+    .left-code img {
+        width: 149px;
+        min-widht:149px;
+    }
+    .left-tip {
+        text-align: center;
+        color: #fff;
+        padding-top: 20px;
+        font-size: 16pt;
+        font-family: 微软雅黑;
+    }
+    .left-logo {
+        padding:25px;
+    }
+    .left-logo img {
+        width: 114px;
+    }
+
+    .sys-name {
+        padding-left: 10px;
+    }
+    
+    .sys-name img {
+        height: 46px;
+    }
+
+    .login-footer {
+        height: 10%;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 44px;
+        line-height: 44px;
+        padding: 0 15px;
+        text-align: center;
+		z-index: 999;
+		color: #000;
+        font-weight: bold;
+    }
+
+    #loginForm {
+        padding-top: 25px;
+        padding-left: 16px;
+        padding-right: 72px;
+        min-width: 400px;
+    }
+
+    .input-outer {
+        height: 46px;
+        padding: 0 5px;
+        margin-bottom: 20px;
+        position: relative;
+        border-bottom: 1px solid #EAEAEA;
+		background: #fff;
+        min-width: 305px;
+    }
+
+    .input-out-code {
+        border:none;
+        margin-bottom: 8px;
+    }
+    .login-input {
+        width: 220px;
+        height: 46px;
+        outline: none;
+        display: inline-block;
+        font: 14px "microsoft yahei",Helvetica,Tahoma,Arial,"Microsoft jhengHei";
+        margin-left: 50px;
+        border: none;
+        background: none;
+        line-height: 46px;
+        color:#000
+    }
+
+    .input-code {
+        width: 166px;
+        border-bottom: 1px solid #EAEAEA;
+        margin-left: 0;
+        padding-left: 50px;
+    }
+
+    .icon {
+        width: 30px;
+        height: 30px;
+        position: absolute;
+    }
+
+    .icon-user {
+        background: url(${basePath}/images/login_icon.png);
+        background-position: -125px 0;
+        margin: 10px 13px;
+    }
+
+    .icon-password {
+        background-image: url(${basePath}/images/login_icon.png);
+        background-position: -44px 0px;
+        margin: 10px 13px;
+    }
+
+    .icon-check {
+        background-image: url(${basePath}/images/login_icon.png);
+        background-position: -83px 0px;
+        margin: 10px 13px;
+        float: right;
+    }
+
+    .icon-refresh {
+        background-image: url(${basePath}/images/login_icon.png);s
+        background-position: 3px 0px;
+        margin: 10px 13px;
+        float:right;
+        right:0px;
+        margin: 0;
+        margin-top: 7px;
+    }
+
+    .check-code {
+        float:right;
+        position: absolute;
+        right:30px;
+        height: 40px;
+        cursor: pointer;
+    }
+
+	.submit-div {
+		height: 30px;
+        line-height: 30px;
+        position: relative;
+        top: -12px;
+	}
+
+    .forget {
+        text-decoration-line: none;
+        color: #5c95c5;
+    }
+
+    .forget:hover {
+        text-decoration-line:underline;
+    }
+
+
+    .btn-submit {
+        line-height: 30px;
+        text-align: center;
+        font-size: 12pt;
+        border-radius: 3px;
+        background: #5c95c5;
+        letter-spacing: 1px;
+        display: block;
+        text-decoration: none;
+        margin: 0 auto;
+        width: 41%;
+        color: #fff;
+        /* float: right; */
+    }
+	.error-div {
+        height: 48px;
+        padding-top: 6px;
+        min-height: 52px;
+    }
+    .error_msg {
+        padding-left: 17px;
+        color: #ff0000;
+        font-size:10pt;
+    }
+
+</style>
+</html>

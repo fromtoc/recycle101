@@ -1,0 +1,72 @@
+
+<#include "common/common.html" />
+<#include "common/common_ztree.html" />
+<script type="text/javascript">
+
+	layui.use([ 'form'],function() {
+		var form = layui.form, 
+			layer = layui.layer;
+	})
+	
+ 	var zTree;
+    var zTreeSetting = {
+        check: {
+            enable: true,
+            chkboxType: { "Y":"ps","N": "ps" }
+        },
+        view: {
+            dblClickExpand: false,
+            showLine: true,
+            selectedMulti: false
+        },
+        data: {
+            simpleData: {
+                enable:true,
+                idKey: "id",
+                pIdKey: "parentId",
+                rootPId: "0"
+            }
+        },
+        async: {
+			enable: true,
+			contentType: "application/json",
+			url: "${basePath}/role/list",
+		},
+        callback: {
+            onAsyncSuccess: onResourceTreeAsyncSuccess
+        }
+    };
+    
+    function onResourceTreeAsyncSuccess(){
+    	zTree.expandAll(true);//指定选中ID节点展开
+    }
+    
+    $(function(){
+        $.fn.zTree.init($("#tree"), zTreeSetting);
+        zTree = $.fn.zTree.getZTreeObj("tree");
+    });
+    
+    function init(userId) {
+    	$.post('${basePath}/roleUser/findRoleByUser',{userId:userId},function(result){
+            //result集合中最后一个是所有人的roleID，之前为该用户对应的roleID
+    	    var count = result.length-1;
+    		for (var i=0; i < count; i++) {
+    			var node = zTree.getNodesByParam("id", result[i], null);
+    			if (node!=null) {
+					zTree.checkNode(node[0], true, false);
+					//所有人角色禁止修改
+					if (node[0].id==result[count]) {
+						node[0].chkDisabled = true;
+						zTree.updateNode(node[0],false);
+					}
+    			}
+			}
+    	});
+    }
+    
+    function getData() {
+    	return zTree.getCheckedNodes(true);
+    }
+    
+</script>
+<ul id="tree" class="ztree" style="overflow:auto;"></ul>

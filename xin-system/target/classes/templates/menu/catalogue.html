@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="keywords" content="">
+    <meta http-equiv="description" content="">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <#include "common/common.html" />
+    <link rel="stylesheet" href="${basePath}/css/module.css">
+    <link rel="stylesheet" href="${basePath}/plugins/zui/zui.min.css">
+    <link rel="stylesheet" href="${basePath}/plugins/zui/zui.dashboard.min.css" />
+    <script src="${basePath}/plugins/zui/zui.min.js"></script>
+    <script src="${basePath}/plugins/zui/zui.dashboard.min.js"></script>
+    
+  </head>
+  <body style="padding-top:20px;">
+    <div class="container-fluid" style="padding:10px">
+		<div class="cards " style="height:100%"> 
+		<#if (menu?? && menu?size>0)>
+		<#list menu as rec>
+			<div class="col-sm-12 col-md-6 col-lg-3">
+				<div class="card">
+					<a href="javascript:;">
+						<#if (rec.thumbnail)??>
+							<img src="${basePath}${rec.thumbnail}" alt="" onclick="cardFileClick('${rec.id}','${rec.name}','${rec.linkType}')">
+						<#else>
+							<img src="${basePath}/images/chartBg.jpg"  alt="" onclick="cardFileClick('${rec.id}','${rec.name}','${rec.linkType}')">
+						</#if>
+					</a>
+				  <div class="caption" onclick="cardFileClick('${rec.id}','${rec.name}','${rec.linkType}')"><#if rec.name?length gt 15>${rec.name?substring(1,15)}...<#else>${rec.name}</#if></div>
+				  <div class="card-heading"><strong><#if rec.name?length gt 15>${rec.name?substring(1,15)}...<#else>${rec.name}</#if></strong></div>
+				  <div class="card-content text-muted"><#if rec.introduce?length gt 15><@spring.message "introduce"/>：${rec.introduce?substring(1,15)}...<#else><@spring.message "introduce"/>：${rec.introduce}</#if></div>
+				  <div class="card-actions">
+				  <#if rec.collect??>
+				  	<button type="button" class="btn btn-danger" onclick="collectClick('${rec.id}','${rec.resourceId}',true,'${panelId}')"><i class="icon-heart"></i></button>
+				  <#else>
+				  	<button type="button" class="btn btn-primary" onclick="collectClick('${rec.id}','${rec.resourceId}',false,'${panelId}')"><i class="icon-heart-empty"></i></button>
+				  </#if>
+				  <div class="pull-right text-danger"><i class="icon-heart-empty"></i> 52 <@spring.message "people_like_it"/></div>
+				  </div>
+				</div>
+			</div>
+			</#list>
+		</#if>
+		</div>
+	</div>
+	<script type="text/javascript">
+	layui.use([ 'form','layer','carousel'],function() {
+		var form = layui.form, 
+			layer = layui.layer;
+  	});
+	function collectClick(id,resourceId,status,panelId){
+		if(status){
+			layer.confirm('<@spring.message "model.You_have_already_collected_it_Do_you_want_to_cancel_it"/>？', {title:'<@spring.message "action.info"/>',
+				btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+				yes: function(index, layero){
+			  		$.post('${basePath}/collect/removeCollect',{resourceId:resourceId},function(result){
+			    		if (result.code==0) {
+			    			layer.close(index);
+				    		parent.layer.msg("<@spring.message 'comment.Cancel_success'/>！");
+				    		parent.reloadTab();
+			    		} else{
+			    			layer.close(index);
+				    		parent.layer.msg("<@spring.message 'comment.Cancel_failure'/>！");
+			    		}
+				    });
+				}
+         	});
+			return;
+		}
+		var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message "model.Add_collection"/>',
+			type:2,
+			content:'${basePath}/collect/addCollect',
+			area: ['600px', '500px'],
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+		  			isSubmit = true;
+		  			var colName;
+		  			var colType = "report";
+		  			//查询到resourceId的报表内容
+		  			$.ajax({
+				            type: "POST",
+				            url:'${basePath}/resource/list',
+				            data:{id:resourceId},
+				            async: false,
+				            error: function(request) {
+				            	parent.layer.msg('<@spring.message "result.addFail"/>！');
+				            },
+				            success: function(result) {
+				            	colName = result[0].name;
+				            }
+				        });
+			  		var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+				  		$.ajax({
+				            type: "POST",
+				            url:'${basePath}/collect/save',
+				            data:{parentId:data,resourceId:resourceId,collectName:colName,collectType:colType},//参数 parentId  collectName  resourceId collectType
+				            async: false,
+				            error: function(request) {
+				                parent.layer.msg('<@spring.message "result.addFail"/>！');
+				                isSubmit = false;
+				            },
+				            success: function(result) {
+				            	if(result.code==0){
+				            		parent.layer.close(index);
+									parent.layer.msg('<@spring.message "result.addSuccess"/>！');
+									parent.reloadTab();
+				            	}else{
+				            		parent.layer.msg('<@spring.message "model.file_already_exists"/>！');
+				            		isSubmit = false;
+				            	}
+				            }
+				        });
+					}else{
+						isSubmit = false;
+					}
+		  		}
+    		},
+    		btn3: function(index, layero){
+    		    //return false 开启该代码可禁止点击该按钮关闭
+    		}
+		});
+	}
+	/* 	function cardFileClick(id,name,linkType){
+			var sys_theme='${sys_theme}';
+			if(linkType!=null&&linkType==1){
+				if(sys_theme=="theme_left_shen"&&parent.openTab){
+					parent.openTab(id,name,"${basePath!}/menu/view/"+id,"iframe")
+				}else{
+					window.open("${basePath!}/menu/view/"+id);	
+				}
+			}else{
+				window.open("${basePath!}/menu/view/"+id);
+			}
+		} */
+		function cardFileClick(id,name,linkType){
+			var sys_theme='${sys_theme}';
+			var isParent = checkParent(id);
+			if(!isParent){
+				if(linkType!=null&&linkType==1){
+					if(sys_theme=="theme_left_shen"){
+						if(parent.openTab){
+							parent.openTab(id,name,"${basePath!}/menu/view/"+id,"iframe")
+						}else{
+							window.open("${basePath!}/menu/view/"+id);	
+						}
+					}else{
+						 if(parent.refreshIframe){
+							parent.refreshIframe("${basePath!}/menu/view/"+id);
+						}else{
+							window.open("${basePath!}/menu/view/"+id);	
+						}
+					}
+				}else{
+					window.open("${basePath!}/menu/view/"+id);
+				}
+			}else{
+				if(sys_theme=="theme_left_shen"){
+					parent.openTab(id,name,"${basePath!}/menu/preferView/"+id,"iframe")
+				}else{
+					parent.refreshIframe("${basePath!}/menu/preferView/"+id);
+				}
+			}
+			
+		}
+		
+		function checkParent(id){
+			var flag = false;
+			$.ajax({
+	            type: "GET",
+	            url:'${basePath}/menu/checkParent/',
+	            data:{parentId:id},
+	            async: false,
+	            error: function(request) {
+	            },
+	            success: function(result) {
+	            	if(result!=null && result!='' && result.length>0){
+	            		flag = true;
+	            	}
+	            }
+	        });
+			return flag;
+		}
+	</script>
+</body>
+</html>
+
+

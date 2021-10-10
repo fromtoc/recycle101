@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+	<title>使用申请</title>
+	<link rel="stylesheet" href="${basePath}/plugins/vue/element-index.css">
+	<script src="${basePath}/plugins/vue/vue.js"></script>
+	<script src="${basePath}/plugins/vue/vue-resource.js"></script>
+	<script src="${basePath}/plugins/vue/element-index.js"></script>
+	<script src="${basePath}/js/moment.min.js"></script>
+	<style>      
+	</style>
+	
+</head>
+<body>
+    <div id="content" style="padding-top:20px">		        
+		<el-row>
+		  <el-col :span="12" :offset="6" style="box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);padding: 50px;">
+		  	<div class="grid-content bg-purple">
+				  欢迎您成为德昂产品用户。成功注册后，您将成为德昂产品正式用户，享受我们为您提供的优质服务。
+		  	</div>
+		  	<el-steps :active="activeStep" finish-status="success" simple style="margin-top: 20px">
+			  <el-step title="申请使用" name="1"></el-step>
+			  <el-step title="邮箱接收激活文件" name="2"></el-step>
+			  <el-step title="提交激活文件" name="3"></el-step>
+			  <el-step title="激活成功" name="4"></el-step>
+			</el-steps>
+			<el-form :model="applyForm" :rules="applyRules" ref="applyForm" label-width="100px" style="margin-top:20px;">
+			  <el-form-item label="公司名称" prop="company">
+			    <el-input v-model="applyForm.company"></el-input>
+			  </el-form-item>
+			  <el-form-item label="姓名" prop="creater">
+			    <el-input v-model="applyForm.creater"></el-input>
+			  </el-form-item>
+			  <el-form-item label="联系电话" prop="phone">
+			    <el-input v-model="applyForm.phone"></el-input>
+			  </el-form-item>
+			  <el-form-item label="联系邮箱" prop="email" placeholder="该邮箱用于接收激活文件">
+			    <el-input v-model="applyForm.email"></el-input>
+			  </el-form-item>
+			  <el-form-item label="联系地址" prop="address">
+			    <el-input type="textarea" v-model="applyForm.address"></el-input>
+			  </el-form-item>
+			  <el-form-item label="使用时间" required>
+			    <el-date-picker
+			      v-model="timeBetween"
+			      type="daterange"
+			      range-separator="至"
+			      start-placeholder="开始日期"
+			      end-placeholder="结束日期"
+			      format="yyyy-MM-dd"
+			      value-format="yyyy-MM-dd"
+			      >
+			    </el-date-picker>
+			  </el-form-item>
+			  
+			  
+			  <el-form-item>
+			    <el-button type="primary" @click="onSubmit()">申请使用</el-button>
+			  </el-form-item>
+			</el-form>
+			
+		  </el-col>
+		</el-row>
+    </div>
+	
+    <footer align="center">
+    </footer>
+
+	<script>
+	var vue = new Vue({			
+			el:"#content",
+		    data: {		  
+		    	activeStep:0,
+		    	timeBetween:[],
+		    	applyForm:{
+		    		applyType:1,
+		    		startTime:'',
+		    		endTime: '',
+		    		type: 1,
+		    		state: 1,
+		    		creater: '小陈',
+		    		company: '德昂公司',
+		    		email: 'zhoujun@dataondemand.cn',
+		    		phone: '',
+		    		address: '',
+		    		amount:'1'
+		    	},
+		    	applyRules: {
+		    		company: [
+		              { required: true, message: '请输入公司名称', trigger: 'blur' },
+		              { min: 2,  message: '长度在 3 到 5 个字符', trigger: 'blur' }
+		            ],
+		            creater: [
+		              { required: true, message: '请输入您的姓名', trigger: 'blur' }
+		            ],
+		            phone: [
+				      { required: true, message: '请输入您的联系电话', trigger: 'blur' }
+				    ],
+				    email: [
+				      { required: true, message: '请输入您的邮箱', trigger: 'blur' },
+				      { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
+				    ],
+				    startTime: [
+				      { type: 'date', required: true, message: '请选择日期', trigger: 'change' }
+				    ]
+		    	}
+		    },
+
+		    methods: {
+		    	onUpload:function(){
+		    		//this.$refs.upload.submit();
+		    	},
+		    
+		    	onUploadSuccess: function() {
+	        		alert('onUploadSuccess');
+	        	},
+	        	onUploadError:function(){
+	        		alert('onUploaderro');
+	        	},
+	        	
+	        	onSubmit: function(){
+	        		this.$refs.applyForm.validate((valid) => {
+	        	          if (valid) {
+	        	        	  this.applyForm.applyTime=moment().format('YYYY-MM-DD HH:mm:ss');
+	        	        	  this.applyForm.startTime=this.timeBetween[0]+' 00:00:00';
+	        	        	  this.applyForm.endTime=this.timeBetween[1]+' 23:59:59';;
+	        	        	  this.$http.post('${basePath}/license/save?',this.applyForm,{emulateJSON:true}).then(function(res){
+	      					  	console.log(res);
+		                      },function(){
+		                         console.log('failed');
+		                      });	
+	        	          } else {
+	        	            console.log('error submit!!');
+	        	            return false;
+	        	          }
+	        	    });
+	        	},
+	        	
+		    	
+		    	
+		    	dateTimeFormatter: function(row, column, value){
+		    		if(value!=null && value!=0){
+		    			return getFormatDate(new Date(value));
+		    		}else{
+		    			return '';
+		    		}
+		    	},
+		    	timeOutFormatter: function(row, column, value) {
+		    		if(value!=null && value!=0){
+		    			return value/1000/60 + '分钟' ;
+		    		}else{
+		    			return '';
+		    		}
+		    	},
+		        //从服务器读取数据
+				loadData: function(pageNum, pageSize){				
+					this.$http.get('${basePath}/license/list?' + 'pageNumber=' +  pageNum + '&pageSize=' + pageSize).then(function(res){
+						console.log(res)
+                		this.tableData = res.body.rows;
+                		this.totalCount = res.body.total;
+                	},function(){
+                  		console.log('failed');
+                	});					
+				},			    		        
+				      
+		        //单行删除
+			    handleLogout: function(index, row) {
+					this.$http.post('${basePath}/session/logout',{"sessionId":row.sessionId},{emulateJSON: true}).then(function(res){
+						this.loadData( this.currentPage, this.pagesize);
+		            },function(){
+		                console.log('failed');
+		            });
+		        },
+		        
+		        
+		        //搜索
+		        search: function(){
+		        	this.loadData(this.currentPage, this.pagesize);
+		        },
+		        
+		        //弹出对话框
+		        handleadd: function(){		                
+		            this.dialogFormVisible = true;	              
+		        },
+		        
+		        //添加
+		        add: function(){
+		        	this.$http.post('${basePath}/job/addjob',
+		        			{"jobName":this.form.jobName,
+		        			"jobGroupName":this.form.jobGroup,
+		        			"jobClassName":this.form.jobClassName,
+		        			"triggerName":this.form.triggerName,
+		        			"triggerDescription":this.form.triggerDescription,
+		        			"jobDescription":this.form.jobDescription,
+		        			"cronExpression":this.form.cronExpression},{emulateJSON: true}).then(function(res){
+        				this.loadData(this.currentPage, this.pagesize);
+        				this.dialogFormVisible = false;
+                    },function(){
+                        console.log('failed');
+                    });
+		        },
+		        
+		        //更新
+		        handleUpdate: function(index, row){
+		        	console.log(row)
+		        	this.updateFormVisible = true;
+		        	this.updateform.jobName = row.jOB_CLASS_NAME;
+		        	this.updateform.jobGroup = row.jOB_GROUP;
+		        },
+		        
+		        //更新任务
+		        update: function(){
+		        	this.$http.post
+		        	('${basePath}/job/reschedulejob',
+		        			{"jobClassName":this.updateform.jobName,
+		        			 "jobGroupName":this.updateform.jobGroup,
+		        			 "cronExpression":this.updateform.cronExpression
+		        			 },{emulateJSON: true}
+		        	).then(function(res){
+		        		this.loadData(this.currentPage, this.pagesize);
+        				this.updateFormVisible = false;
+		        	},function(){
+                        console.log('failed');
+                    });
+		    
+		        },
+		      
+		        //每页显示数据量变更
+		        handleSizeChange: function(val) {
+		            this.pagesize = val;
+		            this.loadData(this.currentPage, this.pagesize);
+		        },
+		        
+		        //页码变更
+		        handleCurrentChange: function(val) {
+		            this.currentPage = val;
+		            this.loadData(this.currentPage, this.pagesize);
+		        },	      
+		        		        
+		    },	    
+		    
+		    
+		  });
+		  //载入数据
+    	  //vue.loadData(vue.currentPage, vue.pagesize);
+		  
+    	  function getFormatDate(date, pattern) {
+              if(date == undefined) {
+                  date = new Date();
+              }
+              if(pattern == undefined) {
+                  pattern = "yyyy-MM-dd hh:mm:ss";
+              }
+
+              var o = {
+                  "M+": date.getMonth() + 1,
+                  "d+": date.getDate(),
+                  "h+": date.getHours(),
+                  "m+": date.getMinutes(),
+                  "s+": date.getSeconds(),
+                  "q+": Math.floor((date.getMonth() + 3) / 3),
+                  "S": date.getMilliseconds()
+              };
+              if(/(y+)/.test(pattern)) {
+                  pattern = pattern.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+              }
+
+              for(var k in o) {
+                  if(new RegExp("(" + k + ")").test(pattern)) {
+                      pattern = pattern.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+                  }
+              }
+              return pattern;
+          }
+	</script>  
+	
+</body>
+</html>

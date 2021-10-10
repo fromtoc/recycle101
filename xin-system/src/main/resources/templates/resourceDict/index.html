@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="keywords" content="">
+    <meta http-equiv="description" content="">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <#include "common/common.html" />
+    <#include "common/common_table.html" />
+  </head>
+  <style>
+      #table,#table th,#table tr,#table td{
+          border:1px solid #0902002e;
+      }
+      #table{
+          border-radius: 1px;
+      }
+  </style>
+  <body style="padding:10px;">
+         <div >
+            <div class="layui-inline">
+                <button id="btn_add" onclick="addRow()" class="layui-btn layui-btn-sm layui-btn-normal">
+                  <i class="layui-icon">&#xe654;</i> <@spring.message 'resource.new-build'/>
+                </button>
+            </div>
+        </div>
+         <form id="formData">
+             <table id="table" class="table table-hover">
+                 <thead>
+                 <tr>
+                     <th style="text-align: center; vertical-align: middle; " data-field="name"><div class="th-inner "><@spring.message 'dict.dictItem'/></div><div class="fht-cell"></div></th>
+                     <th style="text-align: center; vertical-align: middle; " data-field="dictValue"><div class="th-inner "><@spring.message 'dict.value'/></div><div class="fht-cell"></div></th>
+                     <th style="text-align: center; vertical-align: middle; " data-field="explain"><div class="th-inner "><@spring.message 'resource.Explain'/></div><div class="fht-cell"></div></th>
+                     <th style="text-align: center; vertical-align: middle; " data-field="source"><div class="th-inner "><@spring.message 'resource.Source'/></div><div class="fht-cell"></div></th>
+                     <th style="text-align: center; vertical-align: middle; " data-field="algorithm"><div class="th-inner "><@spring.message 'resource.Algorithmic_caliber'/></div><div class="fht-cell"></div></th>
+                     <th style="text-align: center; vertical-align: middle; " data-field="index"><div class="th-inner "><@spring.message 'action.action'/></div><div class="fht-cell"></div></th>
+                 </tr>
+                 </thead>
+                 <tbody id="tbody">
+                 <#list list as res>
+                     <tr class="is_have" id="tr_${res_index}">
+                         <td style="text-align: center; vertical-align: middle; ">
+                             <input type="text" id="name${res_index}" name="name${res_index}" value="${res.name}" class="layui-input" lay-verify="required">
+                         </td>
+                         <td style="text-align: center; vertical-align: middle; ">
+                             <input type="text" id="dictValue${res_index}" name="dictValue${res_index}"  value="${res.dictValue}" class="layui-input">
+                         </td>
+                         <td style="text-align: center; vertical-align: middle; ">
+                             <input type="text" id="explain${res_index}" name="explain${res_index}" value="${res.explain}" class="layui-input">
+                         </td>
+                         <td style="text-align: center; vertical-align: middle; ">
+                             <input type="text" id="source${res_index}" name="source${res_index}" value="${res.source}" class="layui-input">
+                         </td>
+                         <td style="text-align: center; vertical-align: middle; ">
+                             <input type="text" id="algorithm${res_index}" name="algorithm${res_index}" value="${res.algorithm}" class="layui-input">
+                         </td>
+                         <td style="text-align: center; vertical-align: middle; ">
+                             <button onclick="delRow(${res_index})" class="layui-btn layui-btn-sm layui-btn-normal"><i class="fa fa-trash-o"></i></button>
+                         </td>
+                     </tr>
+                 </#list>
+                 </tbody>
+             </table>
+         </form>
+  </body>
+  <script>
+  	var resourceId = "${resourceId}";
+  	var size =  "${size}";
+  	$(function(){
+
+        layui.use([ 'form','layer'],function() {
+            var form = layui.form,
+                layer = layui.layer;
+        });
+
+
+
+    })
+    function delRow(id) {
+        var tbody = document.getElementById("tbody");
+        var row = document.getElementById("tr_"+id);
+        tbody.removeChild(row)
+    }
+
+    function  addRow(){
+
+     var html = '<tr class="is_have" id="tr_'+size+'">'+
+                '<td style="text-align: center; vertical-align: middle; ">'+
+                '<input type="text" id="name'+size+'" name="name'+size+'" value="" class="layui-input"  placeholder="<@spring.message "tips.input"/><@spring.message "dict.dictItem"/>（<@spring.message "prompt.Must_fill"/>）" lay-verify="required">'+
+                '</td>'+
+                '<td style="text-align: center; vertical-align: middle; ">'+
+                '<input type="text" id="dictValue'+size+'" name="dictValue'+size+'" value="" class="layui-input" placeholder="<@spring.message "tips.input"/>">'+
+                '</td>'+
+                '<td style="text-align: center; vertical-align: middle; ">'+
+                '<input type="text" id="explain'+size+'" name="explain'+size+'" value="" class="layui-input"placeholder="<@spring.message "tips.input"/>">'+
+                '</td>'+
+                '<td style="text-align: center; vertical-align: middle; ">'+
+                '<input type="text" id="source'+size+'" name="source'+size+'"  value="" class="layui-input"placeholder="<@spring.message "tips.input"/>">'+
+                '</td>'+
+                '<td style="text-align: center; vertical-align: middle; ">'+
+                '<input type="text" id="algorithm'+size+'" name="algorithm'+size+'" value="" class="layui-input" placeholder="<@spring.message "tips.input"/>">'+
+                '</td>'+
+                '<td style="text-align: center; vertical-align: middle; ">'+
+                '<button onclick="delRow('+size+')" class="layui-btn layui-btn-sm layui-btn-normal"><i class="fa fa-trash-o"></i></button>'+
+                '</td>'+
+                '</tr>';
+        $("#tbody").prepend(html);
+        size++;
+    }
+
+    function getData(){
+        var list=[];
+        for(var i=0;i<Number(size);i++){
+             if(document.getElementById("name"+i)){
+                 if($("#name"+i).val()){
+                     var resourceDict={
+                         name:$("#name"+i).val(),
+                         resourceId:resourceId,
+                         dictValue:$("#dictValue"+i).val(),
+                         explain:$("#explain"+i).val(),
+                         source:$("#source"+i).val(),
+                         algorithm:$("#algorithm"+i).val()
+                     }
+                     list.push(resourceDict)
+                 }else{
+                     $("#name"+i).focus();
+                     layer.msg("<@spring.message 'tips.input'/><@spring.message 'dict.dictItem'/>");
+                     return null;
+                 }
+             }
+        }
+        return list;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </script>
+</html>

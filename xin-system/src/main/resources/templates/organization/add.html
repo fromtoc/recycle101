@@ -1,0 +1,104 @@
+ <#include "common/common.html" />
+
+<form id="form_add" class="layui-form" action=""
+	style="padding-top:10px;">
+	<div style="margin-left:50px;">
+		<input type="hidden" name="parentId" id="parentId">
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label label-required-diy"><@spring.message 'org.supOrg'/></label>
+			<div class="layui-input-inline">
+				<input type="text" id="parentName" name="parentName" readonly value=""
+					class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label label-required-diy"><@spring.message 'org.orgName'/></label>
+			<div class="layui-input-inline">
+				<input type="text" name="name" id="name" lay-verify="required" placeholder="<@spring.message 'tips.input'/>"
+					autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item layui-hide">
+			<label class="layui-form-label my-label"><@spring.message 'org.orgSysCode'/></label>
+			<div class="layui-input-inline">
+				<input type="text" id="code" name="code" placeholder="<@spring.message 'tips.input'/>"
+					autocomplete="off" class="layui-input" readonly >
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label label-required-diy"><@spring.message 'org.orgCode'/></label>
+			<div class="layui-input-inline">
+				<input type="text" id="extCode" name="extCode" placeholder="<@spring.message 'tips.input'/>" lay-verify="required"
+					autocomplete="off" class="layui-input" >
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label"><@spring.message 'list.order'/></label>
+			<div class="layui-input-inline">
+				<input type="number" id="sort" name="sort" min="1" max="100" value="1" placeholder="<@spring.message 'tips.input'/>"
+					autocomplete="off" class="layui-input" >
+			</div>
+		</div>
+		
+	</div>
+</form>
+
+<script type="text/javascript">
+	function init (parentNode) {
+		$('#parentName').val(parentNode.name);
+		$('#parentId').val(parentNode.id);
+		/* var children = parentNode.children;
+		var code = parentNode.code + '001';
+		if (children!=null) {
+			if (children.length>=100) {
+				code = parentNode.code + '' + (children.length+1);
+			} else if (children.length>=10) {
+				code = parentNode.code + '0' + (children.length+1);
+			} else {
+				code = parentNode.code + '00' + (children.length+1);
+			}
+		}
+		$('#code').val(code); */
+	}
+	
+	function check(id) {
+		var selectors = ["#"+id];
+		var result = true;
+		$.each(selectors,function(index, rec){
+			if (!checkField(rec)) {
+				result = false;
+				return false;//调出循环
+			}
+			
+		});
+  		return result;
+  	}
+  	
+  	function checkField(selector){
+  		var value = $(selector).val();
+  		if (value==null || value == '') {
+  			$(selector).addClass("layui-form-danger");
+  			$(selector).focus();
+  			layer.tips("<@spring.message 'tips.inputSome'/>", selector);
+  			return false;
+  		} else {
+  			return true;
+  		}
+  	}
+	
+	function getData(){
+		if(check("name") &&　check("extCode")){
+			return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+  	}
+	
+	layui.use([ 'form', 'layedit', 'laydate' ],function() {
+		var form = layui.form, 
+			layer = layui.layer, 
+			layedit = layui.layedit, 
+			laydate = layui.laydate;
+	})
+</script>

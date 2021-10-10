@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.IntegrationLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.IntegrationLog">
+        <id column="id" property="id" />
+        <result column="type" property="type" />
+        <result column="creater" property="creater" />
+        <result column="createrName" property="createrName" />
+        <result column="create_time" property="createTime" />
+        <result column="content" property="content" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, type, creater, create_time, content
+    </sql>
+    
+    <select  id="findPage" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.IntegrationLog">
+    	select log.id, log.type, log.creater, log.create_time, log.content,ui.realname as createrName
+    	from t_integration_log log
+    	left join t_user_info ui on log.creater = ui.id
+    	<where>
+    		<if test="type!=null and type!=''">
+    			and type=#{type}
+    		</if>
+    		<if test="createrName!=null and createrName!=''">
+    			and ui.realname like '${realname}'
+    		</if>
+    	</where>
+    	order by log.create_time desc
+    </select>
+
+</mapper>

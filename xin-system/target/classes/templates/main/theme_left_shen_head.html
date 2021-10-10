@@ -1,0 +1,96 @@
+
+<ul class="layui-nav nav-head" id="nav" lay-filter="nav_filter">
+	<!--<li class="version-info">
+		${(version)!'1.0.0'}
+	</li> -->
+	<li class="layui-nav-item">
+		<a href="javascript:void(0)" layadmin-event="message" lay-text="消息中心"  style="position: relative;">
+			<i class="fa fa-bell fa-lg"   style="position: relative;top:-1px;" >
+				<#if ((unreadNotices && unreadNotices?size>0) || (messageList && messageList?size>0)) >
+					<span style="position: relative;top:-13px;left:-13px;border-radius: 7px;padding: 0 5px;font-size: 12px;margin-left: 1px;margin-right: 1px;" class="layui-badge flashing">${((messageCount+noticeCount)>99)?string('99+',(messageCount+noticeCount))}</span>
+				</#if>
+			</i>
+		</a>
+		<dl class="layui-nav-child" >
+			<div class="layui-tab layui-tab-brief layui-zeroMarge" style="width:248px">
+				  <ul class="layui-tab-title layui-tab-title-ul" style="height:40px;">
+				    <li class="layui-tab-title-li layui-this">通知<span class="${(noticeCount<=0)?string('layui-hide','')}">(${(noticeCount>99)?string('99+',noticeCount)})</span></li>
+				    <li class="layui-tab-title-li" >消息<span class="${(messageCount<=0)?string('layui-hide','')}" >(${(messageCount>99)?string('99+',messageCount)})</span></li>
+				  </ul>
+				  <div class="layui-tab-content layui-unpadding" style="height: 100%;padding:0 5px 0 5px;">
+					<div class="layui-tab-item layui-show">
+						<#if ((unreadNotices && unreadNotices?size>0) || (readNotices && readNotices?size>0))>
+							<#list unreadNotices as rec>
+								<dd><div class="layui-lineDiv divHover" style="color:${(rec.titleColor==null)?string('#000',rec.titleColor)};position: relative;cursor: pointer;" onclick="noticeInfo('${(rec.id)}','${(rec.type)}');">
+									<div><i class="layui-icon layui-icon-speaker" style="position: relative;font-weight:bold;" ></i></div><div style="position: relative;width: 200px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">${(rec.title)!}</div><div  style="position: relative;top:20px;;" class="layui-badge-dot"></div>
+									</div>
+								</dd>
+							</#list>
+							<#list readNotices as rec>
+								<dd><div class="layui-lineDiv divHover" style="color:${(rec.titleColor==null)?string('#000',rec.titleColor)};position: relative;cursor: pointer;" onclick="noticeInfo('${(rec.id)}','${(rec.type)}');">
+									<div><i class="layui-icon layui-icon-speaker" style="position: relative;font-weight:bold;" ></i></div><div style="position: relative;width: 200px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">${(rec.title)!}</div>
+									</div>
+								</dd>
+							</#list>
+							<div class="layui-noticeBottomDiv">
+								<div class="layui-noticeRead divHover" onclick="setAllNoticeRead()">全部已读</div>
+								<div class="layui-noticeMore divHover" onclick="moreNotice()"><@spring.message "model.more"/>...</div>
+							</div>
+						<#else>
+							<div style="padding: 73px 0 88px;color: rgba(0,0,0,.45);text-align: center;">
+								<img src="${basePath}/images/haveNoNotice.svg" alt="not found">
+								<div>暂无通知</div>
+							</div>
+						</#if>
+					</div>
+				    <div class="layui-tab-item">
+				    	<#if (messageList && messageList?size>0)>
+					    	<#list messageList as rec>
+								<dd >
+									<div class="layui-lineDiv divHover" style="position: relative;color: #000;cursor: pointer;" onclick="MessageInfo('${(rec.id)}');">
+									<#if (rec.type=='1')>
+									<div><i class="layui-icon layui-icon-tips" style="position: relative;font-weight:bold;" ></i></div>
+									<#elseif (rec.type=='2')>
+									<div><i class="layui-icon layui-icon-dialogue" style="position: relative;font-weight:bold;" ></i></div>
+									<#elseif (rec.type=='4')>
+									<div><i class="layui-icon layui-icon-dialogue" style="position: relative;font-weight:bold;" ></i></div>
+									<#else>
+									<div><i class="layui-icon layui-icon-speaker" style="position: relative;font-weight:bold;" ></i></div>
+									</#if>
+										<div style="position: relative;width: 200px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">${(rec.title)!}</div><div  style="position: relative;top:20px;" class="layui-badge-dot"></div>
+									</div>
+								</dd>
+							</#list>
+							<div class="layui-noticeBottomDiv">
+								<div class="layui-noticeRead divHover" onclick="setAllMessageRead()" >全部已读</div>
+								<div class="layui-noticeMore divHover" onclick="moreMessage()"><@spring.message "model.more"/>...</div>
+							</div>
+						<#else>
+							<div style="padding: 73px 0 88px;color: rgba(0,0,0,.45);text-align: center;">
+								<img src="${basePath}/images/haveNoNotice.svg" alt="not found">
+								<div>暂无消息</div>
+							</div>
+						</#if>
+				    </div>
+				  </div>
+				</div>
+		</dl>
+	</li>
+	<li class="layui-nav-item"  style="margin-left: 2px;">
+		<a href="javascript:issueSubmit()" lay-text="问题提交">
+			<i class="layui-icon" style="padding: 0 0px">&#xe6b2;</i>
+			<#if (issueList && issueList?size>0)>
+				<span style="position: relative;top:-1px;border-radius: 7px;padding: 0 5px;font-size: 12px;margin-left: 0px" class="layui-badge">${issueCount}</span>
+			</#if>
+		</a>
+	</li>
+	<li class="layui-nav-item">
+		<a href="javascript:void(0)" style="padding-left: 10px;" >${(user.realname)!} &nbsp;&nbsp;<img id='headPic'src="" height="45px;" width="45px;" style="border-radius:64px;box-shadow:0px 0px 12px #7E7E7E;"></a>
+		<dl class="layui-nav-child">
+			<dd><a href="javascript:"id="setRecord"  onclick="openTab('个人信息','个人信息','${basePath}/userInfo/personalRecord/${user.id}','iframe')"><@spring.message "PersonalPortrait"/></a></dd>
+			<!--<dd><a href="javascript:" id="setPassword"><@spring.message 'updatePassword'/></a></dd>-->
+			<dd><a href="javascript:" onclick="setPreference('${(user.id)!}')"> <@spring.message 'setPreference'/></a></dd>
+			<dd><a href="${basePath}/logout"><@spring.message 'logout'/></a></dd>
+		</dl>
+	</li>
+</ul>

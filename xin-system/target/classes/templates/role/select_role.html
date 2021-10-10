@@ -1,0 +1,80 @@
+
+<#include "common/common.html" />
+<#include "common/common_ztree.html" />
+<script type="text/javascript">
+
+	layui.use([ 'form'],function() {
+		var form = layui.form, 
+			layer = layui.layer;
+	})
+	
+ 	var zTree;
+    var zTreeSetting = {
+        check: {
+            enable: true,
+            chkboxType: { "Y":"","N": "" }
+        },
+        view: {
+            dblClickExpand: false,
+            showLine: true,
+            selectedMulti: false
+        },
+        data: {
+            simpleData: {
+                enable:true,
+                idKey: "id",
+                pIdKey: "parentId",
+                rootPId: "0"
+            }
+        },
+        async: {
+			enable: false,
+		},
+        callback: {
+        }
+    };
+    
+    /* function onResourceTreeAsyncSuccess(){
+    	zTree.expandAll(true);//指定选中ID节点展开
+    } */
+    
+    $(function(){
+    	initZTree();
+        //$.fn.zTree.init($("#tree"), zTreeSetting);
+        zTree = $.fn.zTree.getZTreeObj("tree");
+        zTree.expandAll(true);//展开所有
+    });
+    
+
+    function initZTree(){
+		$.ajax({
+            url : "${basePath}/role/list",
+            async: false,
+            type : "post",
+            dataType : "json",
+            success : function(data) {
+            	$.fn.zTree.init($("#tree"), zTreeSetting, data);
+            },
+            error : function() {
+            }
+        });
+    }
+    
+    function init(tabs) {
+       	if(tabs){
+       		var count = tabs.length;
+       		for (var i=0; i < count; i++) {
+       			var node = zTree.getNodesByParam("id", tabs[i].getAttribute('data-id'), null);
+       			if (node!=null) {
+   					zTree.checkNode(node[0], true, true);
+       			}
+   			}
+		}
+    }
+    
+    function getData() {
+    	return zTree.getCheckedNodes(true);
+    }
+    
+</script>
+<ul id="tree" class="ztree" style="overflow:auto;"></ul>

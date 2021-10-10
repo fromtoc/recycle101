@@ -1,0 +1,73 @@
+<link rel="stylesheet"  href="${basePath}/plugins/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet"	href="${basePath}/plugins/bootstrap/css/bootstrap-table.css">
+<link rel="stylesheet"  href="${basePath}/plugins/bootstrap/css/bootstrap-table-fixed-columns.css">
+<link rel="stylesheet" type="application/x-font-ttf"  href="${basePath}/plugins/bootstrap/fonts/glyphicons-halflings-regular.woff">
+<link rel="stylesheet" type="application/x-font-ttf"  href="${basePath}/plugins/bootstrap/fonts/glyphicons-halflings-regular.ttf">
+<script type="text/javascript" src="${basePath}/plugins/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${basePath}/plugins/bootstrap/js/bootstrap-table.js"></script>
+<script src="${basePath}/plugins/bootstrap/js/bootstrap-table-fixed-columns.js"></script>
+<#if SYS_LOCALE=='zh_CN'>
+<script type="text/javascript" src="${basePath}/plugins/bootstrap/js/bootstrap-table-zh-CN.min.js"></script>
+</#if>
+<#if SYS_LOCALE=='zh_TW'>
+<script type="text/javascript" src="${basePath}/plugins/bootstrap/js/bootstrap-table-zh-TW.min.js"></script>
+</#if>
+<#if SYS_LOCALE=='en_US'>
+<script type="text/javascript" src="${basePath}/plugins/bootstrap/js/bootstrap-table-en-US.min.js"></script>
+</#if>
+<script type="text/javascript">
+	function indexFormatter(value,row,index){
+        return index + 1;
+	}
+	
+	function dateTimeFormatter(value,row,index){
+		if(value!=null){
+			return utils.tmDate.getFormatDateByLong(value);
+		}else{
+			return '';
+		}
+	}
+	function dateFormatter(value,row,index){
+		if(value!=null){
+			return utils.tmDate.getFormatDateByLong(value,'yyyy-MM-dd');
+		}else{
+			return '';
+		}
+	}
+	function dateTimeFormatter(value,row,index){
+		if(value!=null){
+			return utils.tmDate.getFormatDateByLong(value,'yyyy-MM-dd hh:mm:ss');
+		}else{
+			return '';
+		}
+	}
+	
+	layui.use([ 'layer'],function() {
+		var layer = layui.layer;
+		  	var tip_index = 0;
+		  	$(document).on('mouseover', '.btn-opt', function(){
+		  		var tipStr = $(this).attr('data-tip');
+		  		var tipType = $(this).attr('tip-type');
+		  		tipType = tipType==null?1:tipType;
+		  		tip_index = layer.tips('<span style="color:#000">' + tipStr + '</span>', this, {
+		  		  tips: [tipType, '#fff'],
+		  		});
+		  	}).on('mouseout', this, function(){
+		  		layer.close(tip_index);
+		  	});
+	});
+	
+	
+</script>
+<style>
+	* {
+		-webkit-box-sizing: inherit;
+	    -moz-box-sizing: inherit;
+	    box-sizing: inherit;
+	}
+	/* .layui-layer-tips .layui-layer-content {//影响资源tips的样式暂时注掉
+	    background-color: #fff!important;
+	    color: #000!important;
+	} */
+	table td{word-break: keep-all;white-space:nowrap;}
+</style>

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+	
+    <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+    <meta http-equiv="description" content="this is my page">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    
+    <#include "common/common.html" />
+	<#include "common/common_table.html" />
+
+  </head>
+  
+  <body style="padding:10px;">
+  	 <@system.path id="${menuId!}"></@system.path>
+  	 <form action="javascript:query();"  id="query_form"  class="layui-form layui-form-pane">
+				<button type="button" onclick="javascript:addDict();" class=" layui-btn layui-btn-sm layui-btn-normal <@shiro.hasRole name='role_test' >layui-btn-disabled</@shiro.hasRole>" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole>><i class="layui-icon">&#xe654;</i><@spring.message 'dict.addDict'/></button>
+       			<div class="layui-inline">
+			      <label class="layui-form-label"><@spring.message 'list.name'/></label>
+			      <div class="layui-input-inline">
+			        <input name="name" id="query_name" class="layui-input" type="text" autocomplete="off">
+			      </div>
+			      </div>
+			      <div class="layui-inline">
+			       <label class="layui-form-label"><@spring.message 'dict.code'/></label>
+			      <div class="layui-input-inline">
+			        <input name="code" id="query_code" class="layui-input" type="text" autocomplete="off">
+			      </div>
+			    </div>
+			    <div class="layui-inline">
+			        <button type="submit" class="layui-btn layui-btn-sm layui-btn-normal btn-opt" data-tip="<@spring.message 'action.query'/>"><i class="layui-icon">&#xe615;</i></button>
+			        <button type="button" class="reset layui-btn layui-btn-sm layui-btn-normal btn-opt" data-tip="<@spring.message 'action.reset'/>"><i class="glyphicon glyphicon-refresh"></i></button>
+			    </div>
+        </form>
+        <div class="layui-container" style="width:100%;padding:0;padding-top:20px;">  
+		  <div class="layui-row">
+		    <div class="layui-col-md6">
+		      <table id="table"
+		               data-toggle="table"
+		               data-search="false"
+		               data-pag="10"
+		               data-side-pagination="server"
+		               data-pagination="true"
+		               data-query-params-type=""
+		               data-url="${basePath}/dict/page"
+		               data-query-params="queryParams"
+		               data-detail-view="false"
+		               
+		        >
+		            <thead>
+		            <tr>
+		            	<th data-align="center" 
+		                	data-width="1%"
+		                	data-halign="center"
+							data-valign="middle"
+		                	data-formatter="indexFormatter"
+		                	><@spring.message 'list.serialNum'/></th>
+		                <th data-align="left" 
+		                	data-halign="center"
+							data-valign="middle"
+							data-formatter="infoFormatter"
+		                	data-field="dictName"><@spring.message 'list.name'/></th>
+		                <th data-align="center" 
+		                	data-halign="center"
+							data-valign="middle"
+		                	data-field="dictCode"><@spring.message 'dict.code'/></th>
+		                <th data-align="left"
+		                	data-halign="center" 
+							data-valign="middle"
+		                	data-field="remark"><@spring.message 'list.remark'/></th>
+		                <th data-align="center"
+		                	data-halign="center"
+							data-valign="middle"
+		                	data-formatter="opeFormatter" ><@spring.message 'action.action'/></th>
+		            </tr>
+		            </thead>
+		        </table>
+		    </div>
+		    <div class="layui-col-md6" style="padding-left:20px">
+		    <input type="hidden" id="selDictCode"/>
+		    <input type="hidden" id="selDictName"/>
+		     	<table id="item_table"
+               data-toggle="table"
+               data-search="false"
+               data-pag="10"
+               data-side-pagination="client"
+               data-pagination="true"
+               data-detail-view="false" 
+               data-url="${basePath}/dict/listItem" 
+               data-query-params="queryItemParams"
+               data-method="post"
+               data-content-type="application/x-www-form-urlencoded"
+               data-data-type="json"
+               
+        >
+            <thead>
+            <tr>
+            	<th data-align="center" 
+                	data-width="1%"
+                	data-halign="center"
+					data-valign="middle"
+                	data-formatter="indexFormatter"
+                	><@spring.message 'list.serialNum'/></th>
+                <th data-align="left" 
+                	data-halign="center"
+					data-valign="middle"
+                	data-field="itemName"><@spring.message 'list.name'/></th>
+                <th data-align="center" 
+                	data-halign="center"
+					data-valign="middle"
+                	data-field="itemValue"><@spring.message 'dict.value'/></th>
+                <th data-align="center" 
+                	data-halign="center"
+					data-valign="middle"
+                	data-field="itemOrder"><@spring.message 'list.order'/></th>
+                <th data-align="center" 
+                	data-halign="center"
+					data-valign="middle"
+                	data-field="parentDictCode"><@spring.message 'list.parentDictCode'/></th>
+                <th data-align="left"
+                	data-halign="center" 
+					data-valign="middle"
+                	data-field="remark"><@spring.message 'list.remark'/></th>
+                <th data-align="center"
+                	data-halign="center"
+					data-valign="middle"
+                	data-formatter="opeItemFormatter" ><@spring.message 'action.action'/></th>
+            </tr>
+            </thead>
+        </table>
+		    </div>
+		  </div>
+		</div>
+        
+      
+  </body>
+  <script>
+  
+  var table = $('#table');
+  var selectDictCode;
+  var selectDictType
+	var laytpl;
+  $(function(){
+  	laytpl = layui.laytpl;
+		$(window).on('resize', function() {
+			var $content = $('.admin-content-body');
+			$content.height($(this).height()-160);
+		}).resize();
+		
+		$('.reset').on('click',function(){
+			$('#query_form')[0].reset();
+            table.bootstrapTable('refresh');
+		});
+		
+		
+		table.on('click-row.bs.table',function(e, row, element){
+			$('.showColor').removeClass('showColor').css("background-color", "white");
+			$(element).addClass('showColor').css("background-color", "#f5f5f5");
+			$('#selDictCode').val(row.dictCode);
+			$('#selDictName').val(row.dictName);
+			var param = {
+					url:basePath+'/dict/listItem',
+					query:{dictCode:row.dictCode,isSource:row.isSource}
+			};
+			selectDictCode = row.dictCode;
+			selectDictType = row.isSource;
+			$('#item_table').bootstrapTable('refresh',param);
+		});
+		
+	});
+	
+	function queryItemParams(params){
+		params.dictCode = selectDictCode;
+  		params.isSource = selectDictType;
+  		return params;
+	}
+	
+	function queryParams(params) {
+		var dict_name = $.trim($('#query_name').val() );
+		var dict_code = $.trim( $('#query_code').val());
+		params.dictName = dict_name;
+		params.dictCode = dict_code;
+		return params;
+	}
+	
+	function query() {
+		table.bootstrapTable('refresh');
+	}
+	
+	function indexFormatter(value,row,index){
+      return index+1;
+	}
+
+
+
+	//是否是测试用户
+	var isTestRole = "<@shiro.hasRole name='role_test' >true</@shiro.hasRole>" ? true : false;
+	function opeFormatter(value,row,index) {
+		if (isTestRole) {
+			return '<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled " disabled title='+"<@spring.message 'action.disable'/>"+' ><i class="layui-icon layui-icon-more"></i> </button>';
+	  	}
+		if(row.issystem==1){
+          	var v = '<div class="layui-btn-group">'
+              	+'<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled" data-tip="<@spring.message "action.edit"/>" onclick="javascript:"><i class="layui-icon">&#xe642;</i></button>'
+              	+'<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled" data-tip="<@spring.message "action.delete"/>" onclick="javascript:"><i class="layui-icon">&#xe640;</i></button>'
+              	+'<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled" data-tip="<@spring.message "dict.addDictItem"/>" onclick="javascript:"><i class="layui-icon">&#xe654;</i></button>'
+              	+'<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled" data-tip="<@spring.message "dict.import"/>" onclick="javascript:"><i class="layui-icon layui-icon-download-circle"></i></button>'
+              	+'</div>';
+          	return v;
+		} else if(row.isSource == 1){
+			var v = '<div class="layui-btn-group">'
+			  	+'<button class="layui-btn layui-btn-normal layui-btn-sm btn-opt" data-tip="<@spring.message "action.edit"/>" onclick="javascript:edit(\''+row.id+'\')"><i class="layui-icon">&#xe642;</i></button>'
+			 	+'<button class="layui-btn layui-btn-normal layui-btn-sm btn-opt" data-tip="<@spring.message "action.delete"/>" onclick="javascript:del(\''+row.dictCode+'\')"><i class="layui-icon">&#xe640;</i></button>'
+             	+'</div>';
+			return v;
+		} else{
+			var v = '<div class="layui-btn-group">'
+				+'<button class="layui-btn layui-btn-normal layui-btn-sm btn-opt" data-tip="<@spring.message "action.edit"/>" onclick="javascript:edit(\''+row.id+'\')"><i class="layui-icon">&#xe642;</i></button>'
+				+'<button class="layui-btn layui-btn-normal layui-btn-sm btn-opt" data-tip="<@spring.message "action.delete"/>" onclick="javascript:del(\''+row.dictCode+'\')"><i class="layui-icon">&#xe640;</i></button>'
+				+'<button class="layui-btn layui-btn-normal layui-btn-sm btn-opt" data-tip="<@spring.message "dict.addDictItem"/>" onclick="javascript:addItem(\''+row.dictCode+'\',\''+row.dictName+'\')"><i class="layui-icon">&#xe654;</i></button>'
+				+'<button class="layui-btn layui-btn-normal layui-btn-sm btn-opt" data-tip="<@spring.message "dict.import"/>" onclick="javascript:importDictValue(\''+row.dictCode+'\')"><i class="layui-icon layui-icon-download-circle"></i></button>'
+				+'</div>';
+			return v;
+		}
+		return '';
+	}
+
+	function opeItemFormatter(value,row,index){
+		if (isTestRole) {
+			return '<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled " disabled title='+"<@spring.message 'action.disable'/>"+' ><i class="layui-icon layui-icon-more"></i> </button>';
+		}
+        if(row.issystem==1 || row.isSource != 0){
+            var v = '<div class="layui-btn-group">'
+                +'<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled" data-tip="<@spring.message "action.edit"/>" onclick="javascript:"><i class="layui-icon">&#xe642;</i></button>'
+                +'<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled" data-tip="<@spring.message "action.delete"/>" onclick="javascript:"><i class="layui-icon">&#xe640;</i></button>'
+                +'</div>';
+            return v;
+        }
+		var v = '<div class="layui-btn-group">'
+			+'<button class="layui-btn layui-btn-normal layui-btn-sm btn-opt" data-tip="<@spring.message "action.edit"/>" onclick="javascript:editItem(\''+row.id+'\')"><i class="layui-icon">&#xe642;</i></button>'
+			+'<button class="layui-btn layui-btn-normal layui-btn-sm btn-opt" data-tip="<@spring.message "action.delete"/>" onclick="javascript:delItem(\''+row.id+'\')"><i class="layui-icon">&#xe640;</i></button>'
+			+'</div>';
+      return v;
+	}
+	
+	function itemsFormatter(value,row,index){
+		if(value!=null && value.substring(0,1)==','){
+			return value.substr(1) ;
+		}else{
+			return value;
+		}
+	}
+	
+	function infoFormatter(value,row,index){
+		if(value.length > 20){
+			if(row.issystem == 0){
+				return '<a style="margin-left:10px;" title='+row.dictName+' href="javascript:window.showPromptInfo(\''+row.dictCode+'\',\''+row.dictName+'\')" >'+row.dictName.substring(0,20)+'...'+'</a>';
+			}else{
+				return '<span style="margin-left:10px;" title='+row.dictName+' >'+row.dictName.substring(0,20)+'...'+'</span>';
+			}
+		}
+		if(row.issystem == 0){
+			return '<a style="margin-left:10px;" title='+row.dictName+' href="javascript:window.showPromptInfo(\''+row.dictCode+'\',\''+row.dictName+'\')" >'+row.dictName+'</a>';
+		}
+		return '<span style="margin-left:10px;" title='+row.dictName+'>'+row.dictName+'</span>';
+	}
+	
+	function showPromptInfo(code, name){
+		var dictCode = code;
+  		var title = '【'+name+'】';
+    	parent.layer.open({
+			title: title,
+			type:2,
+			content:'${basePath}/prompt/PromptResourceInfo?dictCode='+dictCode,
+			area: ['50%', '60%'],
+			btn:['<@spring.message "banner.Determine"/>'],
+			success: function(layero){
+				/* var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				iframeWin.init(pushId); */
+			},
+		});
+	}
+	
+	function addDict(){
+		var isSubmit = false;
+		parent.layer.open({
+			title: '<@spring.message "dict.addDataDict"/>',
+			type:2,
+			content:'${basePath}/dict/add',
+			area: ['600px', '400px'],
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+						$.ajax({
+			                type: "POST",
+			                url:'${basePath}/dict/save',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message "result.addFail"/>！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('<@spring.message "result.addSuccess"/>！');
+									reloadTable();
+			                	}else if(result.code==1){
+			                		parent.layer.msg('<@spring.message "dict.Dictionary_entry_name_or_dictionary_entry_value_already_exists"/>');
+			                		isSubmit = false;
+			                	}else if(result.code==2){
+                                    parent.layer.msg('<@spring.message "dict.Dictionary_encoding_already_exists"/>');
+                                    isSubmit = false;
+                                }else if(result.code==3){
+                                	parent.layer.msg('<@spring.message "dict.Dictionary_encoding_already_illegal"/>');
+                                    isSubmit = false;
+                                }
+			                }
+			            });
+					} else{
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+	}
+	
+	function addItem(dictCode,dictName) {
+		var isSubmit = false;
+		parent.layer.open({
+			title: '<@spring.message "dict.addDataDictItem"/>',
+			type:2,
+			content:'${basePath}/dict/addItem',
+			area: ['600px', '500px'],
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				var addWin = top.window[layero.find('iframe')[0]['name']]; 
+				addWin.init(dictCode,dictName);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+						$.ajax({
+			                type: "POST",
+			                url:'${basePath}/dict/save',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message "result.addFail"/>！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('<@spring.message "result.addSuccess"/>！');
+									reloadItemTable();
+			                	}else if(result.code==1){
+                                    parent.layer.msg('<@spring.message "dict.Dictionary_entry_name_or_dictionary_entry_value_already_exists"/>');
+                                    isSubmit = false;
+                                }else if(result.code==2){
+                                    parent.layer.msg('<@spring.message "dict.Dictionary_encoding_already_exists"/>');
+                                    isSubmit = false;
+                                }
+			                }
+			            });
+					} else{
+						isSubmit = false;
+					}
+				}
+   		    	
+    		}
+		});
+		
+	}
+	
+	function edit(id){
+		var isSubmit = false;
+		parent.layer.open({
+			title: '<@spring.message "dict.editDataDict"/>',
+			type:2,
+			content:'${basePath}/dict/edit?id='+id,
+			area: ['600px', '400px'],
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath}/dict/update',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message "tips.inputSome"/>result.updateFail！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('<@spring.message "result.updateSuccess"/>！');
+									reloadTable();
+			                	}else if(result.code==1){
+                                    parent.layer.msg('<@spring.message "dict.Dictionary_entry_name_or_dictionary_entry_value_already_exists"/>');
+                                    isSubmit = false;
+                                }else if(result.code==2){
+                                    parent.layer.msg('<@spring.message "dict.Dictionary_encoding_already_exists"/>');
+                                    isSubmit = false;
+                                }else if(result.code==3){
+                                	parent.layer.msg('<@spring.message "dict.Dictionary_encoding_already_illegal"/>');
+                                    isSubmit = false;
+                                }
+			                	
+			                }
+			            });
+		            } else{
+		            	isSubmit = false;
+		            }
+				}
+    		}
+		});
+	}
+	
+	function editItem(id){
+		var isSubmit = false;
+		parent.layer.open({
+			title: '<@spring.message "dict.editDataDictItem"/>',
+			type:2,
+			content:'${basePath}/dict/editItem?id='+id,
+			area: ['600px', '500px'],
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				var editWin = top.window[layero.find('iframe')[0]['name']]; 
+				editWin.init($('#selDictName').val());
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath}/dict/update',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message "result.updateFail"/>！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('<@spring.message "result.updateSuccess"/>！');
+									reloadItemTable();
+			                	}else if(result.code==1){
+                                    parent.layer.msg('<@spring.message "dict.Dictionary_entry_name_or_dictionary_entry_value_already_exists"/>');
+                                    isSubmit = false;
+                                }else if(result.code==2){
+                                    parent.layer.msg('<@spring.message "dict.Dictionary_encoding_already_exists"/>');
+                                    isSubmit = false;
+                                }
+			                	
+			                }
+			            });
+		            } else{
+		            	isSubmit = false;
+		            }
+				}
+    		}
+		});
+		
+		
+	}
+	
+	function del(code){
+		parent.layer.confirm('<@spring.message "dict.deleteDataDict"/>？',  {title:'<@spring.message "action.info"/>',
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			yes: function(index, layero){
+		  		$.post('${basePath}/dict/delByCode',{dictCode:code},function(result){
+		    		if(result.code==0){
+                        parent.layer.msg("<@spring.message 'result.deleteSuccess'/>！");
+						reloadTable();
+						reloadItemTable();
+                	} else if (result.code == -1){
+                		parent.layer.msg("<@spring.message 'dict.bePrompted_can_not_delete'/>！");
+                	} else {
+                        parent.layer.msg("<@spring.message 'result.deleteFail'/>！");
+                	}
+		    		
+			    });
+	                
+			}
+        });
+	}
+	
+	function delItem(id){
+		parent.layer.confirm('<@spring.message "dict.deleteDataDictItem"/>？',   {title:'<@spring.message "action.info"/>',
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			yes: function(index, layero){
+		  		$.post('${basePath}/dict/delById',{id:id},function(result){
+		    		if(result.code==0){
+                        parent.layer.msg("<@spring.message 'result.deleteSuccess'/>！");
+                		reloadItemTable();
+                	}else{
+                        parent.layer.msg("<@spring.message 'result.deleteFail'/>！");
+                	}
+		    		
+			    });
+	                
+			}
+        });
+	}
+	
+	function importDictValue(dictCode){
+		parent.layer.open({
+			title: '<@spring.message "dict.import"/>',
+			type:2,
+			content:'${basePath!}/dict/import',
+			area: ['45%', '70%'],
+			success: function(layero){
+				var importWin = top.window[layero.find('iframe')[0]['name']]; 
+				importWin.init(dictCode);
+				debugger;
+			},
+			cancel: function(){ 
+			    reloadTable();
+			    reloadItemTable();
+			  }
+  		});
+	}
+	
+	function reloadTable() {
+    	$('#table').bootstrapTable('refresh', null);
+    }
+	
+	function reloadItemTable() {
+		var param = {
+				url:basePath+'/dict/listItem',
+				query:{dictCode:$('#selDictCode').val()}
+		};
+		
+		
+		$('#item_table').bootstrapTable('refresh',param);
+    }
+	
+	
+	
+  </script>
+</html>

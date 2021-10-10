@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.MessageCenterMapper"> 
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.MessageCenter">
+        <id column="id" property="id" />
+        <result column="title" property="title" />
+        <result column="content" property="content" />
+        <result column="receive_user" property="receiveUser" />
+        <result column="produce_user" property="produceUser" />
+        <result column="create_time" property="createTime" />
+        <result column="type" property="type" />
+        <result column="is_read" property="isRead" />
+        <result column="read_time" property="readTime" />
+        <result column="levels" property="levels" />
+        <result column="resource_id" property="resourceId" />
+        <result column="message_source_id" property="messageSourceId" />
+        <result column="issue_id" property="issueId" />
+        <result column="tenant_id" property="tenantId" />
+        <result column="avatar" property="avatar" />
+        <result column="realname" property="realName" />
+        <result column="name" property="resourceName" />
+        <result column="link_type" property="linkType" />
+        <result column="resourc_id" property="resourcId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, title, content, receive_user, produce_user, create_time, type, is_read, read_time, levels, resource_id, message_source_id, issue_id, tenant_id
+    </sql>
+
+	<update id="updateAllMessageIsReadById" parameterType="java.lang.String" >
+		UPDATE 
+		  t_message_center 
+		SET
+		  is_read = 1 
+		WHERE receive_user = #{userId,jdbcType=VARCHAR} 
+	</update>
+
+    <delete id="clearAllMessageById" parameterType="java.lang.String">
+       DELETE  FROM t_message_center WHERE receive_user=#{userId,jdbcType=VARCHAR}
+    </delete>
+
+    <select id="findList" resultMap="BaseResultMap">
+        SELECT
+        a.id, a.title, a.content, a.receive_user,a.produce_user,
+        a.create_time ,a.type,a.is_read, a.read_time, a.levels,
+        a.resource_id, a.issue_id, a.tenant_id,b.realname,b.avatar,c.name,c.link_type
+        FROM
+          t_message_center  a  LEFT JOIN t_user_info  b ON a.produce_user = b.id
+          LEFT JOIN  t_resource c ON  a.resource_id=c.id
+        <where>
+        	<if test="receiveUser!=null and receiveUser!=''">
+        		AND a.receive_user=#{receiveUser}
+        	</if>
+        	<if test="isRead!=null and isRead!=''">
+        		AND a.is_read=#{isRead}
+        	</if>
+        	<if test="typeList!= null and typeList.size > 0">
+	        	<foreach collection="typeList" item="type" separator=" " >
+	        		AND a.type != #{type}
+	   			</foreach>
+	        </if>
+        </where>
+        order by a.create_time desc
+    </select>
+    
+    <insert id="insertWithTenantId" parameterType="com.xin.portal.system.model.MessageCenter">
+    	insert into t_message_center (id, title, content, receive_user, produce_user, create_time , type   
+			, is_read, read_time, levels, resource_id, message_source_id, issue_id, tenant_id)
+        values(#{id,jdbcType=VARCHAR}, #{title,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, #{receiveUser,jdbcType=VARCHAR}, #{produceUser,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP} , #{type,jdbcType=INTEGER}   
+			, #{isRead,jdbcType=INTEGER}, #{readTime,jdbcType=TIMESTAMP}, #{levels,jdbcType=INTEGER}, #{resourceId,jdbcType=VARCHAR}, #{messageSourceId,jdbcType=VARCHAR}, #{issueId,jdbcType=VARCHAR}, #{tenantId,jdbcType=VARCHAR})
+    </insert>
+</mapper>

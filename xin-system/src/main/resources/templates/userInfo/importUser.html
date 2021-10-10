@@ -1,0 +1,123 @@
+<#include "common/common.html" />
+<style>
+	.layui-form-label{
+		text-align: left!important
+	}
+	.btn-blockquote{
+		display: inline-block;
+	    border-left: 5px solid #539fff;
+	    line-height: 0px;
+	    font-size: 10pt;
+	}
+</style>
+	<fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+  			<legend><@spring.message 'userInfo.Please_download_Excel_template_and_input_data_according_to_template_requirements'/></legend>
+	</fieldset> 
+ 	
+ 	<div class="layui-container">
+	 	<div class="layui-form-item">
+	 		  <label  class="layui-form-label" style='width:200px'> 1  <@spring.message 'biMapping.download_Excel_template'/></label>
+		      <div class="layui-input-inline">
+		     	 <button id="downExcel"class="layui-btn layui-btn-normal layui-btn-sm"><@spring.message 'biMapping.click_me_to_download'/></button>
+		      </div>
+		</div>
+		<div class="layui-form-item">
+	 		  <label  class="layui-form-label" style='width:200px'> 2  <@spring.message 'userInfo.Fill_data_in_Excel_as_required'/></label>
+		</div>
+		
+	 	<label  class="layui-form-label" style='width:200px'> 3  <@spring.message 'userInfo.Upload_Excel'/></label>
+		<div class="layui-upload-drag" id="test10">
+		  <i class="layui-icon "></i>
+		  <p><@spring.message 'biMapping.Click_Upload_or_drag_the_file_here'/></p>
+		</div>
+		<blockquote class=" layui-elem-quote btn-blockquote"><@spring.message "userInfo.EXCEL_Check_Rules"/></blockquote>
+		<div class="layui-form-item">
+		      <div class="layui-input-inline">
+		     	 <label id="error_msg" style="color:red">${msg}</label>
+		      </div>
+		</div>
+	</div>
+
+
+<script type="text/javascript">
+
+	layui.use([ 'form', 'layer','upload' ],function() {
+		var form = layui.form, 
+			layer = layui.layer,
+			upload = layui.upload;
+			//拖拽上传
+			upload.render({
+			     elem: '#test10'
+			   	,accept: 'file' //普通文件
+			   	,exts: 'xlsx|csv' //只允许上传xlsx
+			    ,url: basePath + '/userInfo/import'
+			    ,done: function(res){
+			    	if(res.code==0){
+						parent.layer.msg('<@spring.message "banner.successfully_upload"/>');
+			    	}else if(res.code==-2){
+			    		parent.layer.msg('<@spring.message "userInfo.excelEmployeeNumberRepeatCheck"/>！');
+			    	}else if(res.code==-3){
+			    		parent.layer.msg('<@spring.message "userInfo.excelUsernameRepeatCheck"/>！');
+			    	}else if(res.code==-4){
+			    		parent.layer.msg('<@spring.message "userInfo.excelEmailRepeatCheck"/>！');
+			    	}else if(res.code==-5){
+			    		parent.layer.msg('<@spring.message "userInfo.ImportFailedNotFoundOrgCheck"/>'+res.msg+'<@spring.message "userInfo.lineData"/>！');
+			    	}else if(res.code==-6){
+			    		parent.layer.msg('<@spring.message "userInfo.OrganizationDataErrorCheck"/>'+res.msg+'<@spring.message "userInfo.line"/>！');
+			    	}else if(res.code==-7){
+			    		parent.layer.msg('<@spring.message "userInfo.employeeNumberCannotEmptyCheck"/>'+res.msg+'<@spring.message "userInfo.line"/>！');
+			    	}else if(res.code==-8){
+			    		parent.layer.msg('<@spring.message "userInfo.employeeNumberRepeatCheck"/>'+res.msg+'<@spring.message "userInfo.line"/>！');
+			    	}else if(res.code==-9){
+			    		parent.layer.msg('<@spring.message "userInfo.usernameCannotEmptyCheck"/>'+res.msg+'<@spring.message "userInfo.line"/>！');
+			    	}else if(res.code==-10){
+			    		parent.layer.msg('<@spring.message "userInfo.usernameRepeatCheck"/>'+res.msg+'<@spring.message "userInfo.line"/>！');
+			    	}else if(res.code==-11){
+			    		parent.layer.msg('<@spring.message "userInfo.emailNotNullCheck"/>'+res.msg+'<@spring.message "userInfo.line"/>！');
+			    	}else if(res.code==-12){
+			    		parent.layer.msg('<@spring.message "userInfo.emailFormatWrongCheck"/>'+res.msg+'<@spring.message "userInfo.line"/>！');
+			    	}else if(res.code==-13){
+			    		parent.layer.msg('<@spring.message "userInfo.emailRepeatCheck"/>'+res.msg+'<@spring.message "userInfo.line"/>！');
+			    	}else if(res.code==-14){
+			    		parent.layer.msg('<@spring.message "userInfo.phoneNumFormatWrongCheck"/>'+res.msg+'<@spring.message "userInfo.line"/>！');
+			    	}else if(res.code==-15){
+			    		parent.layer.msg('<@spring.message "userInfo.importError_checkUserInfo"/>！');
+			    	}else if(res.code==-16){
+			    		parent.layer.msg('<@spring.message "userInfo.excelHaveRepeatPhoneNumberCheck"/>！');
+			    	}else if(res.code==-17){
+			    		parent.layer.msg('<@spring.message "userInfo.phoneNumberHasRepeatForOtherPhoneNumberCheck"/>'+res.msg+'<@spring.message "userInfo.line"/>！');
+			    	}else if(res.code==-18){
+			    		parent.layer.msg('<@spring.message "userInfo.endTimeHasLessThenStartTimeCheck"/>'+res.msg+'<@spring.message "userInfo.line"/>！');
+			    	}else if(res.code==-19){
+			    		parent.layer.msg('<@spring.message "userInfo.mainOrgNotEqualDeputyOrg"/>！');
+			    	}else{
+			    		parent.layer.msg('<@spring.message "activate.Upload_failure"/>');
+			    	}
+			    }
+			  });
+	})
+	$("#findPwd").on("click",function(){
+		var email=$('#email').val();
+		if(email==null||email==""){
+			layer.tips('<@spring.message "userInfo.Please_enter_your_mailbox"/>','#email');
+			return;
+		}
+		if(check_mail(email)){
+			$.ajax({
+	             type: "POST",
+	             url:basePath + '/userInfo/forget/sendEmail?email='+email,
+	             async: false,
+	             error: function(request) {
+	            	 layer.tips("<@spring.message 'userInfo.Connection_exception'/>",'#email');
+	             },
+	             success: function(data) {
+	            	 window.location.href=basePath+'/userInfo/forget/sendSuccess';
+	             }
+	         });
+		}
+		
+	})
+	$("#downExcel").click(function(){
+		window.open('${basePath}/userInfo/downExcel');
+	})
+</script>

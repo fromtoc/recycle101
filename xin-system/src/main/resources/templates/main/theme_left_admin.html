@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>${SYS_NAME!'系统主页'}</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport"
+		  content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
+	<#include "common/common.html" />
+	<script src="${basePath}/plugins/zui/zui.min.js"></script>
+	<script src="${basePath}/plugins/zui/zui.tabs.js"></script>
+	<script type="text/javascript" src="${basePath}/js/comments.js"></script>
+	<link rel="stylesheet" href="${basePath}/plugins/zui/zui.min.css">
+	<link rel="stylesheet" href="${basePath}/plugins/zui/zui.tabs.css">
+	<!-- Bootstrap core CSS -->
+	<link rel="stylesheet" type="text/css" href="${basePath}/plugins/theme-admin/bootstrap/css/bootstrap-3.3.4.css">
+
+	<!-- Font Awesome -->
+	<!-- <link rel="stylesheet" type="text/css" href="${basePath}/plugins/theme-admin/css/font-awesome.4.6.0.css"> -->
+
+	<!-- ionicons -->
+
+	<!-- Morris -->
+	<link href="${basePath}/plugins/theme-admin/css/morris.css" rel="stylesheet"/>
+
+	<!-- Datepicker -->
+	<link href="${basePath}/plugins/theme-admin/css/datepicker.css" rel="stylesheet"/>
+
+	<!-- Animate -->
+	<link href="${basePath}/plugins/theme-admin/css/animate.min.css" rel="stylesheet">
+
+	<!-- Owl Carousel -->
+	<link href="${basePath}/plugins/theme-admin/css/owl.carousel.min.css" rel="stylesheet">
+	<link href="${basePath}/plugins/theme-admin/css/owl.theme.default.min.css" rel="stylesheet">
+
+	<!-- Simplify -->
+	<link href="${basePath}/plugins/theme-admin/css/simplify.min.css" rel="stylesheet">
+	<!-- typeahead -->
+	<link href="${basePath}/plugins/typeahead/jquery.typeahead.min.css" rel="stylesheet">
+	<style>
+		body{
+			background-image: linear-gradient(to right, #F0FAFE,#E0EAF7);
+		}
+		.main-container{
+			background-image: linear-gradient(to right, #F0FAFE,#E0EAF7);
+		}
+		.top-nav .nav-header{
+			background-color: #1c2b36 !important;
+		}
+		.top-nav{
+			background-color: #1c2b36 !important;
+		}
+		.top-nav .nav-container{
+			background-color: #1c2b36 !important;
+		}
+		.top-nav .top-nav-inner{
+		    border-top: 2px solid #fff !important;
+		}
+		.viewNum {
+		    position: absolute;
+		    top: 0;
+		    right: 0;
+		    padding: 10px 4px 0 10px;
+		    font-size: 10px;
+		    -webkit-transform: scale(0.8);
+		    color:#7ca0bb
+		}
+		.introduce{
+		    font-size: 10px;
+		    -webkit-transform: scale(0.9);
+		    color:#777
+		}
+		.messageContent{
+			/*width:257px;*/
+			overflow: hidden;
+			text-overflow:ellipsis;
+			white-space: nowrap;
+			font-size: 11px;
+
+		}
+
+		.messageContent img{
+			width: 20px !important;
+			height: 20px !important;
+			float: none !important;
+			position: relative;
+		}
+
+		.messageTitle{
+			display:inline-block;
+			width: 360px;
+			height:20px;
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			margin-bottom: 0px;
+		}
+		.liNotice{
+			display:inline-block;width:142px;text-align: center;font-size: 15px;font-weight: bold;
+		}
+		.dropdown-menu.notification {
+			top: 95%;
+			padding: 0;
+			width: 427px;
+		}
+		.childrenLi{
+			width:200px;
+			overflow: hidden;
+			text-overflow:ellipsis;
+			white-space: nowrap;
+		}
+		.sidebar-menu.sidebar-mini .main-menu li .submenu {
+			right:-200px;
+		}
+
+	</style>
+
+</head>
+
+<body class="overflow-hidden">
+<div class="wrapper preload" id="wrapper" style="padding-bottom: 0px;">
+	<div class="sidebar-right" id="sidebar-right">
+		<div class="sidebar-inner scrollable-sidebar">
+			<div class="title-block">
+				<@spring.message "main.Visiting_History"/>
+			</div>
+			<div class="content-block" id="historyDiv">
+				<#include "main/theme_left_admin_history.html"/>
+			</div>
+		</div><!-- sidebar-inner -->
+	</div><!-- sidebar-right -->
+	<header class="top-nav" onclick="clickRelation();">
+		<div class="top-nav-inner">
+			<div class="nav-header">
+				<button type="button" class="navbar-toggle pull-left sidebar-toggle" id="sidebarToggleSM"  >
+					<span class="icon-bar" ></span>
+					<span class="icon-bar" ></span>
+					<span class="icon-bar" ></span>
+				</button>
+				<ul class="nav-notification pull-right">
+					<li>
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-cog fa-lg"></i></a>
+						<span class="badge badge-danger bounceIn">1</span>
+						<ul class="dropdown-menu dropdown-sm pull-right user-dropdown">
+							<li class="user-avatar">
+								<img src="images/profile/profile1.jpg" alt="" class="img-circle">
+								<div class="user-content">
+									<h5 class="no-m-bottom">Jane Doe</h5>
+									<div class="m-top-xs">
+										<a href="profile.html" class="m-right-sm">Profile</a>
+										<a href="signin.html">Log out</a>
+									</div>
+								</div>
+							</li>
+							<li>
+								<a href="inbox.html">
+									Inbox
+									<span class="badge badge-danger bounceIn animation-delay2 pull-right">1</span>
+								</a>
+							</li>
+							<li>
+								<a href="#">
+									Notification
+									<span class="badge badge-purple bounceIn animation-delay3 pull-right">2</span>
+								</a>
+							</li>
+							<li>
+								<a href="#" class="sidebarRight-toggle">
+									Message
+									<span class="badge badge-success bounceIn animation-delay4 pull-right">7</span>
+								</a>
+							</li>
+							<li class="divider"></li>
+							<li>
+								<a href="#">Setting</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+
+				<div style="width:260px;heigt:54px;overflow:hidden;text-align:left; padding:0px; margin:0px;position:relative;top:-1px;cursor: pointer;" onclick="openHome()">
+					<img style="width: 120px;height: 29px;position: relative;top: -9px;"
+						 src="${basePath}${(SYS_MAIN_LOGO!='')?string('${SYS_MAIN_LOGO}','/images/dataWindow_white.png')}" />&nbsp;&nbsp;
+					<div style="display: inline-block;height:20px;width:127px;white-space: nowrap;text-overflow: ellipsis;margin-top: 13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+						<span title="${SYS_NAME!''}" style="font-size: 16px;font-weight: 600;color: #a2a7b5;">${SYS_NAME!''} </span>
+					</div>
+				</div>
+
+			</div>
+			<div class="nav-container">
+				<button type="button" class="navbar-toggle pull-left sidebar-toggle" id="sidebarToggleLG" onclick="changeWidth()">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<ul class="nav-notification" style="width:300px;margin-top:10px">
+                	<li class="search-list" style="width:100%">
+                    <form>
+				        <div class="typeahead__container">
+				            <div class="typeahead__field">
+				            	<span class="typeahead__query">
+				                	<input class="js-typeahead"
+				                       name="q"
+				                       type="search"
+				                       autocomplete="off" placeholder="Search" >
+				            	</span> 
+				            </div>
+				        </div>
+				    </form>
+				    </li>
+                </ul>
+				<div class="pull-right m-right-sm" id="head">
+					<#include "main/theme_left_admin_head.html"/>
+				</div>
+			</div>
+		</div><!-- ./top-nav-inner -->
+	</header>
+	<aside class="sidebar-menu fixed"  onclick="clickRelation();">
+		<div class="sidebar-inner scrollable-sidebar">
+			<div class="main-menu">
+				<ul class="accordion">
+					<#if (user_menus?? && user_menus?size>0)>
+						<#list user_menus as rec>
+							<li class="openable bg-palette${rec.colorNum}">
+								<#if (rec.children?? && rec.children?size>0)>
+									<#if (rec.showStyle?? && rec.showStyle == "card") >
+										<a href="javascript:void(0);" onclick = "openTabCard('${rec.id}',false)">
+											<span class="menu-content block">
+												<span class="menu-icon">
+													<#if menuIcon?? && menuIcon!=0>
+														<#if rec.iconName??>
+															<i class="fa ${rec.iconName}"></i>
+															<#else>
+															<i class="fa fa-dot-circle-o"></i>
+														</#if>
+													</#if>
+												</span>
+												<span class="text m-left-sm shake">${rec.name}</span>
+											</span>
+											<span class="menu-content-hover block">
+													${rec.shortTitle}
+											</span>
+										</a>
+										<#else>
+										<a href="javascript:void(0);">
+											<span class="menu-content block">
+												<span class="menu-icon">
+													<#if menuIcon?? && menuIcon!=0>
+														<#if rec.iconName??>
+															<i class="fa ${rec.iconName}"></i>
+															<#else>
+															<i class="fa fa-dot-circle-o"></i>
+														</#if>
+													</#if>
+												</span>
+												<span class="text m-left-sm shake">${rec.name}</span>
+												<span class="submenu-icon"></span>
+											</span>
+											<span class="menu-content-hover block">
+													${rec.shortTitle}
+											</span>
+										</a>
+									</#if>
+									<#else>
+										<a href="javascript:;" onclick = "openTab('${rec.id}','${rec.linkType}')">
+											<span class="menu-content block">
+												<span class="menu-icon">
+													<#if menuIcon?? && menuIcon!=0>
+														<#if rec.iconName??>
+															<i class="fa ${rec.iconName}"></i>
+															<#else>
+															<i class="fa fa-dot-circle-o"></i>
+														</#if>
+													</#if>
+												</span>
+												<span class="text m-left-sm shake">${rec.name}</span>
+											</span>
+											<span class="menu-content-hover block">
+												${rec.shortTitle}
+											</span>
+										</a>
+								</#if>
+								<#if (rec.children?? && rec.children?size>0)>
+									<#if (rec.showStyle?? && rec.showStyle == "card")>
+										<#else>
+										<ul class="submenu bg-palette2" >
+											<#list rec.children as child>
+												<li class="openable">
+													<#if (child.children?? && child.children?size>0)>
+														<#if (child.showStyle?? && child.showStyle == "card")>
+															<a href="javascript:;" class="childrenLi" onclick = "openTabCard('${rec.id}',false)">
+																<span class="submenu-label shake">
+																	<#if menuIcon?? && menuIcon!=0>
+																		<#if child.iconName!=''>
+																			<i class="fa ${child.iconName}"></i>
+																			<#else>
+																			<i class="fa fa-dot-circle-o"></i>
+																		</#if>
+																	</#if>
+																		${(child.name)!}
+																</span>
+															</a>
+															<#else>
+															<a href="javascript:;" class="childrenLi" >
+																<span class="submenu-label shake">
+																	<#if menuIcon?? && menuIcon!=0>
+																		<#if child.iconName!=''>
+																			<i class="fa ${child.iconName}"></i>
+																			<#else>
+																			<i class="fa fa-dot-circle-o"></i>
+																		</#if>
+																	</#if>
+																		${(child.name)!}<span class="submenu-icon"></span>
+																</span>
+															</a>
+															<ul class="submenu third-level" name="kidsMenus" >
+																<#list child.children as kid>
+																	<li >
+																		<a class="childrenLi" href="javascript:;"oncilck="openTab('${kid.id}','${kid.linkType}')">
+																			<span class="submenu-label">
+																				<#if menuIcon?? && menuIcon!=0>
+																					<#if kid.iconName??>
+																						<i class="fa ${kid.iconName}"></i>
+																						<#else>
+																						<i class="fa fa-dot-circle-o"></i>
+																					</#if>
+																				</#if>
+																				${(kid.name)!}
+																			</span>
+																		</a>
+																	</li>
+																</#list>
+															</ul>	
+														</#if>
+														<#else>
+															<a class="childrenLi" href="javascript:;"onclick="openTab('${child.id}','${child.linkType}')">
+																<span class="submenu-label shake">
+																	<#if menuIcon?? && menuIcon!=0>
+																		<#if child.iconName!=''>
+																			<i class="fa ${child.iconName}"></i>
+																			<#else>
+																			<i class="fa fa-dot-circle-o"></i>
+																		</#if>
+																	</#if>
+																	${(child.name)!}
+																</span>
+															</a>
+													</#if>
+												</li>
+											</#list>
+										</ul>
+									</#if>
+								</#if>
+							</li>
+						</#list>
+					</#if>
+				</ul>
+			</div>
+			<div class="sidebar-fix-bottom clearfix">
+				<div class="user-dropdown dropup pull-left">
+					<a href="#" class="dropdwon-toggle font-18" data-toggle="dropdown"><i class="ion-person-add"></i>
+					</a>
+					<ul class="dropdown-menu">
+						<li>
+							<a href="inbox.html">
+								Inbox
+								<span class="badge badge-danger bounceIn animation-delay2 pull-right">1</span>
+							</a>
+						</li>
+						<li>
+							<a href="#">
+								Notification
+								<span class="badge badge-purple bounceIn animation-delay3 pull-right">2</span>
+							</a>
+						</li>
+						<li>
+							<a href="#" class="sidebarRight-toggle">
+								Message
+								<span class="badge badge-success bounceIn animation-delay4 pull-right">7</span>
+							</a>
+						</li>
+						<li class="divider"></li>
+						<li>
+							<a href="#">Setting</a>
+						</li>
+					</ul>
+				</div>
+				<a href="lockscreen.html" class="pull-right font-18"><i class="ion-log-out"></i></a>
+			</div>
+		</div><!-- sidebar-inner -->
+	</aside>
+
+	<div class="main-container" id="main-container" >
+		<iframe id="content_iframe" src="" style="padding:0px;border:0px solid white" ></iframe>
+	</div><!-- /main-container -->
+
+	<!--	<footer class="footer">
+        </footer>-->
+</div><!-- /wrapper -->
+
+<a href="#" class="scroll-to-top hidden-print"><i class="fa fa-chevron-up fa-lg"></i></a>
+
+
+
+<!-- Le javascript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+
+<!-- Jquery -->
+<script src="${basePath}/plugins/theme-admin/js/jquery-1.10.2.js"></script>
+
+<!-- Bootstrap -->
+<script src="${basePath}/plugins/theme-admin/bootstrap/js/bootstrap-3.3.4.js"></script>
+
+<!-- Flot -->
+<script src='${basePath}/plugins/theme-admin/js/jquery.flot.min.js'></script>
+
+<!-- Slimscroll -->
+<script src='${basePath}/plugins/theme-admin/js/jquery.slimscroll.min.js'></script>
+
+<!-- Morris -->
+<script src='${basePath}/plugins/theme-admin/js/rapheal.min.js'></script>
+<script src='${basePath}/plugins/theme-admin/js/morris.min.js'></script>
+
+<!-- Datepicker -->
+<script src='${basePath}/plugins/theme-admin/js/uncompressed/datepicker.js'></script>
+
+<!-- Sparkline -->
+<script src='${basePath}/plugins/theme-admin/js/sparkline.min.js'></script>
+
+<!-- Skycons -->
+<script src='${basePath}/plugins/theme-admin/js/uncompressed/skycons.js'></script>
+
+<!-- Popup Overlay -->
+<script src='${basePath}/plugins/theme-admin/js/jquery.popupoverlay.min.js'></script>
+
+<!-- Easy Pie Chart -->
+<script src='${basePath}/plugins/theme-admin/js/jquery.easypiechart.min.js'></script>
+
+<!-- Sortable -->
+<script src='${basePath}/plugins/theme-admin/js/uncompressed/jquery.sortable.js'></script>
+
+<!-- Owl Carousel -->
+<script src='${basePath}/plugins/theme-admin/js/owl.carousel.min.js'></script>
+
+<!-- Modernizr -->
+<script src='${basePath}/plugins/theme-admin/js/modernizr.min.js'></script>
+
+<!-- Simplify -->
+<script src="${basePath}/plugins/theme-admin/js/simplify/simplify.js"></script>
+<script src="${basePath}/plugins/theme-admin/js/simplify/simplify_dashboard.js"></script>
+<!-- typeahead -->
+<script src="${basePath}/plugins/typeahead/jquery.typeahead.min.js"></script>
+
+<script>
+    src="${basePath}/module/moduleHome/${moduleId}"
+    var preferType = '${preferType!}';
+    var preferValue = '${preferValue!}';
+    var moduleId = '${moduleId!}';
+    var changePWD = '${changePWD!}';
+    var loginPrompt = '${LOGIN_PROMPT}';
+    var lastLoginTime = '${lastLoginTime}';
+    var lastLoginip = '${lastLoginip}';
+    var lastLoginAdress = '${lastLoginAdress}';
+    var pwdUpdateReg = '${PASSWORD_UPDATE_REGULARLY}';
+    var updatePwdPrompt = '${UPDATE_REGULARLY_PROMPT}';
+    goSearch();//搜索
+
+    layui.use(['element','layer'], function(){
+        var element = layui.element,
+            layer = layui.layer;
+
+
+        window.onload=function (){
+            IframeOnClick.track(document.getElementById("content_iframe"), function() { clickRelation()});
+            var ifm= document.getElementById("content_iframe");
+            ifm.width = $("#main-container").width();
+            ifm.height=$(window).height()-60;
+            var url = getHomeUrl(preferType,preferValue,moduleId);
+            $('#content_iframe').attr('src', url);
+            if(loginPrompt=="1"){
+                loginPromptInfo();
+            }
+            if(updatePwdPrompt=="1" && pwdUpdateReg=="1" ){
+                promptUpdatePwd();
+            }
+            if(changePWD=="0"){
+                changePassword('('+'<@spring.message"First_login"/>'+')');
+            } else if (updatePwdPrompt=="1" && changePWD=="1"){
+                changePassword('('+'<@spring.message"password_reset"/>'+')');
+            }
+            var url='';
+            var AvatarPath = "${AvatarPath}";
+            if(AvatarPath.length != null && AvatarPath.length < 60){
+                url = "${basePath}"+"/"+AvatarPath;
+            }else{
+                url = AvatarPath;
+            }
+            $('#headPic').attr("src",url);
+
+        }
+    });
+    window.onresize = function(){
+        var ifm= document.getElementById("content_iframe");
+        ifm.width = $("#main-container").width();
+        ifm.height=$(window).height()-60;
+    }
+    var sizeFlag = '0';
+    function changeWidth(){
+        if($("#sidebar-right").hasClass("active")){
+            $("#fa-history").click();
+        }
+
+        var ifm= document.getElementById("content_iframe");
+        var width = $("#main-container").width();
+        if(sizeFlag=='0'){
+            sizeFlag='1';
+            ifm.width=width+175;
+        }else{
+            sizeFlag='0'
+            ifm.width=width-175;
+        }
+    }
+
+
+    function openHome(){
+        var url = getHomeUrl(preferType,preferValue,moduleId);
+        $('#content_iframe').attr('src', url);
+    }
+    
+    function openTabUrl(url){
+        $('#content_iframe').attr('src', url);
+    }
+
+    function getHomeUrl(type,value,id){
+        var URL = '';
+        if(type == 'orgHome' || type==null || type=='' || type=='undefined'){
+            URL = '${basePath}/module/moduleHome/'+id;
+        }else if(type == 'favorites'){
+            URL = '${basePath}/collect/index';
+        }else if(type == 'personalPage'){
+            URL = '${basePath}/userInfo/personalPage';
+        }else if(type == 'catalogue'){
+            URL = '${basePath}/menu/preferView/'+value;
+        }else{//docObject
+            URL = '${basePath}/menu/view/'+value;
+        }
+        return URL;
+    }
+
+    function openTab(id,linkType){
+    	switch(arguments.length){
+    	case 2:
+    		if(linkType!==undefined && linkType !==null && linkType !== ""){
+                $('#content_iframe').html('');
+                if (linkType==1) {
+                    $('#content_iframe').attr('src', '${basePath}/menu/view/'+id);
+                } else {
+                    window.open('${basePath}/menu/view/'+id);
+                }
+            }
+	        break;
+	     case 4:
+	    	 $('#content_iframe').html('');
+	         $('#content_iframe').attr('src', arguments[2]);
+	        break;
+	     default:
+	    	 if(linkType!==undefined && linkType !==null && linkType !== ""){
+	             $('#content_iframe').html('');
+	             if (linkType==1) {
+	                 $('#content_iframe').attr('src', '${basePath}/menu/view/'+id);
+	             } else {
+	                 window.open('${basePath}/menu/view/'+id);
+	             }
+	         }
+        	 break;
+    	}
+    }
+    
+    function openTabCard(id, isResource){
+    	//根据id 展示带权限的菜单
+    	if(isResource){
+    		$("#content_iframe").attr("src","${basePath!}/resource/view/"+id);
+    	}else{
+    		$("#content_iframe").attr("src","${basePath!}/menu/cardShow/"+id);
+    	}
+    }
+    
+    
+    function showTab(id,resourceId,name,linkType){
+        updateMessageState(id);
+        $("#content_iframe").attr("src","${basePath!}/resource/view/"+resourceId);
+        comment(resourceId,"<@spring.message 'Comment_area'/>");
+    }
+    
+    function showTab2(id,issueId,title,linkType){
+        updateMessageState(id);
+        if(linkType!=null&&linkType==1){
+            if(this.openTab){
+                reloadHeadFun();
+                openIssesInfo(issueId);
+            }else{
+                reloadHeadFun();
+                openIssesInfo(issueId);
+            }
+        }else{
+            reloadHeadFun();
+            openIssesInfo(issueId);
+        }
+    }
+    
+    function openIssesInfo(id){
+  		var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message"issue.Details_of_the_problem"/>',
+			type:2,
+			content:'${basePath}/issue/info?id='+id,
+			area: ['80%', '600px'],
+			btn:['<@spring.message"issue.quit"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init();
+			},
+			yes:function(index,layero){
+				parent.layer.close(index);
+    		}
+		});
+  	}
+    
+    function openHistory(linkType,url){
+        if(linkType!==undefined && linkType !==null && linkType !== ""){
+            $('#content_iframe').html('');
+            if (linkType==1) {
+                $('#content_iframe').attr('src', url);
+            } else {
+                window.open(url);
+            }
+        }
+    }
+    function changePassword(msg) {
+        parent.layer.open({
+            title: '<@spring.message "updatePassword"/>'+ msg,
+            type:2,
+            content:'${basePath}/userInfo/setPassword',
+            area: ['50%', '50%'],
+            btn:['<@spring.message"action.ok"/>','<@spring.message"action.cancel"/>'],
+            success: function(layero){
+            },
+            yes:function(index,layero){
+                var iframeWin = top.window[layero.find('iframe')[0]['name']];
+                var data = iframeWin.getData();
+                if (data!=null) {
+                    $.ajax({
+                        type: "POST",
+                        url:'${basePath}/user/updatePwd',
+                        data:data,
+                        async: false,
+                        error: function(request) {
+                            parent.layer.msg('<@spring.message "result.fail"/>！');
+                        },
+                        success: function(result) {
+                            if(result.code==0){
+                                parent.layer.close(index);
+                                layer.confirm('<@spring.message "theme.Password_modification_is_successful_please_login_again"/>!', {title:'<@spring.message "action.info"/>',
+                                    btn: ['<@spring.message"action.ok"/>'] //按钮
+                                }, function(indexCon){
+                                    layer.close(indexCon);
+                                    window.location.href = basePath + '/logout';
+                                });
+                            }else{
+                                parent.layer.msg("<@spring.message 'result.fail'/>");
+                            }
+                        }
+                    });
+                }
+
+            }
+        });
+    }
+    function loginPromptInfo(){
+        var html = '<div style="line-height: 1.8;text-align: left;padding: 0 50px;">'
+            +'<i style="font-size:30px" class="layui-icon">&#xe60e;<i/>'
+            +'<span style="font-size: 16px;vertical-align: text-top;margin-left: 20px;"><@spring.message "theme.Last_login_information"/></span>'
+            +'<div style="font-size: 16px;" ><p style="display: inline-block;width: 39px;"><@spring.message "resource.Time"/></p>：<span>'+lastLoginTime+'</span></div>'
+            +'<div style="font-size: 16px;" ><p style="display: inline-block;width: 39px;">IP</p>：<span>'+lastLoginip+'</span></div>'
+            +'<div style="font-size: 16px;" ><p style="display: inline-block;width: 39px;"><@spring.message "theme.place"/></p>：<span>'+lastLoginAdress+'</span></div>'
+            +'</div>';
+        parent.layer.open({
+            title: '<@spring.message "login.sign"/><@spring.message "action.info"/>',
+            type: 1,
+            offset: 'rb', //右下角弹出
+            area: ['340px', '215px'],
+            shadeClose:true,
+            content: html
+        });
+    }
+
+    function promptUpdatePwd(){
+        parent.layer.open({
+            title: '<@spring.message "theme.Regular_password_modification_prompt"/>',
+            type: 1,
+            offset: 'rb', //右下角弹出
+            area: ['340px', '215px'],
+            content: '<div style="padding: 15px;" >'
+            +'<div><span style="font-size: 16px;"><@spring.message "theme.Your_password_has_exceeded_the_time_limit_for_modification_Please_amend_it_in_time"/></span></div>'
+            +'<div style="padding-top: 20px;padding-left: 20px;" ><span style="color: red;">>>></span><a style="cursor:pointer;" id="promptUpdatePwd" ><@spring.message "updatePassword"/></a></div>'
+            +'</div>'
+        });
+    }
+
+    $(document).on('click', '#promptUpdatePwd', function () {
+        changePassword("");
+    });
+    function personalRecord(){
+        parent.layer.open({
+            title: '<@spring.message"PersonalPortrait"/>',
+            type:2,
+            content:'${basePath}/userInfo/userMessage',
+            area: ['777px', '567px'],
+            yes:function(index,layero){
+                parent.layer.close(index);
+            }
+        });
+    }
+    function setPic(){
+        var url='';
+        var AvatarPath = "${AvatarPath}";
+        if(AvatarPath.length != null && AvatarPath.length < 60){
+            url = "${basePath}"+"/"+AvatarPath;
+        }else{
+            url = AvatarPath;
+        }
+        $('#headPic').attr("src",url);
+    }
+
+    function noticeInfo(id,type) {
+        var title = "<@spring.message 'theme.Notice'/>";
+        var url = '';
+        if(type==1){
+            url = '${basePath}' + '/notice/info?id='+id;
+        }else if(type==2){
+            var notice;
+            $.ajax({
+                type: 'post', // 提交方式 get/post
+                async:false,
+                url: '${basePath}/notice/findOneNotice', // 需要提交的 url
+                data:{
+                    'id':id
+                },
+                success: function(res) {
+                    notice = res;
+                }
+            });
+            url = notice.content;
+            title = notice.title;
+        }
+        setreadNum(id);
+        parent.layer.open({
+            type: 2,
+            title: title,
+            shadeClose: true,
+            shade: 0.5,
+            area: ['80%', '70%'],
+            content: url, //iframe的url
+            cancel: function(){
+                $("#head").load("${basePath}/reloadHead", null,function(){
+                    setPic();
+                    layui.use('element', function () {
+                        var element = layui.element;
+                        element.render('nav', 'nav_filter');
+                    })
+                })
+            }
+
+        });
+    }
+
+    function MessageInfo(id){
+        url = basePath + '/messageCenter/info/'+id;
+        updateMessageState(id);
+        parent.layer.open({
+            type: 2,
+            title: '<@spring.message "Message.detail"/>',
+            shadeClose: true,
+            shade: 0.5,
+            area: ['80%', '70%'],
+            content: url, //iframe的url
+            cancel: function(){
+                $("#head").load("${basePath}/reloadHead", null,function(){
+                    setPic();
+                    layui.use('element', function () {
+                        var element = layui.element;
+                        element.render('nav', 'nav_filter');
+                    })
+                })
+            }
+
+        });
+    }
+
+
+
+    function updateMessageState(id){
+        $.ajax({
+            type: 'post', // 提交方式 get/post
+            url: '${basePath}/messageCenter/update', // 需要提交的 url
+            data:{
+                'id':id ,
+                'isRead':1
+            },
+            async: true,
+            success: function(res) {
+                reloadHeadFun()
+            }
+        });
+    }
+
+    function moreNotice(){
+        parent.layer.open({
+            type: 2,
+            title: '<@spring.message "More.notice"/>',
+            area: ['70%', '70%'],
+            content: "${basePath}/moContent/content_notice_more/null",
+            cancel: function(){
+                $("#head").load("${basePath}/reloadHead", null,function(){
+                    setPic();
+                    layui.use('element', function () {
+                        var element = layui.element;
+                        element.render('nav', 'nav_filter');
+                    })
+                })
+            }
+        });
+    }
+    function setreadNum(id){
+        $.ajax({
+            type: 'post', // 提交方式 get/post
+            url: '${basePath}/notice/updateReadNum', // 需要提交的 url
+            data:{
+                'id':id
+            },
+            async: true,
+            success: function(res) {
+                reloadHeadFun();
+            }
+        });
+    }
+
+
+    function setPreference(id){
+        $('#content_iframe').html('');
+        $('#content_iframe').attr('src', '${basePath}/userInfo/preference/'+id);
+    }
+    function setAllNoticeRead(){//设置全部通知为已读
+        $.ajax({
+            type: 'post', // 提交方式 get/post
+            url: '${basePath}/notice/setAllNoticeRead', // 需要提交的 url
+            async: false,
+            success: function(res) {
+            }
+        });
+        reloadHeadFun();
+        //location.reload();
+    }
+
+
+    function setAllMessageRead(){//设置全部消息为已读
+        $.ajax({
+            type: 'post', // 提交方式 get/post
+            url: '${basePath}/messageCenter/setAllRead', // 需要提交的 url
+            async: false,
+            success: function(res) {
+            }
+        });
+        reloadHeadFun();
+    }
+
+    function clearAllMessage(){//设置全部消息为已读
+        parent.layer.confirm('<@spring.message "theme.Clear_all_messages"/>？', {
+            title: '<@spring.message "action.info"/>',
+            btn: ['<@spring.message "action.ok"/>', '<@spring.message "action.cancel"/>'],
+            yes: function (index, layero) {
+                $.ajax({
+                    type: 'DELETE', // 提交方式 get/post
+                    url: '${basePath}/messageCenter/clearAllMessage', // 需要提交的 url
+                    async: false,
+                    success: function (res) {
+
+                        layer.close(index);
+                    }
+                });
+                reloadHeadFun();
+                //location.reload();
+            }
+        });
+	}
+
+    function moreMessage(){//
+        parent.layer.open({
+            type: 2,
+            title: '<@spring.message "More.news"/>',
+            area: ['70%', '70%'],
+            content: "${basePath}/moContent/content_message_more",
+            cancel: function(){
+                $("#head").load("${basePath}/reloadHead", null,function(){
+                    setPic();
+                    layui.use('element', function () {
+                        var element = layui.element;
+                        element.render('nav', 'nav_filter');
+                    })
+                })
+            }
+        });
+    }
+
+   /* var num="${(messageCount)!}";
+    var num1="${(noticeCount)!}";
+    var num2=Number(num)+Number(num1);*/
+
+    function reloadHeadFun(){//定义刷新head的方法，方便子页面调用父页面方法。
+        $("#head").load("${basePath}/reloadHead/", null,function(){
+            setPic();
+
+        })
+
+    }
+
+
+    function openPersonalRecord(name,url){
+        $('#content_iframe').html('');
+        $('#content_iframe').attr('src', url);
+    }
+
+    var socket;
+    var noticeMsg="${noticeMsg}";
+    var commentMsg="${commentMsg}";
+    var systemMsg="${systemMsg}";
+    var issueMsg="${issueMsg}";
+    if(typeof(WebSocket) == "undefined") {
+        console.log("您的浏览器不支持WebSocket");
+    }else{
+        console.log("您的浏览器支持WebSocket");
+        //实现化WebSocket对象，指定要连接的服务器地址与端口  建立连接
+        //等同于socket = new WebSocket("ws://localhost:8083/checkcentersys/websocket/20");
+        var path='${basePath}'.split("//")[1];
+        socket = new WebSocket("ws://"+path+"/websocketNews/"+"${user.id}");
+        //打开事件
+        socket.onopen = function() {
+            console.log("Socket 已打开");
+            //socket.send("这是来自客户端的消息" + location.href + new Date());
+        };
+        //获得消息事件
+        socket.onmessage = function(msg) {
+            if (msg.data == "1") {
+                reloadHeadFun();
+            } else if (msg.data == "2") {
+                if (noticeMsg == 1) {
+                    reloadHeadFun();
+                    /*layer.tips('<@spring.message "main.You_have_a_new_message"/>', '#aaa', {
+                        tips: [1, '#3595CC'],
+                        time: 4000
+
+                    });*/
+                }
+            } else if (msg.data == "3") {
+                if (commentMsg == 1) {
+                    reloadHeadFun();
+                   /* layer.tips('<@spring.message "main.You_have_a_new_message"/>', '#aaa', {
+                        tips: [1, '#3595CC'],
+                        time: 4000
+                    });*/
+                }
+            }else if (msg.data == "4") {
+                if (systemMsg == 1) {
+                    reloadHeadFun();
+                   /* layer.tips('<@spring.message "main.You_have_a_new_message"/>', '#aaa', {
+                        tips: [1, '#3595CC'],
+                        time: 4000
+                    });*/
+                }
+            }else if (msg.data == "5") {
+                if (issueMsg == 1) {
+                    reloadHeadFun();
+                   /* layer.tips('<@spring.message "main.You_have_a_new_message"/>', '#aaa', {
+                        tips: [1, '#3595CC'],
+                        time: 4000
+                    });*/
+                }
+            };
+        };
+        //关闭事件
+        socket.onclose = function() {
+            console.log("Socket已关闭");
+        };
+        //发生了错误事件
+        socket.onerror = function() {
+            console.log("Socket发生了错误");
+            //此时可以尝试刷新页面
+        }
+
+    }
+    
+    function goSearch(){
+		var search= new Array();
+		/* 名称搜索--------点击次数 */
+		$.ajax({
+            type: "GET",
+            url:basePath+'/menu/findList',
+            success: function(result) {
+            	console.log("-----------------------------------")
+            	console.log(result)
+            	typeof $.typeahead === 'function' && $.typeahead({
+                    input: ".js-typeahead",
+                    minLength: 0,
+                    maxItem: 15,
+                    order: "desc",
+                    hint: true,
+                    dynamic: true,
+                    delay: 500,
+                    cache: false,
+                    searchOnFocus: true,
+                    emptyTemplate: 'No result for {{query}}',
+                    href: function(item){
+                    	/* console.log(item.id+"-------"+item.linkType)
+                    	openTab(item.id,item.linkType) */
+                    },
+                    //groupOrder: ["Eastern", "Western"],
+                    display: ["name","code"],
+                    /* correlativeTemplate: true, */
+                    template:function (query, item) {
+                    	var codeHtml="";
+                    	if(item.code==null||item.code==""){
+                    		
+                    	}else{
+                    		codeHtml='<span class="code">({{code}})</span>';
+                    	}
+                    	var introHtml="";
+						if(item.introduce==null||item.introduce==""){
+                    		
+                    	}else{
+                    		introHtml='<span class="introduce">Intro : {{introduce}}</span>';
+                    	}
+                   		return '<span>' +
+                           '<span class="name">{{name}}</span>' +
+                           codeHtml+
+                           '<span class="viewNum">{{viewNum}}</span>' +
+                           '</span>'+'<br>'+
+                           introHtml;
+                    },
+                    source: {
+                        teams: {
+                            data: result
+                        }
+                    },
+                    callback: {
+                        onClickAfter: function (node, a, item, event) {
+                 			//console.log(item.id+"-----------"+item.linkType)
+                 			openTab(item.id,item.linkType)
+                        }
+                    }
+                });
+            }
+		})
+    }
+</script>
+<script>
+    function showTypeFn1(flag){
+        if(flag=='1'){
+            $("#ul1").show();
+            $("#liNotice1").addClass("")
+        }else if(flag=='0'){
+            $("#ul1").hide();
+        }
+    }
+
+    function showTypeFn2(flag){
+        if(flag=='1'){
+            $("#ul2").show();
+        }else if(flag=='0'){
+            $("#ul2").hide();
+        }
+    }
+
+    function showLis(id){
+        if(id=="liNotice1"){
+            $("#liNotice1").addClass("bottom-style")
+            $("#liNotice2").removeClass("bottom-style")
+            var noticeLis = $(".noticeLis");
+            for(var i=0;i<noticeLis.length;i++){
+                $(noticeLis[i]).show();
+            }
+            var messageLis = $(".messageLis");
+            for(var i=0;i<messageLis.length;i++){
+                $(messageLis[i]).hide();
+            }
+        }else if(id=="liNotice2"){
+            $("#liNotice2").addClass("bottom-style")
+            $("#liNotice1").removeClass("bottom-style")
+            var messageLis = $(".messageLis");
+            for(var i=0;i<messageLis.length;i++){
+                $(messageLis[i]).show();
+            }
+            var noticeLis = $(".noticeLis");
+            for(var i=0;i<noticeLis.length;i++){
+                $(noticeLis[i]).hide();
+            }
+        }
+    }
+   
+
+</script>
+<script>
+    $(function()    {
+        $('.chart').easyPieChart({
+            easing: 'easeOutBounce',
+            size: '140',
+            lineWidth: '7',
+            barColor: '#7266ba',
+            onStep: function(from, to, percent) {
+                $(this.el).find('.percent').text(Math.round(percent));
+            }
+        });
+
+        $('.sortable-list').sortable();
+
+        $('.todo-checkbox').click(function()	{
+
+            var _activeCheckbox = $(this).find('input[type="checkbox"]');
+
+            if(_activeCheckbox.is(':checked'))	{
+                $(this).parent().addClass('selected');
+            }
+            else	{
+                $(this).parent().removeClass('selected');
+            }
+
+        });
+
+        //Delete Widget Confirmation
+        $('#deleteWidgetConfirm').popup({
+            vertical: 'top',
+            pagecontainer: '.container',
+            transition: 'all 0.3s'
+        });
+    });
+
+    function  clickRelation(){
+        if($("#sidebar-right").hasClass("active")){
+            $("#sidebar-right").removeClass("active")
+            $("#wrapper").removeClass("display-right")
+        }
+    }
+
+
+
+
+
+
+
+    var IframeOnClick = {
+        resolution: 200,
+        iframes: [],
+        interval: null,
+        Iframe: function() {
+            this.element = arguments[0];
+            this.cb = arguments[1];
+            this.hasTracked = false;
+        },
+        track: function(element, cb) {
+            this.iframes.push(new this.Iframe(element, cb));
+            if (!this.interval) {
+                var _this = this;
+                this.interval = setInterval(function() { _this.checkClick(); }, this.resolution);
+            }
+        },
+        checkClick: function() {
+            if (document.activeElement) {
+                var activeElement = document.activeElement;
+                for (var i in this.iframes) {
+                    if (activeElement === this.iframes[i].element) { // user is in this Iframe
+                        if (this.iframes[i].hasTracked == false) {
+                            this.iframes[i].cb.apply(window, []);
+                            this.iframes[i].hasTracked = true;
+                        }
+                    } else {
+                        this.iframes[i].hasTracked = false;
+                    }
+                }
+            }
+        }
+    };
+
+</script>
+
+
+</body>
+</html>

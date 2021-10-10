@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+</head>
+<body >
+	<div class="layui-fluid">
+		<div class="layui-row" >
+			<div class="layui-col-md12">
+			  <div  id="query_div" id="toolbar" class="layui-form layui-form-pane" >
+					<form id="query_form" class="layui-form layui-form-pane" style="padding-top:5px;">
+				    	<input type="hidden" id="resourceId" name="resourceId" value="${resourceId!}">
+				    	<div class="layui-inline">
+						    <label class="layui-form-label"><@spring.message "role.role"/></label>
+						  	<div class="layui-input-inline" id="roleDiv">
+							</div>
+						</div>
+						<div class="layui-inline">
+							<div class="layui-input-inline">
+				            	<button type="button" id="query" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/></button>
+						    	<button type="button" class="reset layui-btn layui-btn-sm layui-btn-normal"><i class="glyphicon glyphicon-refresh"></i> <@spring.message 'action.reset'/></button>
+						    </div>
+						</div>
+					</form>
+				</div>
+				<div> 
+    				<table id="table" class="table-condensed"></table>
+    			</div>	
+    		</div>
+	    </div>
+    </div>
+</body>
+<script id="template_role_select" type="text/html">
+	<select name="roleId" id="roleId" lay-filter="roleId">
+		<option value=""><@spring.message "list.all"/></option>
+	{{#  layui.each(d.list, function(index, item){ }}
+        <option value="{{item.id}}">{{item.name}}</option>
+	{{#  }); }}
+    </select>
+</script>
+<script type="text/javascript">
+var roleInfo = JSON.parse('${resourceRole!}');
+
+layui.use([ 'form', 'laytpl'],function() {
+	var form = layui.form, 
+	laytpl = layui.laytpl;
+
+	var data = { 
+	  "list":roleInfo
+	}
+	var getTpl = template_role_select.innerHTML
+	,view = document.getElementById('roleDiv');
+	laytpl(getTpl).render(data, function(html){
+	  view.innerHTML = html;
+	});
+	form.render();
+	
+	$('#table').bootstrapTable({
+        url: basePath + '/rolePermission/pagePermissionRoleUser',         //请求后台的URL（*）
+        contentType : 'application/x-www-form-urlencoded',
+        method: 'post',                      //请求方式（*）
+        toolbar: '#toolbar',                //工具按钮用哪个容器
+        striped: false,                      //是否显示行间隔色
+        cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+        pagination: true,                   //是否显示分页（*）
+        sortable: true,                     //是否启用排序
+        sortOrder: "desc",                   //排序方式
+        queryParamsType:"",
+        queryParams: queryParams,//传递参数（*）
+        sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+        pageNumber: 1,                       //初始化加载第一页，默认第一页
+        pageSize: 10,                       //每页的记录行数（*）
+        uniqueId:'id',
+        undefinedText:'',
+        fixedColumns:true,
+        fixedNumber:1,
+        columns: [{
+            field:'',
+            title:'<@spring.message "list.serialNum"/>',
+            width:'5px',
+            halign: 'center',
+            align: 'center',
+            valign:'middle',
+            formatter:indexFormatter
+        }, {
+            field: 'username',
+            title: '<@spring.message "role.account"/>',
+            halign: 'center',
+            align: "left",
+            valign:'middle',
+        },{
+            field: 'realname',
+            title: '<@spring.message "user.realname"/>',
+            halign: 'center',
+            align: 'left',
+            valign:'middle',
+        }, {
+            field: 'rolename',
+            title: '<@spring.message "user.realname"/>',
+            halign: 'center',
+            align: 'left',
+            valign:'middle',
+        }, {
+            field: 'createTime',
+            title: '<@spring.message "role.Authorized_time"/>',
+            halign: 'center',
+            align: 'center',
+            valign:'middle',
+            formatter:dateTimeFormatter
+        }, {
+            field: 'createName',
+            title: '<@spring.message "role.Authorized_account"/>',
+            halign: 'center',
+            align: 'center',
+            valign:'middle',
+        }],
+    });
+});
+
+$(function(){
+    $('#query').on('click',function(){
+    	//$('#table').bootstrapTable('refresh', {query: {code:code,username: username,realname:realname}});
+    	reloadTable();
+    });
+    
+    $('.reset').on('click',function(){
+		$('#query_form')[0].reset();
+	});
+});
+
+function init(resourceId){
+	//console.log("resourceId"+resourceId);
+}
+	
+function queryParams (params) {
+	var resourceId = $('#resourceId').val();
+	var roleId = $('#roleId').val();
+	params.resourceId = resourceId;
+	params.roleId = roleId;
+	return params;
+}
+	
+function reloadTable() {
+	$('#table').bootstrapTable('refresh', null);
+}
+</script>
+</html>

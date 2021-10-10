@@ -1,0 +1,137 @@
+ <#include "common/common.html" />
+ <#include "common/common_ztree.html" />
+<form id="form_add" class="layui-form" action=""
+	style="padding-top:10px;">
+	<div style="margin-left:50px;">
+		<input type="hidden" name="parentId" id="parentId">
+		<input type="hidden" name="id" id="id" value="${(record.id)!}">
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label"><@spring.message 'org.supOrg'/></label>
+			<div class="layui-input-block">
+				<input type="text"  id="orgName"  name="orgName" lay-filter="orgName" autocomplete="off"  class="layui-input" >
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label"><@spring.message 'org.orgName'/></label>
+			<div class="layui-input-inline">
+				<input type="text" name="name" id="name" value="${(record.name)!}" lay-verify="required" placeholder="<@spring.message 'tips.input'/>"
+					autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item layui-hide">
+			<label class="layui-form-label my-label"><@spring.message 'org.orgSysCode'/></label>
+			<div class="layui-input-inline">
+				<input type="text" id="code" name="code"  value="${(record.code)!}" placeholder="<@spring.message 'tips.input'/>"
+					autocomplete="off" class="layui-input" readonly>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label"><@spring.message 'org.orgCode'/></label>
+			<div class="layui-input-inline">
+				<input type="text" id="extCode" name="extCode"  value="${(record.extCode)!}" placeholder="<@spring.message 'tips.input'/>"
+					autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label"><@spring.message 'list.order'/></label>
+			<div class="layui-input-inline">
+				<input type="number" id="sort" name="sort"  value="${(record.sort)!1}" min="1" max="100" placeholder="<@spring.message 'tips.input'/>"
+					autocomplete="off" class="layui-input" >
+			</div>
+		</div>
+	</div>
+</form>
+
+<script type="text/javascript">
+	var res;
+function loadTree(id){
+layui.use([ 'form', 'layedit', 'laydate','treeSelect' ],function() {
+	var form = layui.form, 
+		layer = layui.layer, 
+		layedit = layui.layedit, 
+		laydate = layui.laydate,
+		treeSelect = layui.treeSelect;
+		$.ajax({
+			type:'GET',
+			url:'${basePath}/organization/list',
+			success:function(result){
+				var treeData = utils.toTreeData(result);
+				treeSelect.render({
+		            // 选择器
+		            elem: '#orgName',
+		            // 数据
+		            data: treeData,
+		            // 异步加载方式：get/post，默认get
+		            type: 'get',
+		            // 占位符
+		            placeholder: '<@spring.message "userInfo.Select_organization"/>',
+		            // 是否开启搜索功能：true/false，默认false
+		            search: true,
+		            view:{
+		            	showIcon:false,
+		            },
+		            // 点击回调
+		            click: function(d){
+		            	console.log(d)
+		            	$("#parentId").val(d.current.id);
+		            },
+		            // 加载完成后的回调函数
+		            success: function (d) {
+		            	 //console.log(d);
+		            	 treeSelect.checkNode(id);
+		            }
+		        });
+			}
+		});
+	})
+	}
+	function init (parentNode,id,parentId) {
+		if(parentId != 0){
+			$('#orgName').val(parentNode.name);
+			$('#parentId').val(parentNode.id);
+		}else{
+			$('#parentId').val(parentId);
+			$('#orgName').attr('disabled','disabled');
+		}
+        /*loadTree(id);*/
+       res=id;
+	}
+$('#orgName').on('click',function(){
+    loadTree(res);
+})
+	function check(id) {
+		var selectors = ["#"+id];
+		var result = true;
+		$.each(selectors,function(index, rec){
+			if (!checkField(rec)) {
+				result = false;
+				return false;//调出循环
+			}
+			
+		});
+  		return result;
+  	}
+  	
+  	function checkField(selector){
+  		var value = $(selector).val();
+  		if (value==null || value == '') {
+  			$(selector).addClass("layui-form-danger");
+  			$(selector).focus();
+  			layer.tips("<@spring.message 'tips.inputSome'/>", selector);
+  			return false;
+  		} else {
+  			return true;
+  		}
+  	}
+	
+	function getData(){
+		if(check("name") &&　check("extCode")){
+			return $('#form_add').serialize();
+		}else{
+			return null;
+		}
+  	}
+	
+	
+</script>

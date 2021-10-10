@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="Generator" content="EditPlus®">
+  <meta name="Author" content="">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+  <title>权限不够</title>
+  <style>
+	html,body{ text-align:center;height:100%;background-color:#F6F6F6;overflow: hidden;} 
+	.info {padding-top:4%}
+	.link {    
+		display: block;
+		text-decoration: underline;
+		color: #5d5858;
+		font-weight: bold;
+	}
+  </style>
+ </head>
+ <body>
+  <div class="info">
+	<div>
+		<h3><@spring.message 'error.403'/>！</h3>
+	</div>
+	<a href="javascript:top.window.location.href='${basePath!}/'" class="link" ><@spring.message 'error.back'/></a>
+  </div>
+ </body>
+</html>

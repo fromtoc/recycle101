@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xin.portal.system.mapper.SysLogMapper" >
+  <resultMap id="BaseResultMap" type="com.xin.portal.system.model.SysLog" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="creater" property="creater" jdbcType="VARCHAR" />
+    <result column="realname" property="realname" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="table_id" property="tableId" jdbcType="INTEGER" />
+    <result column="table_name" property="tableName" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="method" property="method" jdbcType="VARCHAR" />
+    <result column="normal" property="normal" jdbcType="INTEGER" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="ip" property="ip" jdbcType="VARCHAR" />
+    <result column="operation" property="operation" jdbcType="VARCHAR" />
+    <result column="organization" property="organization" jdbcType="VARCHAR" />
+    <result column="organizationName" property="organizationName" jdbcType="VARCHAR" />
+    <result column="resource_id" property="resourceId" jdbcType="VARCHAR" />
+    <result column="resource_name" property="resourceName" jdbcType="VARCHAR" />
+    <result column="resource_type" property="resourceType" jdbcType="VARCHAR" />
+    <result column="resourceTypeName" property="resourceTypeName" jdbcType="VARCHAR" />
+    <result column="return_result" property="returnResult" jdbcType="VARCHAR" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_sys_log
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <!-- <insert id="insert" parameterType="com.xin.portal.system.model.SysLog"  databaseId="mysql">
+    insert into t_sys_log ( creater, create_time, 
+      table_id, table_name, type, method, normal,
+      content, ip, operation, organization)
+    values ( #{creater,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{tableId,jdbcType=INTEGER}, #{tableName,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, 
+      #{method,jdbcType=VARCHAR}, #{normal,jdbcType=INTEGER}, #{content,jdbcType=VARCHAR} ,
+      #{ip,jdbcType=VARCHAR}, #{operation,jdbcType=VARCHAR}, #{organization,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insert" parameterType="com.xin.portal.system.model.SysLog" useGeneratedKeys="true" keyProperty="id">
+    insert into t_sys_log ( creater, create_time, 
+      table_id, table_name, type, method, normal,
+      content, ip, operation, organization)
+    values ( #{creater,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{tableId,jdbcType=INTEGER}, #{tableName,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, 
+      #{method,jdbcType=VARCHAR}, #{normal,jdbcType=INTEGER}, #{content,jdbcType=VARCHAR} ,
+      #{ip,jdbcType=VARCHAR}, #{operation,jdbcType=VARCHAR}, #{organization,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insert" parameterType="com.xin.portal.system.model.SysLog"  databaseId="oracle">
+  	<selectKey keyProperty="id" resultType="int" order="BEFORE">
+         select SEQ_T_SYS_LOG_ID.nextval as id from dual
+     	</selectKey>
+    insert into t_sys_log ( id,creater, create_time, 
+      table_id, table_name, type, method, normal,
+      content, ip, operation, organization)
+    values (#{id}, #{creater,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{tableId,jdbcType=INTEGER}, #{tableName,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, 
+      #{method,jdbcType=VARCHAR}, #{normal,jdbcType=INTEGER}, #{content,jdbcType=VARCHAR} ,
+      #{ip,jdbcType=VARCHAR}, #{operation,jdbcType=VARCHAR}, #{organization,jdbcType=VARCHAR}
+      )
+  </insert> -->
+  <update id="updateByPrimaryKey" parameterType="com.xin.portal.system.model.SysLog">
+    update t_sys_log
+    set creater = #{creater,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      table_id = #{tableId,jdbcType=INTEGER},
+      table_name = #{tableName,jdbcType=VARCHAR},
+      type = #{type,jdbcType=INTEGER},
+      content = #{content,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select id, creater, create_time, table_id, table_name, type, content
+    from t_sys_log
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="findList" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.SysLog">
+    select 
+    	sl.id, 
+    	sl.creater, 
+    	ui.realname,
+    	sl.create_time, 
+    	sl.table_id, 
+    	sl.table_name, 
+    	sl.type,
+    	sl.method,
+    	sl.normal,
+    	sl.ip,
+    	sl.operation,
+    	sl.organization,
+    	sl.return_result,
+    	org.name organizationName,
+    	sl.content
+    from t_sys_log sl
+    LEFT JOIN t_user_info ui ON sl.creater=ui.id
+	LEFT JOIN t_organization org ON sl.organization=org.code
+    <where>
+    	<if test="type!=null and type!=''">
+    		and sl.type = #{type}
+    	</if>
+    	<if test="realname!=null and realname!=''">
+    		<bind name="pattern" value="'%'+realname+'%'"/>
+    		and ui.realname like #{pattern}
+    	</if>
+    	<if test="tableName!=null and tableName!=''">
+    		<bind name="pattern" value="'%'+tableName+'%'"/>
+            and sl.table_name like #{pattern}
+    	</if>
+    	<if test="createTimeStart!=null">
+    		<![CDATA[ and sl.create_time >= #{createTimeStart}]]>
+    	</if>
+    	<if test="createTimeEnd!=null">
+    		<![CDATA[ and sl.create_time <= #{createTimeEnd}]]>
+    	</if>
+    </where>
+    order by sl.create_time desc
+  </select>
+  
+  <select id="findPageList" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.SysLog">
+    select 
+    	sl.id, 
+    	sl.creater, 
+    	ui.realname,
+    	sl.create_time, 
+    	sl.table_id, 
+    	sl.table_name, 
+    	sl.type,
+    	sl.method,
+    	sl.normal,
+    	sl.ip,
+    	sl.operation,
+    	sl.organization,
+    	org.name organizationName,
+    	sl.content,
+    	sl.return_result,
+    	sl.resource_id,
+    	res.name as resourceName,
+    	sl.resource_type,
+    	rest.name as resourceTypeName
+    from t_sys_log sl
+    LEFT JOIN t_user_info ui ON sl.creater=ui.id
+	LEFT JOIN t_organization org ON sl.organization=org.code
+	LEFT JOIN t_resource res ON res.id = sl.resource_id
+	LEFT JOIN t_resource_type rest on rest.id = sl.resource_type
+    <where>
+    	<if test="type!=null and type!=''">
+    		and sl.type = #{type}
+    	</if>
+    	<if test="realname!=null and realname!=''">
+    		<bind name="pattern" value="'%'+realname+'%'"/>
+    		and ui.realname like #{pattern}
+    	</if>
+    	<if test="resourceName!=null and resourceName!=''">
+    		<bind name="pattern" value="'%'+resourceName+'%'"/>
+    		and res.name like #{pattern}
+    	</if>
+    	<if test="content!=null and content!=''">
+    		<bind name="pattern" value="'%'+content+'%'"/>
+    		and sl.content like #{pattern}
+    	</if>
+    	<if test="tableName!=null and tableName!=''">
+    		<bind name="pattern" value="'%'+tableName+'%'"/>
+            and sl.table_name like #{pattern}
+    	</if>
+    	<if test="createTimeStart!=null">
+    		<![CDATA[ and sl.create_time >= #{createTimeStart}]]>
+    	</if>
+    	<if test="createTimeEnd!=null">
+    		<![CDATA[ and sl.create_time <= #{createTimeEnd}]]>
+    	</if>
+    </where>
+    order by sl.create_time desc
+  </select>
+</mapper>

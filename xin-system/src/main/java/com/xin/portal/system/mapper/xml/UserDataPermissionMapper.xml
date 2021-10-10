@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xin.portal.system.mapper.UserDataPermissionMapper">
+	<resultMap id="BaseResultMap" type="com.xin.portal.system.model.UserDataPermission">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="user_id" property="userId" jdbcType="VARCHAR" />
+		<result column="dp_id" property="dpId" jdbcType="VARCHAR" />
+		<result column="state" property="state" jdbcType="INTEGER" />
+		<result column="tenant_id" property="tenantId" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<select id="findUserDataPermission" resultType="com.xin.portal.system.model.UserDataPermission" 
+								   parameterType="com.xin.portal.system.model.UserDataPermission">
+		select
+			id,
+			dp_id as dpId, 
+			dpname,
+			dptype,
+			sort,
+			extcode,
+			user_id as userId,
+			state 
+		from (
+			select '-1' as id, #{userId} as user_id,odp.dp_id,
+				CASE udp.state
+				WHEN -1 THEN -1
+				WHEN 1 THEN 1
+				ELSE 0 END AS state,
+				dp.dpname,dpt.extcode as dptype,dp.sort,dp.extcode
+			FROM t_org_data_permission odp
+			LEFT JOIN t_user_data_permission udp
+			ON udp.dp_id = odp.dp_id
+			LEFT JOIN t_data_permission dp
+			ON odp.dp_id = dp.id
+			LEFT JOIN t_data_permission_type dpt
+			ON dpt.id = dp.type_id
+			where odp.org_id = #{orgId}
+			UNION
+			SELECT udp.id, udp.user_id,udp.dp_id,
+				CASE udp.state
+				WHEN -1 THEN -1
+				WHEN 1 THEN 1
+				ELSE 0 END AS state,
+				dp.dpname,dpt.extcode as dptype,dp.sort,dp.extcode
+			FROM t_user_data_permission udp
+			LEFT JOIN t_org_data_permission odp
+			ON udp.dp_id = odp.dp_id
+			LEFT JOIN t_data_permission dp
+			ON udp.dp_id = dp.id
+			LEFT JOIN t_data_permission_type dpt
+			ON dpt.id = dp.type_id
+			where udp.user_id = #{userId}
+		) ud
+		<where>
+			<if test="dpname != null and dpname !=''">
+				<bind name="pattern1" value="'%'+dpname+'%'"/>
+				and ud.dpname LIKE #{pattern1}
+			</if>
+			<if test="dptype != null and dptype !=''">
+				and ud.dptype = #{dptype}
+			</if>
+		</where>
+		order by ud.dptype ,ud.sort
+	</select>
+
+</mapper>

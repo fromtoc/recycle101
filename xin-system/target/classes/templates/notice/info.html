@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<meta http-equiv="keywords" content="">
+<meta http-equiv="description" content="">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="${basePath}/plugins/zui/zui.min.css">
+<script src="${basePath}/plugins/zui/zui.min.js"></script>
+<#include "common/common.html" /> 
+</head>
+<body style="padding: 10px;">
+	<article class="article">
+	  <!-- 文章头部 -->
+	  <header>
+	    <h1 style="text-align:center;color:${(record.titleColor==null)?string('#000',record.titleColor)}">${(record.title)!}</h1>
+	    <!-- 文章属性列表 -->
+	    <dl class="dl-inline">
+	      <dt><@spring.message "level"/>：</dt>
+	      <dd>${(record.noticeLevelName)!}</dd>
+	      <dt><@spring.message "list.publisher"/>：</dt>
+       	  <dd>${(record.publisherName)!}</dd>
+       	  <dt><@spring.message "list.publishTime"/>：</dt>
+       	  <dd>${(record.publishTime)!?string('yyyy-MM-dd')}</dd>
+	    </dl>
+	    <!-- <div class="abstract">
+	      <p>摘要信息</p>
+	    </div> -->
+	  </header>
+	  <!-- 文章正文部分 -->
+	  <section class="content">
+	   	${(record.content)!}
+	  </section>
+	  <!-- 文章底部 -->
+	  <!-- <footer>
+	    <ul class="pager pager-justify">
+	      <li class="previous"><a href="#"><i class="icon-arrow-left"></i> 上一篇</a></li>
+	      <li><a href="#"><i class="icon-list-ul"></i> 目录</a></li>
+	      <li class="next disabled"><a href="#">没有下一篇 <i class="icon-arrow-right"></i></a></li>
+	    </ul>
+	  </footer> -->
+	</article>
+</body>
+</html>

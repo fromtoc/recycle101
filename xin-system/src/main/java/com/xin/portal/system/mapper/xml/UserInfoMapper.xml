@@ -1,0 +1,619 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xin.portal.system.mapper.UserInfoMapper" >
+  <resultMap id="BaseResultMap" type="com.xin.portal.system.model.UserInfo" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="realname" property="realname" jdbcType="VARCHAR" />
+    <result column="nickname" property="nickname" jdbcType="VARCHAR" />
+    <result column="gender" property="gender" jdbcType="INTEGER" />
+    <result column="birthday" property="birthday" jdbcType="TIMESTAMP" />
+    <result column="intro" property="intro" jdbcType="VARCHAR" />
+    <result column="department" property="department" jdbcType="VARCHAR" />
+    <result column="qq" property="qq" jdbcType="VARCHAR" />
+    <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="phone" property="phone" jdbcType="VARCHAR" />
+    <result column="avatar" property="avatar" jdbcType="VARCHAR" />
+    <result column="signature" property="signature" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="username" property="username" jdbcType="VARCHAR" />
+    <result column="org_code" property="orgCode" jdbcType="VARCHAR" />
+    <result column="org_id" property="orgId" jdbcType="VARCHAR" />
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="locale" property="locale" jdbcType="VARCHAR" />
+    <result column="ext_code" property="extCode" jdbcType="VARCHAR" />
+    <result column="wx_openid" property="wxOpenid" jdbcType="VARCHAR" />
+    <result column="state" property="state" jdbcType="INTEGER" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="mstr_user" property="mstrUser" jdbcType="VARCHAR" />
+    <result column="activate_start_time" property="activateStartTime" jdbcType="TIMESTAMP" />
+    <result column="activate_end_time" property="activateEndTime" jdbcType="TIMESTAMP" />
+    <result column="is_delete" property="isDelete" jdbcType="INTEGER" />
+    <result column="register_time" property="registerTime" jdbcType="TIMESTAMP" />
+    <result column="last_login_time" property="lastLoginTime" jdbcType="TIMESTAMP" />
+    <result column="preference_type" property="preferenceType" jdbcType="VARCHAR" />
+    <result column="preference_value" property="preferenceValue" jdbcType="VARCHAR" />
+    <result column="tenant_id" property="tenantId" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <select id="findUserInfo" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.UserInfo" >
+    select
+		ui.id,
+		realname,
+		nickname,
+		gender,
+		birthday,
+		intro,
+		department,
+		qq,
+		email,
+		phone,
+		avatar,
+		signature,
+		ui.code,
+		address,
+		org_code,
+		org_id,
+		locale,
+		preference_type,
+		preference_value,
+		u.username,
+		u.wx_openid,
+		o.name as org_name,
+		o.ext_code as ext_code,
+		mstr_user,
+		u.activate_start_time,
+		u.activate_end_time,
+		ui.tenant_id
+	from
+		t_user_info ui
+	left join t_user u on ui.id = u.id
+	left join t_organization o on ui.org_id = o.id
+	<where>
+		<if test="id!=null and id!=''">
+			and ui.id = #{id,jdbcType=INTEGER}
+		</if>
+		<if test="code!=null and code!=''">
+			and ui.code = #{code,jdbcType=INTEGER}
+		</if>
+	</where>
+	and u.is_delete = 0
+  </select>
+  
+  <select id="findRoleUserList" resultMap="BaseResultMap"  parameterType="com.xin.portal.system.model.UserInfo">
+    select
+		ui.id,
+		ui.realname,
+		ui.nickname,
+		ui.gender,
+		ui.birthday,
+		ui.intro,
+		ui.department,
+		ui.qq,
+		ui.email,
+		ui.phone,
+		ui.avatar,
+		ui.signature,
+		ui.address,
+		ui.org_code,
+		ui.locale,
+		ui.org_id,
+		ui.preference_type,
+		ui.preference_value,
+		u.username,
+		u.state,
+		u.wx_openid,
+		o.name AS org_name,
+		o.ext_code AS ext_code,
+		r.name AS roleName,
+		ui.code,
+		ui.mstr_user,
+		u.activate_start_time,
+		u.activate_end_time,
+		u.register_time
+	from
+		t_role_user ru
+	LEFT JOIN t_user u ON u.id=ru.user_id
+	LEFT JOIN t_user_info ui ON ui.id = ru.user_id
+	LEFT JOIN t_organization o ON ui.org_id = o.id
+	LEFT JOIN t_role r ON r.id = ru.role_id
+	<where>
+    	<if test="roleIdIn!=null and roleIdIn!=''">
+    		ru.role_id IN (${roleIdIn})
+    	</if>
+    	<if test="roleId!=null and roleId!=''">
+    		and ru.role_id = #{roleId}
+    	</if>
+    	and u.is_delete = 0
+    	and ru.role_id in (select id from t_role)
+	</where>
+	order by ui.id desc
+  </select>
+  
+  <select id="findList" resultMap="BaseResultMap"  parameterType="com.xin.portal.system.model.UserInfo">
+    select
+	  ui.id,
+	  realname,
+	  nickname,
+	  ui.gender,
+	  birthday,
+	  intro,
+	  ui.department,
+	  qq,
+	  ui.email,
+	  phone,
+	  ui.avatar,
+	  signature,
+	  address,
+	  org_code,
+	  locale,
+	  org_id,
+	  preference_type,
+	  preference_value,
+	  u.username,
+	  u.state,
+	  u.wx_openid,
+	  o.name as org_name,
+	  o.ext_code as ext_code,
+	  ui.code,
+	  mstr_user,
+	  u.activate_start_time,
+	  u.activate_end_time,
+	  u.register_time,
+	  u.last_login_time,
+	  ui.tenant_id
+	from
+		t_user_info ui
+	left join t_user u on ui.id = u.id
+	left join t_organization o on ui.org_id = o.id
+	<if test="wxbind!=null and wxbind!=''">
+	LEFT JOIN t_user_wx_work uww ON ui.id = uww.user_id 
+	</if>
+	  <where>
+		<if test="idNot!=null and idNot!=''">
+    		and ui.id!=#{idNot}
+    	</if>
+		<if test="orgCode!=null and orgCode!=''">
+    		and ui.org_code like '${orgCode}%'
+    	</if>
+    	<if test="orgId!=null and orgId!=''">
+    		and ui.org_id = #{orgId} 
+    	</if>
+    	<if test="orgIdIn!=null and orgIdIn!=''">
+    		and o.id in (${orgIdIn})
+    	</if>
+    	<if test="code!=null and code!=''">
+    		and ui.code = #{code}
+    	</if>
+    	<if test="username!=null and username!=''">
+    		and u.username like '%${username}%'
+    	</if>
+    	<if test="realname!=null and realname!=''">
+    		and ui.realname like '%${realname}%'
+    	</if>
+		<if test="roleId!=null and roleId!=''">
+    		and ui.id in (select user_id from t_role_user ru where role_id= #{roleId})
+    	</if>
+    	<if test="roleIdIn!=null and roleIdIn!=''">
+    		and ui.id in (select user_id from t_role_user ru where role_id in (${roleIdIn}))
+    	</if>
+    	<if test="roleIdNot!=null and roleIdNot!=''">
+    		and ui.id not in (select user_id from t_role_user ru where role_id= #{roleIdNot})
+    	</if>
+    	<if test="projectId!=null and projectId!=''">
+    		and ui.id in (select user_id from t_project_user pu where project_id= #{projectId})
+    	</if>
+    	<if test="projectIdNot!=null and projectIdNot!=''">
+    		and ui.id not in (select user_id from t_project_user pu where project_id= #{projectIdNot})
+    	</if>
+    	<if test="biUserIdNot!=null and biUserIdNot!=''">
+    		and ui.id not in  (SELECT user_id FROM t_bi_mapping  bm
+								LEFT JOIN t_bi_user bu ON  bu.id = bm.bi_user_id
+								WHERE bu.bi_server_id = (SELECT bi_server_id FROM t_bi_user WHERE id = #{biUserIdNot})
+							  )
+    	</if>
+    	<if test="wxbind!=null and wxbind!=''">
+    		and uww.app_id = #{wxbind}
+    	</if>
+		and u.is_delete = 0
+	</where>
+
+	order by u.register_time desc
+  </select>
+
+	<select id="findAdUserInfoList" resultMap="BaseResultMap"  parameterType="com.xin.portal.system.model.UserInfo">
+		select
+		ui.id,
+		realname,
+		nickname,
+		ui.gender,
+		birthday,
+		intro,
+		ui.department,
+		qq,
+		ui.email,
+		ui.phone,
+		ui.avatar,
+		signature,
+		address,
+		org_code,
+		locale,
+		org_id,
+		preference_type,
+		preference_value,
+		u.username,
+		u.state,
+		u.wx_openid,
+		o.name as org_name,
+		o.ext_code as ext_code,
+		ui.code,
+		mstr_user,
+		u.activate_start_time,
+		u.activate_end_time,
+		u.register_time,
+		u.last_login_time
+		from
+		t_user_info ui
+		left join t_user u on ui.id = u.id
+		left join t_organization o on ui.org_id = o.id
+		<if test="wxbind!=null and wxbind!=''">
+		LEFT JOIN t_user_wx_work uww ON ui.id = uww.user_id 
+		</if>
+		<where>
+			<if test="idNot!=null and idNot!=''">
+				and ui.id!=#{idNot}
+			</if>
+			<if test="orgCode!=null and orgCode!=''">
+				and ui.org_code like '${orgCode}%'
+			</if>
+			<if test="orgId!=null and orgId!=''">
+				and ui.org_id = #{orgId}
+			</if>
+			<if test="orgIdIn!=null and orgIdIn!=''">
+				and o.id in (${orgIdIn})
+			</if>
+			<if test="code!=null and code!=''">
+				and ui.code = #{code}
+			</if>
+			<if test="username!=null and username!=''">
+				and u.username like '%${username}%'
+			</if>
+			<if test="realname!=null and realname!=''">
+				and ui.realname like '%${realname}%'
+			</if>
+			<if test="roleId!=null and roleId!=''">
+				and ui.id in (select user_id from t_role_user ru where role_id= #{roleId})
+			</if>
+			<if test="roleIdIn!=null and roleIdIn!=''">
+				and ui.id in (select user_id from t_role_user ru where role_id in (${roleIdIn}))
+			</if>
+			<if test="roleIdNot!=null and roleIdNot!=''">
+				and ui.id not in (select user_id from t_role_user ru where role_id= #{roleIdNot})
+			</if>
+			<if test="projectId!=null and projectId!=''">
+				and ui.id in (select user_id from t_project_user pu where project_id= #{projectId})
+			</if>
+			<if test="projectIdNot!=null and projectIdNot!=''">
+				and ui.id not in (select user_id from t_project_user pu where project_id= #{projectIdNot})
+			</if>
+			<if test="biUserIdNot!=null and biUserIdNot!=''">
+				and ui.id not in  (SELECT user_id FROM t_bi_mapping  bm
+				LEFT JOIN t_bi_user bu ON  bu.id = bm.bi_user_id
+				WHERE bu.bi_server_id = (SELECT bi_server_id FROM t_bi_user WHERE id = #{biUserIdNot})
+				)
+			</if>
+			<if test="wxbind!=null and wxbind!=''">
+	    		and uww.app_id = #{wxbind}
+	    	</if>
+			and u.is_delete = 0
+			and u.status = 2
+		</where>
+
+		order by u.register_time desc
+	</select>
+
+
+  <select id="selectUser" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.UserInfo" >
+  	SELECT * FROM t_user_info a LEFT JOIN t_user b ON a.id=b.id 
+  	WHERE b.is_delete=0
+  	<if test="code!=null and code!=''">
+    		and a.code = #{code}
+    </if>
+    <if test="email!=null and email!=''">
+    		and a.email = #{email}
+    </if>
+    <if test="orgId!=null and orgId!=''">
+    		and a.org_id = #{orgId}
+    </if>
+    <if test="phone!=null and phone!=''">
+    		and a.phone = #{phone}
+    </if>
+  </select>
+  
+  <select id="findListWithTenantId" resultMap="BaseResultMap"  parameterType="com.xin.portal.system.model.UserInfo">
+  	select
+		ui.id,
+		ui.realname,
+		ui.nickname,
+		ui.gender,
+		ui.birthday,
+		ui.intro,
+		ui.department,
+		ui.qq,
+		ui.email,
+		ui.phone,
+		ui.avatar,
+		ui.signature,
+		ui.address,
+		ui.locale,
+		ui.preference_type,
+		ui.preference_value,
+		ui.code,
+		ui.mstr_user,
+		uo.org_id,
+		o.name AS org_name,
+		o.code,
+		o.ext_code AS ext_code,
+		u.username,
+		u.state,
+		u.wx_openid,
+		u.activate_start_time,
+		u.activate_end_time,
+		u.register_time,
+		u.last_login_time
+	from
+		t_user_info ui
+	left join t_user u on ui.id = u.id
+	left join t_user_organization uo on uo.user_id = u.id
+	LEFT JOIN t_organization o ON uo.org_id = o.id
+	<where>
+		<if test="idNot!=null and idNot!=''">
+    		and ui.id!=#{idNot}
+    	</if>
+		<if test="orgCode!=null and orgCode!=''">
+    		and ui.org_code like '${orgCode}%'
+    	</if>
+    	<if test="orgId!=null and orgId!=''">
+    		and ui.org_id = #{orgId} 
+    	</if>
+    	<if test="orgIdIn!=null and orgIdIn!=''">
+    		and o.id in (${orgIdIn})
+    	</if>
+    	<if test="code!=null and code!=''">
+    		and ui.code = #{code}
+    	</if>
+    	<if test="username!=null and username!=''">
+    		and u.username like '%${username}%'
+    	</if>
+    	<if test="realname!=null and realname!=''">
+    		and ui.realname like '%${realname}%'
+    	</if>
+		<if test="roleId!=null and roleId!=''">
+    		and ui.id in (select user_id from t_role_user ru where role_id= #{roleId})
+    	</if>
+    	<if test="roleIdIn!=null and roleIdIn!=''">
+    		and ui.id in (select user_id from t_role_user ru where role_id in (${roleIdIn}))
+    	</if>
+    	<if test="roleIdNot!=null and roleIdNot!=''">
+    		and ui.id not in (select user_id from t_role_user ru where role_id= #{roleIdNot})
+    	</if>
+    	<if test="projectId!=null and projectId!=''">
+    		and ui.id in (select user_id from t_project_user pu where project_id= #{projectId})
+    	</if>
+    	<if test="projectIdNot!=null and projectIdNot!=''">
+    		and ui.id not in (select user_id from t_project_user pu where project_id= #{projectIdNot})
+    	</if>
+    	<if test="biUserIdNot!=null and biUserIdNot!=''">
+    		and ui.id not in  (SELECT user_id FROM t_bi_mapping  bm
+								LEFT JOIN t_bi_user bu ON  bu.id = bm.bi_user_id
+								WHERE bu.bi_server_id = (SELECT bi_server_id FROM t_bi_user WHERE id = #{biUserIdNot})
+							  )
+    	</if>
+    	<if test="tenantId!=null and tenantId!=''">
+    		and ui.tenant_id = #{tenantId}
+    	</if>
+		and u.is_delete = 0
+	</where>
+	order by u.register_time desc
+  </select>
+  
+  <select id="selectBatchIdsWithTenantId" resultMap="BaseResultMap">
+  	select
+		ui.id,
+		realname,
+		nickname,
+		gender,
+		birthday,
+		intro,
+		department,
+		qq,
+		email,
+		phone,
+		signature,
+		address,
+		org_code,
+		locale,
+		org_id,
+		preference_type,
+		preference_value,
+		u.username,
+		u.state,
+		u.wx_openid,
+		o.name as org_name,
+		o.ext_code as ext_code,
+		ui.code,
+		mstr_user,
+		u.activate_start_time,
+		u.activate_end_time,
+		u.register_time,
+		u.last_login_time
+	from
+		t_user_info ui
+	left join t_user u on ui.id = u.id
+	left join t_organization o on ui.org_id = o.id
+	<where>
+		ui.id in 
+		<foreach collection="userIds" index="index" item="item" separator="," open="(" close=")">
+			#{item}
+		</foreach>
+		and ui.tenant_id = #{tenantId}
+	</where>
+  </select>
+  
+  <!-- 插入批量数据-->
+	<insert id="insertList" parameterType="java.util.List">
+	    insert into lzf_rental_item_detailsl
+	    (   
+	        id,
+	        rentalInfoId,
+	        itemName,
+	        number,
+	        remark
+	    )
+	    values
+	    <foreach collection="list" item="item" index= "index" separator =",">
+	    (
+	        #{item.id,jdbcType=VARCHAR},
+	        #{item.rentalInfoId,jdbcType=VARCHAR},
+	        #{item.itemName,jdbcType=VARCHAR},
+	        #{item.number,jdbcType=VARCHAR},
+	        #{item.remark,jdbcType=VARCHAR}
+	    )
+	    </foreach>
+	</insert>
+	<insert id="insertUserInfoAllColunmForNewTenant" parameterType="com.xin.portal.system.model.UserInfo">
+		INSERT INTO t_user_info  
+	 	( id,
+		org_code,
+		realname,
+		nickname,
+		gender,
+		birthday,
+		intro,
+		department,
+		qq,
+		email,
+		phone,
+		avatar,
+		signature,
+		address,
+		code,
+		secret_key,
+		mstr_user,
+		out_date,
+		locale,
+		org_id,
+		preference_type,
+		preference_value,
+		tenant_id
+		 )  VALUES 
+	 	( #{id,jdbcType=VARCHAR},
+		#{orgCode,jdbcType=VARCHAR},
+		#{realname,jdbcType=VARCHAR},
+		#{nickname,jdbcType=VARCHAR},
+		#{gender,jdbcType=INTEGER},
+		#{birthday,jdbcType=TIMESTAMP},
+		#{intro,jdbcType=VARCHAR},
+		#{department,jdbcType=VARCHAR},
+		#{qq,jdbcType=VARCHAR},
+		#{email,jdbcType=VARCHAR},
+		#{phone,jdbcType=VARCHAR},
+		#{avatar,jdbcType=VARCHAR},
+		#{signature,jdbcType=VARCHAR},
+		#{address,jdbcType=VARCHAR},
+		#{code,jdbcType=VARCHAR},	
+		#{secretKey,jdbcType=VARCHAR},
+		#{mstrUser,jdbcType=INTEGER},
+		#{outDate,jdbcType=TIMESTAMP},
+		#{locale,jdbcType=VARCHAR},
+		#{orgId,jdbcType=VARCHAR},
+		#{preferenceType,jdbcType=VARCHAR},
+		#{preferenceValue,jdbcType=VARCHAR},
+		#{tenantId,jdbcType=VARCHAR} )
+	</insert>
+
+	<update id="updatePersonnalRecordById"  parameterType="com.xin.portal.system.model.UserInfo">
+		<if test="id!=null and id!=''">
+			update t_user_info
+			<set>
+				<if test="preferenceType !=null and preferenceType !=''">
+					preference_type = #{preferenceType,jdbcType=VARCHAR},
+				</if>
+				<if test="(preferenceType == 'docObject' or preferenceType == 'catalogue') and (preferenceValue!=null and preferenceValue!='')">
+					preference_value = #{preferenceValue,jdbcType=VARCHAR},
+				</if>
+				<if test="locale!=null and locale!=''">
+					locale=#{locale,jdbcType=VARCHAR},
+				</if>
+				<if test="email!=null and email!=''">
+					email=#{email,jdbcType=VARCHAR},
+				</if>
+				<if test="phone!=null and phone!=''">
+					phone=#{phone,jdbcType=VARCHAR},
+				</if>
+			</set>
+			where id=#{id,jdbcType=VARCHAR}
+		</if>
+	</update>
+
+
+	<update  id="updateADUser" parameterType="com.xin.portal.system.model.UserInfo" >
+		update t_user_info set
+		phone = #{phone,jdbcType=VARCHAR},
+		email = #{email,jdbcType=VARCHAR},
+		realname = #{realname,jdbcType=VARCHAR},
+		org_id = #{orgId,jdbcType=VARCHAR},
+		org_code = #{orgCode,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+
+	<insert id="insertUserInfoTD" parameterType="com.xin.portal.system.model.UserInfo">
+		INSERT INTO t_user_info
+		( id,
+		org_code,
+		realname,
+		nickname,
+		gender,
+		birthday,
+		intro,
+		department,
+		qq,
+		email,
+		phone,
+		avatar,
+		signature,
+		address,
+		code,
+		secret_key,
+		mstr_user,
+		out_date,
+		locale,
+		org_id,
+		preference_type,
+		preference_value,
+		tenant_id
+		)  VALUES
+		( #{id,jdbcType=VARCHAR},
+		#{orgCode,jdbcType=VARCHAR},
+		#{realname,jdbcType=VARCHAR},
+		#{nickname,jdbcType=VARCHAR},
+		#{gender,jdbcType=INTEGER},
+		#{birthday,jdbcType=TIMESTAMP},
+		#{intro,jdbcType=VARCHAR},
+		#{department,jdbcType=VARCHAR},
+		#{qq,jdbcType=VARCHAR},
+		#{email,jdbcType=VARCHAR},
+		#{phone,jdbcType=VARCHAR},
+		#{avatar,jdbcType=VARCHAR},
+		#{signature,jdbcType=VARCHAR},
+		#{address,jdbcType=VARCHAR},
+		#{code,jdbcType=VARCHAR},
+		#{secretKey,jdbcType=VARCHAR},
+		#{mstrUser,jdbcType=INTEGER},
+		#{outDate,jdbcType=TIMESTAMP},
+		#{locale,jdbcType=VARCHAR},
+		#{orgId,jdbcType=VARCHAR},
+		#{preferenceType,jdbcType=VARCHAR},
+		#{preferenceValue,jdbcType=VARCHAR},
+		#{tenantId,jdbcType=VARCHAR} )
+	</insert>
+</mapper>

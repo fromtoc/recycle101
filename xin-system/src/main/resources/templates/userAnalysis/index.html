@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <#include "common/common.html" />
+    <#include "common/common_table.html" />
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <style>
+
+        .layui-tab-title{
+            height: 35px;
+            margin: 0px;
+        }
+        .layui-tab-content {
+            padding: 0px;
+        }
+        .layui-tab {
+            margin: 0px;
+
+        }
+        .yj{
+            padding:10px;width:400px;height:150px;
+            border: 2px solid#000000;
+            -moz-border-radius: 15px;
+            -webkit-border-radius: 15px;
+            border-radius:15px;
+
+        }
+        .p1{
+            color: #0a67fb;
+            font-size: 60px;
+        }
+        #p1{
+            font-weight: bold;
+            font-size: 32px;
+            text-align: center;
+            position: absolute;
+            top: 20px;
+            left: 480px;
+        }
+        .p2{
+            color: #0a67fb;
+            font-size: 50px;
+        }
+        .p3{
+            color: #0a67fb;
+            font-size: 40px;
+        }
+        #yj1{
+            position:absolute;
+
+            top:150px;
+
+            left:150px;
+            text-align:center;
+            font-size: 26px;
+
+        }
+        #yj2{
+            position:absolute;
+
+            top:150px;
+
+            left:650px;
+            text-align:center;
+            font-size: 26px;
+
+
+        }
+        #yj3{
+            position: absolute;
+            top: 370px;
+            left: 150px;
+            text-align: center;
+            font-size: 26px;
+
+
+        }
+        #yj4{
+            position: absolute;
+            top: 370px;
+            left: 650px;
+            text-align: center;
+            font-size: 26px;
+
+
+        }
+
+        #pv111{
+            position:absolute;
+
+            top:5px;
+
+            left:490px;
+            text-align:center;
+            margin-top: 0px;
+            margin-bottom: 0px;
+            color: #2b2b2b;
+        }
+        #pv1111{
+            position:absolute;
+
+            top:5px;
+
+            left:490px;
+            text-align:center;
+            margin-top: 0px;
+            margin-bottom: 0px;
+            color: #2b2b2b;
+        }
+        #div1{
+         height: 380px;
+            margin-top: 8px;
+        }
+        #div2{
+            height: 380px;
+
+        }
+        #div11{
+            height: 380px;
+            margin-top: 8px;
+        }
+        #div22{
+            height: 380px;
+        }
+        .layui-form-item {
+            margin-bottom: 0px;
+        }
+        hr {
+            margin-top: 5px;
+            margin-bottom: 0px;
+        }
+        #optionM_day{
+            height: 250px;
+        }
+        #main1{
+            height: 250px;
+        }
+
+        #main11{
+            height: 250px;
+        }
+        .divsz{
+            margin-top: 8px;
+            height: 50px;
+            position: relative;
+        }
+        .layui-tab-item{
+            position: relative;
+        }
+
+        .layui-col-md8{
+            height: 90%;
+            width: 90%;
+            position: absolute;
+            top: 435px;
+
+
+        }
+        .layui-col-xs3{
+            border: 2px solid#000000;
+            -moz-border-radius: 15px;
+            -webkit-border-radius: 15px;
+            border-radius:15px;
+            height:120px;
+           /* line-height:120px;*/
+            font-weight: bold;
+            font-size: 20px;
+            margin: 10px;
+            text-align: center;
+
+
+        }
+        .re{
+            color: #00a0e9;
+            font-size: 50px;
+        }
+
+
+
+
+    </style>
+    <script type="text/javascript" src="${basePath}/plugins/echartsV3/echarts-all-3.js"></script>
+</head>
+<body>
+<form class="layui-form" action="">
+    <@system.path id="${menuId!}"></@system.path>
+<div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+    <ul class="layui-tab-title">
+        <li class="layui-this"><@spring.message 'user.analysis'/><!--用户分析--></li>
+        <li id="resource" onclick="resource()"> <@spring.message 'resource.analysis'/><!--资源分析--> </li>
+    </ul>
+    <div class="layui-tab-content" style="height: 100px;">
+        <div class="layui-tab-item layui-show">
+            <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+                <ul class="layui-tab-title ">
+                    <li class="layui-this"><@spring.message 'user.overview'/><!--用户概览--></li>
+                    <li><@spring.message 'PV.analysis'/><!--PV分析--></li>
+                    <li><@spring.message 'UV.analysis'/><!--UV分析--></li>
+                    <li><@spring.message 'active.user'/><!--活跃用户--></li>
+                    <li><@spring.message 'dormancy.user'/><!--休眠用户--></li>
+                </ul>
+                <div class="layui-tab-content" style="position:relative">
+
+                    <div class="layui-tab-item layui-show">
+
+                        <p id="p1" ><@spring.message 'the.total_number_of_users'/><!--总用户数-->  <span class="p1">${count}</span><@spring.message 'person'/><!--人--></p>
+
+                        <div id="yj1" class="yj">
+                            <p><span class="p2">${numberActive}</span><@spring.message 'person'/><!--人--></p>
+                            <p><@spring.message 'daily.activity'/><!--当日活跃数-->(DAU)</p>
+                        </div>
+
+
+                        <div id="yj2"class="yj" >
+                            <p class="p2">${activeRate}</p>
+                            <p><@spring.message 'daily.activity_rate'/> <!--当日活跃率--></p>
+                        </div>
+                        <div id="yj3"class="yj">
+                            <p><!--当月活跃数--><@spring.message 'monthly.activity'/>(MAU)    <span class="p3">      ${monthActive}</span><@spring.message 'person'/><!--人--></p>
+                            <p><!--上月活跃数--><@spring.message 'previous.month_active'/>(MAU)<span class="p3">       ${dailyActive}</span><@spring.message 'person'/><!--人--></p>
+                        </div>
+                        <div id="yj4" class="yj">
+                            <p><!--当月活跃率--> <@spring.message 'monthly.activity_rate'/> <span class="p3">        ${monthRate}</span></p>
+                            <p><!--上月活跃率--><@spring.message 'previous.month_active.rate'/><span class="p3">        ${dailyRate}</span></p>
+
+
+                        </div>
+
+                    </div>
+                    <div class="layui-tab-item">
+                        <div id="div1" >
+                            <div class="layui-form">
+                                <div class="layui-form-item">
+                                    <div class="layui-inline">
+                                        <label class="layui-form-label"><@spring.message 'query.Date'/><!--查询日期--></label>
+                                        <div class="layui-input-inline">
+                                            <input type="text" class="layui-input" id="test6" >
+                                        </div>
+                                        <div class="layui-inline">
+                                            <div class="layui-input-inline">
+                                                <button style="margin-top: 5px;" type="button" lay-submit lay-filter="query" id="query"
+                                                        class="layui-btn layui-btn-normal layui-btn-sm">
+                                                    <i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/><!--查询-->
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+                            <div id="optionM_day"  style="height:300px"></div>
+                        </div>
+                      <div id="div2" >
+                            <div class="layui-form">
+                                <div class="layui-form-item">
+                                    <div class="layui-inline">
+                                        <label class="layui-form-label"><@spring.message 'please.select_date'/><!--请选择日期--></label>
+                                        <div class="layui-inline">
+                                            <input type="text" class="layui-input" id="test11">
+                                        </div>
+                                        <div class="layui-inline">
+                                            <div class="layui-input-inline">
+                                                <button type="button" lay-submit lay-filter="query" id="query01"
+                                                        class="layui-btn layui-btn-normal layui-btn-sm">
+                                                    <i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/><!--查询-->
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                           <div id="main1"  style="height:300px"></div>
+                            <div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-tab-item">
+                        <div id="div11" >
+                            <div class="layui-form">
+                                <div class="layui-form-item">
+                                    <div class="layui-inline">
+                                        <label class="layui-form-label"><@spring.message 'query.Date'/><!--查询日期--></label>
+                                        <div class="layui-input-inline">
+                                            <input type="text" class="layui-input" id="test17" >
+                                        </div>
+                                        <div class="layui-inline">
+                                            <div class="layui-input-inline">
+                                                <button style="margin-top: 5px;"type="button" lay-submit lay-filter="query" id="query02"
+                                                        class="layui-btn layui-btn-normal layui-btn-sm">
+                                                    <i class="layui-icon">&#xe615;</i><@spring.message 'action.query'/> <!--查询-->
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+                            <div id="mainOne"  style="height:300px"></div>
+                        </div>
+                        <div id="div22" >
+                            <div class="layui-form">
+                                <div class="layui-form-item">
+                                    <div class="layui-inline">
+                                        <label class="layui-form-label"><@spring.message 'please.select_date'/><!--请选择日期--></label>
+                                        <div class="layui-input-inline">
+                                            <input type="text" class="layui-input" id="test18" >
+                                        </div>
+                                        <div class="layui-inline">
+                                            <div class="layui-input-inline">
+                                                <button style="margin-top: 5px;" type="button" lay-submit lay-filter="query" id="query03"
+                                                        class="layui-btn layui-btn-normal layui-btn-sm">
+                                                    <i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/><!--查询-->
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+                            <div id="main11"  style="height:300px"></div>
+                            <div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-tab-item">
+                        <div class="divsz">
+                            <div class="layui-form">
+                                <div class="layui-form-item">
+                                    <div class="layui-inline">
+                                        <label class="layui-form-label"><@spring.message 'query.Date'/><!--查询日期--></label>
+                                        <div class="layui-input-inline">
+                                            <input type="text" class="layui-input" id="test19" >
+                                        </div>
+                                        <div class="layui-inline">
+                                            <div class="layui-input-inline">
+                                                <button style="margin-top: 5px;"type="button" lay-submit lay-filter="query" id="query04"
+                                                        class="layui-btn layui-btn-normal layui-btn-sm">
+                                                    <i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/><!--查询-->
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <h4 id="pv111" ><blockquote class=" layui-elem-quote btn-blockquote" style="padding: 5px;margin: 0px;font-size: 14px;">*<@spring.message 'tips.attention'/>：<@spring.message 'the.default_is_to_load_the_last_months_data'/></blockquote></h4>
+                        </div>
+                        <div class="layui-row">
+                            <div class="layui-col-xs6">
+                                <div class="grid-demo grid-demo-bg1">
+                                    <div id="md6"  style="height:700px;margin-top: 80px;"></div>
+                            </div>
+                            </div>
+                            <div class="layui-col-xs6">
+                                <div class="grid-demo">
+                                    <div id="md7"  style="height:360px"></div>
+                                    <div class="layui-col-md8">
+                                        <!--<div class="layui-card">
+                                            <div class="layui-card-header01">More</div>
+                                            <table  frame=above border rules=none cellpadding="0" cellspacing="0" align=center>
+                                                <colgroup>
+                                                    <col width="150">
+                                                    <col width="200">
+                                                    <col>
+                                                </colgroup>
+                                                <thead>
+                                                <tr>
+                                                    <th>昵称</th>
+                                                    <th>加入时间</th>
+                                                    <th>签名</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr>
+                                                    <td>贤心</td>
+                                                    <td>2016-11-29</td>
+                                                    <td>人生就</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>许闲心</td>
+                                                    <td>2016-11-28</td>
+                                                    <td>于千万人</td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>-->
+                                        <table id="tablecww" lass="layui-table" lay-even="" lay-skin="nob">
+
+
+                                        </table>
+                                    </div></div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="layui-tab-item">
+                        <div class="layui-form-item" style="margin-top: 8px">
+                            <label class="layui-form-label"  style="font-weight: bold "><@spring.message 'temporal.interval'/><!--时间区间--></label>
+                            <div class="layui-input-inline">
+                                <select id="quiz1">
+                                    <option value="1" selected=""><@spring.message 'nearly'/>1<@spring.message 'month'/></option>
+                                    <option value="2"><@spring.message 'nearly'/>2<@spring.message 'month'/></option>
+                                    <option value="3"><@spring.message 'nearly'/>3<@spring.message 'month'/></option>
+                                    <option value="12"><@spring.message 'nearly'/>1<@spring.message 'year'/></option>
+                                    <option value="24"><@spring.message 'nearly'/>2<@spring.message 'year'/></option>
+                                </select>
+                            </div>
+                                <label class="layui-form-label" style="font-weight: bold "><@spring.message 'click.rate'/><!--点击量--></label>
+                                <div class="layui-input-inline">
+                                    <select id="quiz2">
+                                        <option value="5" selected="">5<@spring.message 'times.or_less'/></option>
+                                        <option value="10">10<@spring.message 'times.or_less'/></option>
+                                        <option value="20">20<@spring.message 'times.or_less'/></option>
+                                        <option value="50">50<@spring.message 'times.or_less'/></option>
+                                        <option value="100">100<@spring.message 'times.or_less'/></option>
+                                    </select>
+                            </div>
+                            <div class="layui-inline" style="margin-left: 10px;margin-top: 5px">
+                                <div class="layui-input-inline">
+                                    <button type="button" lay-submit lay-filter="query" id="query06"
+                                            class="layui-btn layui-btn-normal layui-btn-sm">
+                                        <i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/><!--查询-->
+                                    </button>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <table id="dormancy" lclass="table-condensed"></table>
+                    </div>
+                </div>
+        </div>
+        </div>
+
+        <div class="layui-tab-item">
+            <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+                <ul class="layui-tab-title ">
+                    <li class="layui-this" onclick="resource()"><@spring.message 'overview.resources'/><!--资源概览--></li>
+                    <li><@spring.message 'active.resources'/><!--活跃资源--></li>
+                    <li><@spring.message 'inactive.resource'/><!--非活跃资源--></li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <div class="layui-row" >
+                            <div class="layui-col-xs3" >
+                                <div class="grid-demo grid-demo-bg1">
+                                    <h3><span class="re"id="reone">${resourceData}</span><br>
+                                        <@spring.message 'the.total_number_of_resources'/><!-- 总资源数--></h3>
+                                </div>
+                            </div>
+                            <div class="layui-col-xs3">
+                                <div class="grid-demo"><h3><span class="re" id="retwo">${resourceActive}</span><br>
+                                    <@spring.message 'active.resources_of_the_month'/><!--当月活跃资源数--></h3></div>
+                            </div>
+                            <div class="layui-col-xs3">
+                                <div class="grid-demo grid-demo-bg1">
+                                    <h3><span class="re" id="rethree">${resourceActivity}</span><br>
+                                        <@spring.message 'monthly.active_resource_rate'/><!--当月活跃资源率--></h3></div>
+                            </div>
+                        </div>
+                        <div style=" height: 100px; text-align: center;font-size: 20px;font-weight: bold;margin-top: 20px">
+                            <@spring.message 'proportion.resource_type_visits_in_that_month'/> <!--当月资源大类访问占比-->
+                        </div>
+                        <div id="resour" style="height:500px" ></div>
+
+
+                    </div>
+                    <div class="layui-tab-item">
+
+                        <div class="divsz">
+                            <div class="layui-form">
+                                <div class="layui-form-item">
+                                    <div class="layui-inline">
+                                        <label class="layui-form-label"><@spring.message 'query.Date'/><!--查询日期--></label>
+                                        <div class="layui-input-inline">
+                                            <input type="text" class="layui-input" id="test1" >
+                                        </div>
+                                        <div class="layui-inline">
+                                            <div class="layui-input-inline">
+                                                <button style="margin-top: 5px;"type="button" lay-submit lay-filter="query" id="query05"
+                                                        class="layui-btn layui-btn-normal layui-btn-sm">
+                                                    <i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/><!--查询-->
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <h4 id="pv1111" >
+                                <blockquote class=" layui-elem-quote btn-blockquote" style="padding: 5px;margin: 0px;font-size: 14px;">*<@spring.message 'tips.attention'/>：<@spring.message 'the.default_is_to_load_the_last_months_data'/></blockquote>
+                            </h4>
+                        </div>
+                        <div class="layui-row">
+                            <div class="layui-col-xs6">
+                                <div class="grid-demo grid-demo-bg1">
+                                    <div id="md61"  style="height:700px;margin-top: 80px;"></div>
+                            </div>
+                            </div>
+                            <div class="layui-col-xs6">
+                                <div class="grid-demo">
+                                    <div id="md62"  style="height:360px"></div>
+                                    <div class="layui-col-md8">
+                                        <table id="tablecww1" lass="layui-table" lay-even="" lay-skin="nob">
+                                            <colgroup>
+                                                <col width="150">
+                                                <col width="150">
+                                                <col width="200">
+                                                <col>
+                                            </colgroup>
+
+                                        </table>
+
+                                    </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+                    <div class="layui-tab-item">
+                        <div class="layui-form-item" style="margin-top: 8px">
+                            <label class="layui-form-label"  style="font-weight: bold "><@spring.message 'temporal.interval'/><!--时间区间--></label>
+                            <div class="layui-input-inline">
+                                <select id="quiz3">
+                                    <option value="1" selected=""><@spring.message 'nearly'/>1 <@spring.message 'month'/></option>
+                                    <option value="2"><@spring.message 'nearly'/>2 <@spring.message 'month'/></option>
+                                    <option value="3"><@spring.message 'nearly'/>3 <@spring.message 'month'/></option>
+                                    <option value="4"><@spring.message 'nearly'/>1 <@spring.message 'year'/></option>
+                                    <option value="5"><@spring.message 'nearly'/>2 <@spring.message 'year'/></option>
+                                </select>
+                            </div>
+                            <label class="layui-form-label" style="font-weight: bold "><@spring.message 'click.rate'/><!--点击量--></label>
+                            <div class="layui-input-inline">
+                                <select id="quiz4">
+                                    <option value="5" selected="">5 <@spring.message 'times.or_less'/></option>
+                                    <option value="10">10 <@spring.message 'times.or_less'/></option>
+                                    <option value="20">20 <@spring.message 'times.or_less'/></option>
+                                    <option value="50">50 <@spring.message 'times.or_less'/></option>
+                                    <option value="100">100 <@spring.message 'times.or_less'/></option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="layui-inline" style="margin-left: 10px;margin-top: 5px">
+                                    <div class="layui-input-inline">
+                                        <button type="button" lay-submit lay-filter="query" id="query07"
+                                                class="layui-btn layui-btn-normal layui-btn-sm">
+                                            <i class="layui-icon">&#xe615;</i><@spring.message 'action.query'/> <!--查询-->
+                                        </button>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <table id="InactiveResource" lass="layui-table" lay-even="" lay-skin="nob"></table>
+
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+</div>
+</div>
+</div>
+</form>
+<!-- ECharts单文件引入 -->
+<script src="${basePath}/plugins/echartsV2.7/echarts.js"></script>
+<script src="${basePath}/plugins/resize/jquery.ba-resize.js"></script>
+<script>
+    var createTimeStart=null;
+    var createTimeEnd=null;
+    var timeHour=null;
+    var timeHour1=null;
+
+    $(function(){
+
+        CurentTime();
+
+        one();
+
+
+    });
+    layui.use([ 'form','element','laydate','layedit'], function() {
+        var $ = layui.jquery
+            , element = layui.element;
+        // 路径配置
+        element.on('tab(docDemoTabBrief)', function(elem){
+            one();
+        });
+        var form = layui.form
+            ,layer = layui.layer
+            ,layedit = layui.layedit;
+        form.render();
+        var laydate = layui.laydate;
+        laydate.render({
+            elem: '#test6'
+            ,range: true
+            /* ,done:function (value,date,endDate) {
+             var times = value.split(' - ');
+             createTimeStart = times[0];
+             createTimeEnd = times[1];
+             dateStatistics(createTimeStart,createTimeEnd);
+             }*/
+
+        });
+        laydate.render({
+            elem: '#test11'
+
+
+        });
+        laydate.render({
+            elem: '#test17'
+            ,range: true
+        });
+        laydate.render({
+            elem: '#test18'
+        });
+        laydate.render({
+            elem: '#test19'
+            ,range: true
+        });
+        laydate.render({
+            elem: '#test1'
+            ,range: true
+        });
+
+    });
+
+    $('#query').on('click', function(data){
+         var timeBetween = $('#test6').val();
+         if (timeBetween!=null && timeBetween!='') {
+             var times = timeBetween.split(' - ');
+            createTimeStart=times[0];
+            createTimeEnd=times[1];
+             myChart();
+        }else{
+            layer.msg("<@spring.message 'analysis.inputQueryDateInterval'/>");
+        }
+        
+    });
+    $('#query01').on('click',function (data) {
+       var time= $('#test11').val();
+       if(time!=null&&time!=''){
+               timeHour=time;
+                myChart1();
+       }else {
+           layer.msg("<@spring.message 'analysis.inputQueryDate'/>");
+       }
+         
+     });
+    $('#query02').on('click',function (data) {
+         var timeBetween=$('#test17').val();
+         if(timeBetween!=null&&timeBetween!=''){
+             var times = timeBetween.split(' - ');
+             createTimeStart=times[0];
+             createTimeEnd=times[1];
+             myChart01();
+         }else{
+             layer.msg("<@spring.message 'analysis.inputQueryDateInterval'/>");
+         }
+    });
+    $('#query03').on('click',function (data) {
+        var time= $('#test18').val();
+        if(time!=null&&time!=''){
+            timeHour1=time;
+            myChartUV();
+        }else {
+            layer.msg("<@spring.message 'analysis.inputQueryDate'/>");
+        }
+
+    });
+    $('#query04').on('click',function (data) {
+        var timeBetween=$('#test19').val();
+        if(timeBetween!=null&&timeBetween!=''){
+            var times = timeBetween.split(' - ');
+            createTimeStart=times[0];
+            createTimeEnd=times[1];
+            myChartSix();
+        }else{
+            layer.msg("<@spring.message 'analysis.inputQueryDate'/>");
+        }
+    });
+    $('#query05').on('click',function (data) {
+        var timeBetween=$('#test1').val();
+        if(timeBetween!=null&&timeBetween!=''){
+            var times = timeBetween.split(' - ');
+            createTimeStart=times[0];
+            createTimeEnd=times[1];
+            myChartResour();
+        }else{
+            layer.msg("<@spring.message 'analysis.inputQueryDate'/>");
+        }
+    });
+    $('#query06').on('click',function (data) {
+       var monthCount= $("#quiz1").val();
+       var  hits=$("#quiz2").val();
+        $("#dormancy").bootstrapTable('refresh', {monthCount:monthCount,hits:hits});
+    });
+    $('#query07').on('click',function (data) {
+        var monthCount= $("#quiz3").val();
+        var  hits=$("#quiz4").val();
+        $("#InactiveResource").bootstrapTable('refresh', {monthCount:monthCount,hits:hits});
+    });
+
+
+     function CurentTime() {
+         var now = new Date();
+         var year = now.getFullYear();       //年
+         var month = now.getMonth() + 1;     //月
+         var day = now.getDate();            //日
+
+         /* var hh = now.getHours();         //时
+          var mm = now.getMinutes();          //分 */
+
+         var time= year + "-";
+         if(month < 10)
+             time += "0";
+         time+= month + "-";
+         if(day < 10)
+             time += "0";
+         time += day + " ";
+
+         /*  if(hh < 10)
+          clock += "0";
+          clock += hh + ":";
+          if (mm < 10) clock += '0';
+          clock += mm;  */
+         var nowdate = new Date();
+         nowdate.setMonth(nowdate.getMonth()-1);
+         var y = nowdate.getFullYear();
+         var m = nowdate.getMonth()+1;
+         if(m < 10) {
+             m = "0"+m;
+         }
+         var d = nowdate.getDate();
+         if(d < 10) {
+             d = "0"+d;
+         }
+         timeHour=time;
+         timeHour1=time;
+         $("#test11").val(timeHour);
+         $("#test18").val(timeHour1);
+         createTimeStart = y+'-'+m+'-'+d;
+         createTimeEnd=time;
+         $("#test6").val(createTimeStart+' - '+createTimeEnd);
+         $("#test17").val(createTimeStart+' - '+createTimeEnd);
+         $("#test19").val(createTimeStart+' - '+createTimeEnd);
+         $("#test1").val(createTimeStart+' - '+createTimeEnd);
+
+
+
+
+
+     }
+
+     function myChart() {
+         var myChart = echarts.init(document.getElementById('optionM_day'));
+         optionM_day = {
+             title : {
+                 text: "<@spring.message 'daily.PV_statistics_user_clicks'/>",
+                 x:'center',
+                 textStyle:{
+                     //字体大小
+                     fontSize:20
+
+                 }
+             },
+             tooltip: {
+                 trigger: 'axis',
+                 axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                     type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                 }
+             },
+             grid: {
+                 left: '6%'
+             },
+             xAxis: {
+                 type: 'category',
+                 axisLabel : {//坐标轴刻度标签的相关设置。
+                     clickable:true,//并给图表添加单击事件  根据返回值判断点击的是哪里
+                     interval : 0,
+                     formatter : function(params,index){
+                         if (index % 2 != 0) {
+                             return '\n\n' + params;
+                         }
+                         else {
+                             return params;
+                         }
+                     }
+                 }
+             },
+             yAxis: {
+                 type: 'value'
+             },
+             series: [{
+                 type: 'line',
+                 itemStyle: {
+                     normal: {
+                         color: '#0a94e8',
+                         lineStyle: {
+                             color: '#6a9bf0'
+                         }
+                     }
+                 },
+                 markPoint : {
+                     data : [
+                         {type : 'max', name: '<@spring.message "analysis.MaximumClicks"/>'},
+                         {type : 'min', name: '<@spring.message "analysis.MinimumClicks"/>'}
+                     ]
+                 },
+
+             }]
+         }
+         var resourceLog = {"createTimeStart": createTimeStart, "createTimeEnd": createTimeEnd};
+         $.ajax({
+             type: "post",
+             url: "${basePath}/resourceLog/dateStatistics",
+             data: JSON.stringify(resourceLog),
+             dataType: "json",
+             contentType: "application/json",
+             success: function (result) {
+                 optionM_day.series[0].data=result.series[0].data;
+                 optionM_day.xAxis.data=result.category;
+                 myChart.setOption(optionM_day);
+                 myChart.resize();
+             }
+         });
+
+     }
+     function myChart1() {
+         var myChart1 = echarts.init(document.getElementById('main1'));
+         optionM_day01 ={
+             title : {
+                 text: "<@spring.message 'Hourly.PV_statistics_user_clicks'/>",
+                 x:'center',
+                 textStyle:{
+                     //字体大小
+                     fontSize:20
+
+                 }
+             },
+             tooltip: {
+                 trigger: 'axis',
+                 axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                     type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                 }
+             },
+             grid: {
+                 left: '6%'
+             },
+             xAxis: {
+                 type: 'category'
+             },
+             yAxis: {
+                 type: 'value'
+             },
+             series: [{
+                 type: 'line',
+                 itemStyle: {
+                     normal: {
+                         color: '#0a94e8',
+                         lineStyle: {
+                             color: '#6a9bf0'
+                         }
+                     }
+                 },
+                 markPoint : {
+                     data : [
+                         {type : 'max', name: '<@spring.message "analysis.MaximumClicks"/>'},
+                         {type : 'min', name: '<@spring.message "analysis.MinimumClicks"/>'}
+                     ]
+                 },
+
+             }]
+         }
+         $.ajax({
+             type: "post",
+             url: "${basePath}/resourceLog/clickHour?timeHour="+timeHour,
+             dataType: "json",
+             contentType: "application/json",
+             success:function (result) {
+                 optionM_day01.series[0].data=result.series[0].data;
+                 optionM_day01.xAxis.data=result.category;
+                 myChart1.setOption(optionM_day01);
+                 myChart1.resize();
+             }
+
+     });
+     }
+     function myChart01() {
+         var myChart01 = echarts.init(document.getElementById('mainOne'));
+         optionM_dayOne =  {
+             title : {
+                 text: "<@spring.message 'daily.UV_statistics_user_clicks'/>",
+                 x:'center',
+                 textStyle:{
+                     //字体大小
+                     fontSize:20
+
+                 }
+             },
+             tooltip: {
+                 trigger: 'axis',
+                 axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                     type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                 }
+             },
+             grid: {
+                 left: '6%'
+             },
+             xAxis: {
+                 type: 'category',
+                 axisLabel : {//坐标轴刻度标签的相关设置。
+                     clickable:true,//并给图表添加单击事件  根据返回值判断点击的是哪里
+                     interval : 0,
+                     formatter : function(params,index){
+                         if (index % 2 != 0) {
+                             return '\n\n' + params;
+                         }
+                         else {
+                             return params;
+                         }
+                     }
+                 }
+             },
+             yAxis: {
+                 type: 'value'
+             },
+             series: [{
+                 type: 'line',
+                 itemStyle: {
+                     normal: {
+                         color: '#0a94e8',
+                         lineStyle: {
+                             color: '#6a9bf0'
+                         }
+                     }
+                 },
+                 markPoint : {
+                     data : [
+                         {type : 'max', name: '<@spring.message "analysis.MaximumClicks"/>'},
+                         {type : 'min', name: '<@spring.message "analysis.MinimumClicks"/>'}
+                     ]
+                 },
+
+             }]
+         }
+         var resourceLog = {"createTimeStart": createTimeStart, "createTimeEnd": createTimeEnd};
+         $.ajax({
+             type:"post",
+             url:"${basePath}/resourceLog/dateStatisticsUv",
+             data:JSON.stringify(resourceLog),
+             dataType:"json",
+             contentType:"application/json",
+             success:function (result) {
+              optionM_dayOne.series[0].data=result.series[0].data;
+                 optionM_dayOne.xAxis.data=result.category;
+                 myChart01.setOption( optionM_dayOne);
+                 myChart01.resize();
+             }
+
+         });
+     }
+     function myChartUV() {
+         var myChart11 = echarts.init(document.getElementById('main11'));
+         var timeHour=timeHour1;
+         optionM_day02 = {
+             title : {
+                 text:"<@spring.message 'Hourly.UV_statistics_user_clicks'/>",
+                 x:'center',
+                 textStyle:{
+                     //字体大小
+                     fontSize:20
+
+                 }
+             },
+             tooltip: {
+                 trigger: 'axis',
+                 axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                     type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                 }
+             },
+             grid: {
+                 left: '6%'
+             },
+             xAxis: {
+                 type: 'category'
+             },
+             yAxis: {
+                 type: 'value'
+             },
+             series: [{
+                 type: 'line',
+                 itemStyle: {
+                     normal: {
+                         color: '#0a94e8',
+                         lineStyle: {
+                             color: '#6a9bf0'
+                         }
+                     }
+                 },
+                 markPoint : {
+                     data : [
+                         {type : 'max', name: '<@spring.message "analysis.MaximumClicks"/>'},
+                         {type : 'min', name: '<@spring.message "analysis.MinimumClicks"/>'}
+                     ]
+                 },
+
+             }]
+         }
+         $.ajax({
+             type: "post",
+             url: "${basePath}/resourceLog/clickHourUv?timeHour="+timeHour,
+             dataType: "json",
+             contentType: "application/json",
+             success:function (result) {
+                 optionM_day02.series[0].data=result.series[0].data;
+                 optionM_day02.xAxis.data=result.category;
+                 myChart11.setOption(optionM_day02);
+                 myChart11.resize();
+             }
+
+
+         });
+
+     }
+     function myChartSix() {
+         var md6 = echarts.init(document.getElementById('md6'));
+         var md7 = echarts.init(document.getElementById('md7'));
+         option11 = {
+             title : {
+                 text:"<@spring.message 'Active.User_TO20'/>",
+                 x:'center',
+                 textStyle:{
+                     //字体大小
+                     fontSize:20
+
+                 }
+             },
+             tooltip : {
+                 trigger: 'axis'
+             },
+
+             calculable : true,
+             xAxis : [
+                 {
+                     type : 'value',
+                     boundaryGap : [0, 0.01]
+                 }
+             ],
+             yAxis : [
+                 {
+                     type : 'category',
+                 }
+             ],
+             series : [
+                 {
+                     name:'',
+                     type:'bar',
+                     itemStyle: {
+                         normal: {
+                             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                 offset: 0,
+                                 color: '#85f3dc'
+                             }, {
+                                 offset: 1,
+                                 color: '#718cf2'
+                             }])
+                         }
+                     }
+
+                 },
+
+             ]
+
+         };
+         option122 = {
+             title : {
+                 text: "<@spring.message 'Resource.Access_Histogram'/>",
+                 x:'center',
+                 textStyle:{
+                     //字体大小
+                     fontSize:20
+
+                 }
+             },
+             color: ['#3398DB'],
+             tooltip : {
+                 trigger: 'axis',
+                 axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                     type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                 }
+             },
+             grid: {
+                 left: '3%',
+                 right: '4%',
+                 bottom: '3%',
+
+                 containLabel: true
+             },
+             xAxis : [
+                 {
+                     type : 'category',
+
+                     axisLabel : {//坐标轴刻度标签的相关设置。
+                         clickable:true,//并给图表添加单击事件  根据返回值判断点击的是哪里
+                         interval : 0,
+                         formatter : function(params,index){
+                             if (index % 2 != 0) {
+                                 return '\n\n' + params;
+                             }
+                             else {
+                                 return params;
+                             }
+                         }
+                     }
+                 }
+             ],
+             yAxis : [
+                 {
+                     type : 'value'
+                 }
+             ],
+             series : [
+                 {
+
+                     type:'bar',
+                     barWidth: '60%',
+                     itemStyle: {
+                         normal: {
+                             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                 offset: 0,
+                                 color: '#85f3dc'
+                             }, {
+                                 offset: 1,
+                                 color: '#718cf2'
+                             }])
+                         }
+                     }
+
+                 }
+             ]
+         };
+
+         var resourceLog = {"createTimeStart": createTimeStart, "createTimeEnd": createTimeEnd};
+         var rdname=null
+         $.ajax({
+             type:"post",
+             url:"${basePath}/resourceLog/activeUser",
+             data:JSON.stringify(resourceLog) ,
+             dataType:"json",
+             contentType:"application/json",
+             success:function(result) {
+                 option11.series[0].data=result.series[0].data;
+                 option11.yAxis[0].data=result.category;
+                 md6.setOption(option11);
+
+                /* $(".layui-card-header").resize(function(){*/
+                     md6.resize();
+               /*  });*/
+
+                 $('#tablecww').bootstrapTable('refresh');
+
+                 rdname=result.category[result.category.length-1];
+                 clik();
+
+
+                 md6.on('click',function (params) {
+                     rdname=params.name;
+                     clik();
+                     $('#tablecww').bootstrapTable('refresh', {rdname:rdname});
+                 });
+
+
+
+             }
+
+         });
+
+         function clik() {
+             $.ajax({
+                 type:"post",
+                 url:"${basePath}/resourceLog/clickRosource?rdname="+rdname,
+                 dataType:"json",
+                 data:JSON.stringify(resourceLog),
+                 contentType:"application/json",
+                 success:function(result) {
+                     option122.series[0].data= result.series[0].data;
+                     option122.xAxis[0].data=result.category;
+                     md7.setOption(option122);
+                     md7.resize();
+                 }
+
+             });
+         };
+
+         $("#tablecww").bootstrapTable({
+             url: '${basePath}/resourceLog/clickTable',         //请求后台的URL（*）
+             contentType : 'application/x-www-form-urlencoded',
+             method: 'post',                      //请求方式（*）
+             striped: false,                      //是否显示行间隔色
+             cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+             pagination: true,                   //是否显示分页（*）
+             sortable: true,                     //是否启用排序
+             sortOrder: "desc",                   //排序方式
+             queryParamsType:"",
+             queryParams: queryParams,//传递参数（*）
+             sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+             pageNumber: 1,                       //初始化加载第一页，默认第一页
+             pageSize: 5,                       //每页的记录行数（*）
+             uniqueId:'id',
+             columns: [{
+                 field:'createTime',
+                 title:"<@spring.message 'resource.Time'/>",
+                 width:'5px',
+                 halign: 'center',
+                 align: 'center',
+                 valign:'middle',
+                 formatter:dateTimeFormatter
+             },
+                 {
+                     field: 'createrName',
+                     title: "<@spring.message 'user'/>",
+                     halign: 'center',
+                     align: 'center',
+                     valign:'middle',
+                 },
+                 {
+                     field: 'rdname',
+                     title: "<@spring.message 'wechat.Resources'/>",
+                     halign: 'center',
+                     align: 'center',
+                     valign:'middle',
+                 },
+             ],
+         });
+
+         function queryParams(params) {
+            params.createTimeStart=createTimeStart;
+            params.createTimeEnd=createTimeEnd;
+            params.rdname=rdname;
+            return  params;
+
+         }
+
+
+
+
+
+
+     }
+    function resource() {
+        var myChartRe = echarts.init(document.getElementById('resour'));
+        optionResource = {
+            title : {
+                text: '',
+                x:'center',
+                textStyle:{
+                    //字体大小
+                    fontSize:20
+
+                }
+            },
+            tooltip : {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient : 'vertical',
+                x : '25%',
+                data:[]
+            },
+
+            calculable : true,
+            series : [
+                {
+                    name:'<@spring.message "analysis.AccessNumber"/>',
+                    type:'pie',
+                    radius : '75%',
+                    center: ['50%', '50%'],
+                    data:[]
+                }
+            ]
+        };
+        $.ajax({
+            type:"post",
+            url:"${basePath}/resource/overviewResource",
+            success:function (result) {
+                $("#reone").html(result['resourceData']);
+                $("#retwo").html(result['resourceActive']);
+                $("#rethree").html(result['resourceActivity']);
+                $.ajax({
+                    type:"post",
+                    url:"${basePath}/resource/chart",
+                    dataType:"json",
+                    cache : false,
+                    contentType:"application/json",
+                    success:function (result) {
+                        var states=result.states;
+                        var names=result.names;
+                        var nums=[];
+                        for(var i=0;i<states.length;i++){
+                         var obj=new Object();
+                         obj.name=names[i];
+                         obj.value=states[i];
+                           nums.push(obj);
+                        }
+                        myChartRe.setOption({
+                           legend:{
+                               data:names
+                           },
+                           series:{
+                               data:nums
+                           }
+                        });
+
+                    }
+
+                });
+                myChartRe.setOption(optionResource);
+                myChartRe.resize();
+
+            }
+        });
+
+    }
+     function myChartResour() {
+         var md61 = echarts.init(document.getElementById('md61'));
+         var md62 = echarts.init(document.getElementById('md62'));
+         option111 = {
+             title : {
+                 text: "<@spring.message 'Resource.clicks'/>",
+                 x:'center',
+                 textStyle:{
+                     //字体大小
+                     fontSize:20
+
+                 }
+             },
+             tooltip : {
+                 trigger: 'axis'
+             },
+
+             calculable : true,
+             xAxis : [
+                 {
+                     type : 'value',
+                     boundaryGap : [0, 0.01]
+                 }
+             ],
+             yAxis : [
+                 {
+                     type : 'category',
+                 }
+             ],
+             series : [
+                 {
+                     name:'',
+                     type:'bar',
+                     itemStyle: {
+                         normal: {
+                             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                 offset: 0,
+                                 color: '#85f3dc'
+                             }, {
+                                 offset: 1,
+                                 color: '#718cf2'
+                             }])
+                         }
+                     }
+                 },
+
+             ]
+
+         };
+         option1222 = {
+             title : {
+                 text: "<@spring.message 'Resource.Access_Histogram'/>",
+                 x:'center',
+                 textStyle:{
+                     //字体大小
+                     fontSize:20
+
+                 }
+             },
+             color: ['#3398DB'],
+             tooltip : {
+                 trigger: 'axis',
+                 axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                     type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                 }
+             },
+             grid: {
+                 left: '3%',
+                 right: '4%',
+                 bottom: '3%',
+                 containLabel: true
+             },
+             xAxis : [
+                 {
+                     type : 'category',
+                     axisLabel : {//坐标轴刻度标签的相关设置。
+                         clickable:true,//并给图表添加单击事件  根据返回值判断点击的是哪里
+                         interval : 0,
+                         formatter : function(params,index){
+                             if (index % 2 != 0) {
+                                 return '\n\n' + params;
+                             }
+                             else {
+                                 return params;
+                             }
+                         }
+                     }
+                 }
+             ],
+             yAxis : [
+                 {
+                     type : 'value'
+                 }
+             ],
+             series : [
+                 {
+
+                     type:'bar',
+                     barWidth: '60%',
+                     itemStyle: {
+                         normal: {
+                             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                 offset: 0,
+                                 color: '#85f3dc'
+                             }, {
+                                 offset: 1,
+                                 color: '#718cf2'
+                             }])
+                         }
+                     }
+
+                 }
+             ]
+         };
+
+         var resourceLog = {"createTimeStart": createTimeStart, "createTimeEnd": createTimeEnd};
+         var resourName=null;
+         $.ajax({
+             type: "post",
+             url: "${basePath}/resourceLog/resourceClick",
+             data: JSON.stringify(resourceLog),
+             dataType: "json",
+             contentType: "application/json",
+             success: function (result) {
+                 option111.series[0].data=result.series[0].data;
+                 option111.yAxis[0].data=result.category;
+                 md61.setOption(option111);
+                 md61.resize();
+                 resourName=result.category[result.category.length-1];
+                 clickre();
+                 $('#tablecww1').bootstrapTable('refresh');
+                 md61.on('click',function (params) {
+                     resourName=params.name;
+                     clickre();
+                     $('#tablecww1').bootstrapTable('refresh', {resourName:resourName});
+                 });
+             }
+         });
+         
+         function clickre() {
+             $.ajax({
+                  type:"post",
+                 url:"${basePath}/resourceLog/visitUser?resourName="+resourName,
+                 data:JSON.stringify(resourceLog),
+                 dataType: "json",
+                 contentType: "application/json",
+                 success:function (result) {
+                     option1222.series[0].data= result.series[0].data;
+                     option1222.xAxis[0].data=result.category;
+                     md62.setOption(option1222);
+                     md62.resize();
+                 }
+             });
+
+         }
+
+         $("#tablecww1").bootstrapTable({
+             url: '${basePath}/resourceLog/clickTable1',         //请求后台的URL（*）
+             contentType : 'application/x-www-form-urlencoded',
+             method: 'post',                      //请求方式（*）
+             striped: false,                      //是否显示行间隔色
+             cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+             pagination: true,                   //是否显示分页（*）
+             sortable: true,                     //是否启用排序
+             sortOrder: "desc",                   //排序方式
+             queryParamsType:"",
+             queryParams: queryParams,//传递参数（*）
+             sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+             pageNumber: 1,                       //初始化加载第一页，默认第一页
+             pageSize: 5,                       //每页的记录行数（*）
+             uniqueId:'id',
+             columns: [{
+                 field:'createTime',
+                 title:"<@spring.message 'resource.Time'/>",
+                 width:'5px',
+                 halign: 'center',
+                 align: 'center',
+                 valign:'middle',
+                 formatter:dateTimeFormatter,
+             },
+                 {
+                     field: 'createrName',
+                     title:"<@spring.message 'user'/>",
+                     halign: 'center',
+                     align: 'center',
+                     valign:'middle',
+                 },
+                 {
+                     field: 'resourName',
+                     title: "<@spring.message 'wechat.Resources'/>",
+                     halign: 'center',
+                     align: 'center',
+                     valign:'middle',
+                 }
+             ],
+         });
+
+         function queryParams(params) {
+             params.createTimeStart=createTimeStart;
+             params.createTimeEnd=createTimeEnd;
+             params.resourName=resourName;
+             return  params;
+
+         }
+     }
+
+
+     function dormancys () {
+         $("#dormancy").bootstrapTable('refresh');
+         $("#dormancy").bootstrapTable({
+             url: '${basePath}/resourceLog/dormancyUser',         //请求后台的URL（*）
+             contentType : 'application/x-www-form-urlencoded',
+             method: 'post',                      //请求方式（*）
+             striped: false,                      //是否显示行间隔色
+             cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+             pagination: true,                   //是否显示分页（*）
+             sortable: true,                     //是否启用排序
+             sortOrder: "desc",                   //排序方式
+             queryParamsType:"",
+             queryParams: queryParamrs,//传递参数（*）
+             sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+             pageNumber: 1,                       //初始化加载第一页，默认第一页
+             pageSize: 10,                       //每页的记录行数（*）
+             uniqueId:'id',
+             columns: [{
+                 field:'createrName',
+                 title:"<@spring.message 'user'/>",
+                 width:'5px',
+                 halign: 'center',
+                 align: 'center',
+                 valign:'middle',
+             },
+                 {
+                     field: 'hits',
+                     title: "<@spring.message 'click.rate'/>"+'(PV)',
+                     halign: 'center',
+                     align: 'center',
+                     valign:'middle',
+                 },
+                 {
+                     field: 'codename',
+                     title: "<@spring.message 'user.belongOrg'/>",
+                     halign: 'center',
+                     align: 'center',
+                     valign:'middle',
+                 },
+                 {
+                     field: 'opt',
+                     title: '<@spring.message"action.action"/>',
+                     halign: 'center',
+                     align: 'center',
+                     valign:'middle',
+                     formatter:opeFormatter
+                 }
+
+
+             ],
+         });
+
+
+         $("#InactiveResource").bootstrapTable('refresh');
+         $("#InactiveResource").bootstrapTable({
+             url: '${basePath}/resourceLog/InactiveResource',         //请求后台的URL（*）
+             contentType : 'application/x-www-form-urlencoded',
+             method: 'post',                      //请求方式（*）
+             striped: false,                      //是否显示行间隔色
+             cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+             pagination: true,                   //是否显示分页（*）
+             sortable: true,                     //是否启用排序
+             sortOrder: "desc",                   //排序方式
+             queryParamsType:"",
+             queryParams: queryParamsRe,//传递参数（*）
+             sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+             pageNumber: 1,                       //初始化加载第一页，默认第一页
+             pageSize: 10,                       //每页的记录行数（*）
+             uniqueId:'id',
+             columns: [{
+                 field:'rdname',
+                 title:"<@spring.message 'wechat.Resources'/>",
+                 width:'5px',
+                 halign: 'center',
+                 align: 'center',
+                 valign:'middle',
+             },
+                 {
+                     field: 'hits',
+                     title:"<@spring.message 'click.rate'/>"+'(PV)',
+                     halign: 'center',
+                     align: 'center',
+                     valign:'middle',
+                 },
+                 {
+                     field: 'typename',
+                     title: "<@spring.message 'type'/>",
+                     halign: 'center',
+                     align: 'center',
+                     valign:'middle',
+                 },
+                 {
+                     field: 'opt',
+                     title: '<@spring.message"action.action"/>',
+                     halign: 'center',
+                     align: 'center',
+                     valign:'middle',
+                     formatter:opeFormatters
+                 }
+
+             ],
+         });
+     }
+
+    var isTestRole = "<@shiro.hasRole name='role_test' >true</@shiro.hasRole>" ? true : false;
+    function opeFormatter(value,row,index) {
+        if (isTestRole) {
+            return '<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled " disabled title='+"<@spring.message'action.disable'/>"+' ><i class="layui-icon layui-icon-more"></i> </button>';
+        }
+        var state = row.state==0?"<@spring.message 'action.disable'/>":"<@spring.message 'action.enable'/>";
+        var stateTo = row.state==0?1:0;
+        var v = '<div class="layui-btn-group layui-btn-group-xs" >'
+            +'<button  type="button" class="layui-btn layui-btn-normal layui-btn-sm "  title='+"<@spring.message 'action.enable'/>/<@spring.message 'action.disable'/>"+' onclick="javascript:setState(\'%\','+stateTo+')"><i class="layui-icon">&#xe609;</i></button>'
+        if (row.state==1){
+            v+= '<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" title='+"<@spring.message 'action.delete'/>"+' onclick="javascript:deleteUser(\'%\')" ><i class="layui-icon layui-icon-delete"></i></button>'
+      } else {
+        v+='<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled" title='+"<@spring.message'action.delete'/>"+' onclick="javascript:"><i class="fa fa-trash-o"></i></button>';
+       }
+            v+= '</div>';
+        return v.replace(new RegExp(/(%)/g),row.id);
+
+    }
+
+    function setState(id,stateTo) {
+        if (stateTo==1) {
+            layer.confirm("<@spring.message 'action.disable'/>？", {title:'<@spring.message "action.info"/>',
+                btn:["<@spring.message 'action.ok'/>","<@spring.message 'action.cancel'/>"],
+                yes: function(index, layero){
+                    $.post('${basePath}/user/update',{id:id,state:stateTo},function(result){
+                    	layer.close(index);
+                    	$('#dormancy').bootstrapTable('refresh', null);
+                    	if(result.code==0){
+                    		 parent.layer.msg('<@spring.message "result.updateSuccess"/>');
+                    	}else{
+                    		 parent.layer.msg('<@spring.message "result.updateFail"/>');
+                    	}
+                    });
+                }
+            });
+
+        } else {
+            $.post('${basePath}/user/update',{id:id,state:stateTo},function(result){
+            	$('#dormancy').bootstrapTable('refresh', null);
+            	if(result.code==0){
+					parent.layer.msg('<@spring.message "result.updateSuccess"/>');
+	           	}else{
+					parent.layer.msg('<@spring.message "result.updateFail"/>');
+	           	}
+            });
+        }
+    }
+    function deleteUser(id) {
+        $.get('${basePath}/menu/page',{userId:id,pageNumber:1,pageSize:10},function(result){
+            var title = "<@spring.message 'action.delete'/>？";
+            if (result.total>0) {
+                title = "<@spring.message 'action.delete'/>？";
+            }
+            parent.layer.confirm(title, {title:'<@spring.message "action.info"/>',
+                btn:["<@spring.message 'action.ok'/>","<@spring.message 'action.cancel'/>"],
+                yes: function(index, layero){
+                    $.post('${basePath}/user/delete',{id:id},function(result){
+                        parent.layer.close(index);
+                        $('#dormancy').bootstrapTable('refresh');
+                        if (result.code==0) {
+                            parent.layer.msg("<@spring.message 'result.deleteSuccess'/>");
+                        } else {
+                            parent.layer.msg("<@spring.message 'result.deleteFail'/>");
+                        }
+                    });
+                }
+            });
+
+        });
+
+    }
+
+    function opeFormatters(vaue,row,index) {
+        if (isTestRole) {
+            return '<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled " disabled title='+"<@spring.message'action.disable'/>"+' ><i class="layui-icon layui-icon-more"></i> </button>';
+        }
+        var state = row.state==0?"<@spring.message 'action.disable'/>":"<@spring.message 'action.enable'/>";
+        var stateTo = row.state==0?1:0;
+        var v = '<div class="layui-btn-group layui-btn-group-xs" >'
+            +'<button  type="button" class="layui-btn layui-btn-normal layui-btn-sm "  title='+"<@spring.message 'action.enable'/>/<@spring.message 'action.disable'/>"+' onclick="javascript:stateResource(\'%\','+stateTo+')"><i class="layui-icon">&#xe609;</i></button>'
+        if (row.state==1) {
+            v+= '<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" title='+"<@spring.message 'action.delete'/>"+' onclick="javascript:deleteResource(\'%\')" ><i class="layui-icon layui-icon-delete"></i></button>'
+        } else {
+            v+='<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled" title='+"<@spring.message'action.delete'/>"+' onclick="javascript:"><i class="fa fa-trash-o"></i></button>';
+        }
+            v+= '</div>';
+        return v.replace(new RegExp(/(%)/g),row.id);
+
+    }
+    function stateResource(id,stateTo) {
+        if (stateTo==1) {
+            layer.confirm("<@spring.message 'action.disable'/>？", {title:'<@spring.message "action.info"/>',
+                btn:["<@spring.message 'action.ok'/>","<@spring.message 'action.cancel'/>"],
+                yes: function(index, layero){
+                    $.post('${basePath}/resource/update',{id:id,state:stateTo},function(result){
+                        layer.close(index);
+                        $('#InactiveResource').bootstrapTable('refresh', null);
+                        if(result.code==0){
+                        	parent.layer.msg('<@spring.message "result.updateSuccess"/>');
+                        }else if(result.code==3){
+                        	parent.layer.msg('<@spring.message "resource.Shortcut_code_already_exists"/>');
+                        }else{
+                        	parent.layer.msg('<@spring.message "result.updateFail"/>');
+                        }
+                    });
+                }
+            });
+
+        } else {
+            $.post('${basePath}/resource/update',{id:id,state:stateTo},function(result){
+                $('#InactiveResource').bootstrapTable('refresh', null);
+                if(result.code==0){
+                	parent.layer.msg('<@spring.message "result.updateSuccess"/>');
+                }else if(result.code==3){
+                	parent.layer.msg('<@spring.message "resource.Shortcut_code_already_exists"/>');
+                }else{
+                	parent.layer.msg('<@spring.message "result.updateFail"/>');
+                }
+            });
+        }
+    }
+    function deleteResource(id) {
+        $.get('${basePath}/menu/page',{resourceId:id,pageNumber:1,pageSize:10},function(result){
+            var title = "<@spring.message 'action.delete'/>？";
+            if (result.total>0) {
+                title = "<@spring.message 'resource.Delete_this_resource_will_delete_the_corresponding_menu_confirm_the_delete'/>？";
+            }
+            parent.layer.confirm(title, {title:'<@spring.message "action.info"/>',
+                btn:["<@spring.message 'action.ok'/>","<@spring.message 'action.cancel'/>"],
+                yes: function(index, layero){
+                    $.post('${basePath}/resource/delete',{id:id},function(result){
+                        parent.layer.close(index);
+                        $('#InactiveResource').bootstrapTable('refresh');
+                        if (result.code==0) {
+                            parent.layer.msg("<@spring.message 'result.success'/>");
+                        } else {
+                            parent.layer.msg("<@spring.message 'result.fail'/>");
+                        }
+                    });
+                }
+            });
+
+        });
+
+    }
+
+
+
+
+    function queryParamrs(params) {
+
+
+      params.monthCount= $("#quiz1").val();
+      params.hits=$("#quiz2").val();
+        return params;
+    }
+    function queryParamsRe(params) {
+
+
+        params.monthCount= $("#quiz3").val();
+        params.hits=$("#quiz4").val();
+        return params;
+    }
+
+     function one() {
+
+
+
+
+
+
+
+         myChart();
+         myChart1();
+         myChart01();
+         myChartUV();
+         myChartSix();
+         myChartResour();
+         dormancys();
+
+
+
+
+    }
+    
+
+
+
+</script>
+</body>
+</html>

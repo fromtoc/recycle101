@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>index.html</title>
+	
+    <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+    <meta http-equiv="description" content="this is my page">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    <#include "common/common.html" />
+	<#include "common/common_table.html" />
+
+  </head>
+	<body style="padding:10px;">
+	<div class="layui-fluid">
+	 <div class="layui-row">
+	 <@system.path id="${menuId!}"></@system.path>
+  	 <textarea id="sessionContent" style="display:none;">
+  	  		<#if user_perms??>
+  			 <#list user_perms as rec>
+  			   ${rec}
+  			 </#list>
+  			</#if>
+  	 </textarea>
+	 	<form id="query_form" class="layui-form " style="padding-bottom: 5px;">
+		 <div class="layui-inline">
+			<div class="layui-inline">
+				<label class="layui-form-label"><@spring.message 'list.actionTime'/></label>
+			<div class="layui-input-inline" style="width:300px">
+		    <input type="text" class="layui-input" id="createTime" autocomplete="off" placeholder="<@spring.message 'comment.Please_select_the_time_interval'/>...">
+			</div>
+			</div>
+			<div class="layui-inline">
+			<label class="layui-form-label"><@spring.message 'list.actionMan'/></label>
+			<div class="layui-input-inline">
+			<input type="text" id="commentName" name="commentName" placeholder="<@spring.message 'tips.input'/>"
+			autocomplete="off" class="layui-input">
+			</div>
+			</div>
+			<div class="layui-inline">
+			<label class="layui-form-label"><@spring.message 'comment.Resource_name'/></label>
+			<div class="layui-input-inline">
+			<input type="text" id="name" name="name" placeholder="<@spring.message 'tips.input'/>"
+			autocomplete="off" class="layui-input" >
+			</div>
+			</div>
+			<button type="button" id="query" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon" style="position: relative;top: 1px;font-size: 20px;">&#xe615;</i></button>
+			</div>
+		</form>
+        <table id="table" class="table-condensed"></table>
+        </div>
+       </div>
+  </body>     
+  	<script type="text/javascript">
+  	var sessionContent = '';
+ 	layui.use([ 'form','laydate'],function() {
+		laydate = layui.laydate,
+		laydate.render({
+		    elem: '#createTime'
+		    ,type: 'datetime',
+		    theme: '#1E9FFF'
+		    ,range: true
+		  });
+        //是否是测试用户
+        var isTestRole = "<@shiro.hasRole name='role_test' >true</@shiro.hasRole>" ? true : false;
+		 $('#table').bootstrapTable({
+	            url: '${basePath!}/comment/selectCommentMore',         //请求后台的URL（*）
+	            contentType : 'application/x-www-form-urlencoded',
+	            method: 'get',                      //请求方式（*）
+	            striped: false,                      //是否显示行间隔色
+	            cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+	            pagination: true,                   //是否显示分页（*）
+	            sortable: true,                     //是否启用排序
+	            sortOrder: "desc",                   //排序方式
+	            queryParamsType:"",
+	            queryParams: queryParams,//传递参数（*）
+	            sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+	            pageNumber: 1,                       //初始化加载第一页，默认第一页
+	            pageSize: 10,                       //每页的记录行数（*）
+	            uniqueId:'id',
+	            undefinedText:'',
+	            fixedColumns:true,
+		        fixedNumber:1,
+	            columns: [
+					{
+					       field: "opt",
+					       title: "<@spring.message 'comment.operation'/>",
+					    	align: 'center',
+					    	halign: 'center',
+					    	valign: 'middle',
+					    	formatter: function(value,row,index) {
+                           if (isTestRole) {
+                                    return '<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled " disabled title='+"<@spring.message'action.disable'/>"+' ><i class="layui-icon layui-icon-more"></i> </button>';
+                                }
+						    var v = '';
+					    	var e = row.resourceId+':comment';
+					    	if(sessionContent.indexOf(e) > 0){
+							 	    	v=
+								    	'<div class="layui-btn-group layui-btn-group-xs">'
+										+
+										'<button class="layui-btn layui-btn-normal layui-btn-sm" title='+"<@spring.message 'action.delete'/><@spring.message 'action.delete'/>"+' onclick="javascript:delComment(\''+row.id+'\')"><i class="layui-icon">&#xe640;</i></button>'
+										+'</div>'; 
+					    	}
+							return v;
+					    	}
+					   },
+		         	{
+		                field: "resourceName",
+		                title: "<@spring.message 'comment.Resource_name'/>",
+		             	align: 'left',
+		             	halign: 'center',
+		             	valign: 'middle',
+	   	             	formatter: function(value,row,index) {
+	   	             		row.resourceName = value;
+	   	             		var v = '<a onclick="javascript:showByResourceId(\''+row.resourceId+'\',\''+row.resourceName+'\')">'+row.resourceName+'</a>';
+	   	             		return v;
+	   	             	}
+		            },
+		           {
+		                field: "content",
+		                title: "<@spring.message 'comment.Comment_content'/>",
+		             	align: 'left',
+		             	halign: 'center',
+		             	valign: 'middle',
+		             	formatter: function(value,row,index){
+		             		var v = '<a onclick="javascript:showContent(\''+row.id+'\',\''+row.resourceName+'\',\''+row.commentName+'\',\''+row.resourceId+'\',\''+row.replyName+'\')">'+value+'</a>';
+		             		return v;
+		                }
+		            },
+		            {
+		                field: "replyContent",
+		                title: "<@spring.message 'comment.Reply_content'/>",
+		             	align: 'left',
+		             	halign: 'center',
+		             	valign: 'middle',
+		            },
+		            {
+		                field: "roof",
+		                title: "<@spring.message 'comment.isTop'/>",
+		             	align: 'left',
+		             	halign: 'center',
+		             	valign: 'middle',
+				    	formatter: function(value,row,index) {
+                      if (isTestRole) {
+                                return '<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled " disabled title='+"<@spring.message'action.disable'/>"+' ><i class="layui-icon layui-icon-more"></i> </button>';
+                            }
+				    	var v='<div class="layui-btn-group layui-btn-group-xs">'
+						+'<button class="layui-btn layui-btn-normal layui-btn-sm" title="<@spring.message "comment.top"/>" onclick="javascript:roofBegin(\''+row.id+'\',\''+row.resourceId+'\')"><i class="layui-icon">&#xe619;</i></button>'
+						+'<button class="layui-btn layui-btn-normal layui-btn-sm" title="<@spring.message "action.cancel"/>" onclick="javascript:cancelComment(\''+row.id+'\')"><i class="layui-icon">&#xe61a;</i></button>'
+						+'</div>'; 
+						return v;
+				    	}
+		            },
+		            {
+		                field: "commentName",
+		                title: "<@spring.message 'comment.Commentator'/>",
+		             	align: 'left',
+		             	halign: 'center',
+		             	valign: 'middle',
+		            },
+		            {
+		                field: "createTime",
+		                title: "<@spring.message 'comment.Commentary_time'/>",
+		             	align: 'left',
+		             	halign: 'center',
+		             	valign: 'middle',
+		            },
+		            {
+		                field: "replyName",
+		                title: "<@spring.message 'comment.Reply_to_people'/>",
+		             	align: 'left',
+		             	halign: 'center',
+		             	valign: 'middle',
+		            },
+		            {
+		                field: "replyTime",
+		                title: "<@spring.message 'comment.Recovery_time'/>",
+		             	align: 'left',
+		             	halign: 'center',
+		             	valign: 'middle',
+		            },
+			]
+	    });
+ 	});
+ 	
+ 	
+ 	
+  	function roofBegin(id , resourceid){
+ 		var submit = '';
+ 		$.ajax({
+ 			url: '${basePath!}/comment/roofBegin',
+ 			data: {resourceId:resourceid,roof:'1'},
+ 			success: function(result){
+ 				submit = result.data;
+ 				if(submit!=null && submit!=''){
+ 					parent.layer.msg('<@spring.message "comment.Top_comments_already_exist_in_this_resource_review_area"/>');
+ 				}else{
+ 					roofComment(id , resourceid);
+ 				}
+ 			}
+ 		});
+ 	} 
+ 	
+ 	function roofComment(id , resourceid){
+ 		$.ajaxSettings.async = false;
+ 		$.post('${basePath!}/comment/update',{id:id,roof:'1'},function(result){
+		if (result.code == 0) {
+		parent.layer.msg('<@spring.message "comment.Top_success"/>');
+		} else {
+					parent.layer.msg('<@spring.message "comment.Top_failure"/>');
+		}
+ 		});
+ 		$.ajaxSettings.async = true;
+ 	
+ 	}
+ 	
+ 	function cancelComment(id){
+ 		$.ajax({
+ 			url: '${basePath!}/comment/update',
+ 			type: 'Post',
+ 			async: false,
+ 			data: {id:id,roof:'0'},
+ 			success: function(result){
+ 				if(result.code == 0){
+ 					parent.layer.msg('<@spring.message "comment.Cancel_success"/>');
+ 				}else{
+ 					parent.layer.msg('<@spring.message "comment.Cancel_failure"/>');
+ 				}
+ 			}
+ 		});
+ 	}
+ 	
+    function delComment(id){
+		parent.layer.confirm('<@spring.message "comment.Confirm_delete"/>？',{title:'<@spring.message "action.info"/>',
+			btn : ['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>' ],
+			yes : function(index,layero) {
+				$.ajax({
+						url : '${basePath!}/comment/delete/'+id,
+						type : 'DELETE',
+						success : function(result) {
+							if (result.code == 0) {
+								parent.layer.msg('<@spring.message "result.deleteSuccess"/>');
+								$("#"+id).hide(800);
+								$('#table').bootstrapTable('refresh');
+							} else {
+								parent.layer.msg('<@spring.message "result.deleteFail"/>');
+							}
+							layer.close(index);
+						}
+				});
+			}
+		});
+	}
+ 
+   function showContent(cid,name,user,resourceid,rname){
+	    parent.layer.open({
+	    	title: '<@spring.message "comment.Comment_content"/>',
+	    	type: 2,
+	    	content:'${basePath!}/comment/content',
+	    	area: ['800px','500px'],
+	    	btn: ['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+	    	success:function(layero){
+	    		var iframeWin = top.window[layero.find('iframe')[0]['name']];
+	    		iframeWin.init(cid,name,user,resourceid,rname);
+	    	},
+	    	yes:function(index,layero){
+	    		var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				var result = iframeWin.getData();
+				var data = result;
+				if(data!=null && data!=''){
+					$.ajax({
+						type: 'Post',
+						url: '${basePath!}/comment/saveComment',
+						data: {id:cid,replyContent:data,resourceId:resourceid},
+						error: function(request){
+							parent.layer.msg('<@spring.message "comment.Failed_reply"/>');
+						},
+						success: function(result){
+							parent.layer.close(index);
+							layer.msg('<@spring.message "comment.Successful_reply"/>');
+						}
+					});
+				}
+	    	}
+	    });
+    }
+   
+   function showByResourceId(id,name){
+	   	var id = id;
+	   	var name = name;
+	    parent.layer.open({
+	    	title: '['+name+'] <@spring.message "comment.comment"/>',
+	    	type: 2,
+	    	content:'${basePath!}/comment/container',
+	    	area: ['1500px','700px'],
+            btn: ['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+	    	success:function(layero){
+	    		var iframeWin = top.window[layero.find('iframe')[0]['name']];
+	    		iframeWin.init(id);
+	    	},
+	    	yes:function(index,layero){
+	    		parent.layer.close(index);
+	    	}
+	    });
+   }
+  	function queryParams (params) {
+  		var commentName = $.trim($('#commentName').val());
+  		var createTime = $('#createTime').val();
+  		var name =  $.trim($('#name').val());
+ 		if (createTime!=null && createTime!='') {
+			var times = createTime.split(' - ');
+			params.createTimeStart = times[0];
+			params.createTimeEnd = times[1];
+		} 
+  		params.commentName = commentName;
+  		params.resourceName = name;
+  		return params;
+  	}
+    
+  	$('#query').on('click', function(data){
+		$('#table').bootstrapTable('refresh');
+	});
+  	
+  	window.onload = function(){
+  		this.sessionContent = $('#sessionContent').val();
+  	}
+  	</script>
+</html>

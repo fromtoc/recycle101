@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xin.portal.system.mapper.RoleUserMapper" >
+  <resultMap id="BaseResultMap" type="com.xin.portal.system.model.RoleUser" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="role_id" property="roleId" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="role_code" property="roleCode" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <select id="findRoleCodes" resultMap="BaseResultMap" >
+    select distinct role_id, role_code
+    from t_role_user
+    where user_id = #{userId,jdbcType=INTEGER}
+  </select>
+  
+  <select id="findRoleByUser" resultType="java.lang.String" >
+    select distinct role_id
+    from t_role_user
+    where user_id = #{userId,jdbcType=INTEGER}
+  </select>
+  
+  <select id="findUsersByRole" resultType="com.xin.portal.system.model.UserInfo" >
+    select distinct ru.user_id as id,ui.realname
+    from t_role_user ru 
+    left join t_user_info ui on ru.user_id = ui.id
+    where role_code = #{roleCode,jdbcType=INTEGER}
+  </select>
+  
+  <select id="findUsersByRoleIds" resultType="com.xin.portal.system.model.RoleUser" parameterType="java.util.List">
+    SELECT DISTINCT user_id as userId
+    FROM t_role_user 
+    WHERE role_id IN 
+    <foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+        #{item}
+    </foreach>
+  </select>
+  
+  
+  
+  <insert id="saveRoleUserByUserId" databaseId="mysql" >
+    insert into t_role_user (role_id, user_id, 
+      role_code)
+    values 
+    <foreach collection="roleIds" item="item" index="index" separator="," > 
+		(substring_index(#{item},'#',1),#{userId,jdbcType=INTEGER},substring_index(#{item},'#',-1))
+	</foreach> 
+  </insert>
+  
+  <insert id="saveRoleUserByUserId" >
+    insert into t_role_user (role_id, user_id, 
+      role_code)
+    values 
+    <foreach collection="roleIds" item="item" index="index" separator="," > 
+		(SUBSTRING(#{item},0,charindex('#',#{item},0)),
+		#{userId,jdbcType=INTEGER},
+		SUBSTRING(REVERSE(#{item}),0,charindex('#',REVERSE(#{item}),0)))
+	</foreach> 
+  </insert>
+  
+  <insert id="saveRoleUserByUserId" databaseId="oracle" >
+    insert into t_role_user (id,role_id, user_id, 
+      role_code)
+      select 
+		SEQ_T_ROLE_USER_ID.nextval,role_id,#{userId,jdbcType=INTEGER},role_code from
+    <foreach close=")" collection="roleIds" item="item" index="index" open="(" separator="union" >   
+		select 
+		substr(#{item},1,instr(#{item},'#',-1)-1) as role_id,
+		substr(#{item},instr(#{item},'#',-1)+1) as role_code
+		from dual
+	</foreach> 
+  </insert>
+  
+  <insert id="saveRoleUserByRoleId" databaseId="mysql"  >
+    insert into t_role_user (role_id, user_id, role_code)
+    values 
+    <foreach collection="userIds" item="item" index="index" separator="," > 
+		(#{roleId,jdbcType=VARCHAR},#{item},#{roleCode,jdbcType=VARCHAR})
+	</foreach> 
+  </insert>
+  
+  <insert id="saveRoleUserByRoleId" >
+    insert into t_role_user (role_id, user_id, role_code)
+    values 
+    <foreach collection="userIds" item="item" index="index" separator="," > 
+		(#{roleId,jdbcType=VARCHAR},#{item},#{roleCode,jdbcType=VARCHAR})
+	</foreach> 
+  </insert>
+  
+  <insert id="saveRoleUserByRoleId" databaseId="oracle" >
+    insert into t_role_user (id,role_id, user_id, role_code)
+    select 
+		SEQ_T_ROLE_USER_ID.nextval,#{roleId,jdbcType=INTEGER},user_id,#{roleCode,jdbcType=VARCHAR} from
+    <foreach collection="userIds" item="item" index="index" close=")" open="(" separator="union" >   
+		select #{item,jdbcType=VARCHAR} as user_id from dual
+	</foreach> 
+  </insert>
+  
+  <delete id="deleteByUserId" parameterType="java.lang.Integer" >
+    delete from t_role_user
+    where user_id = #{userId,jdbcType=VARCHAR}
+  </delete>
+  
+  <delete id="delete" parameterType="com.xin.portal.system.model.RoleUser" >
+    delete from t_role_user
+    where user_id = #{userId,jdbcType=VARCHAR} 
+    and role_id = #{roleId,jdbcType=VARCHAR} 
+  </delete>
+
+  <delete id="deleteByRoleId" parameterType="java.lang.String" >
+     delete from t_role_user
+     where role_id = #{roleId,jdbcType=VARCHAR}
+  </delete>
+  
+  <insert id="insertRoleUserAllColunmForNewTenant" parameterType="com.xin.portal.system.model.RoleUser">
+  	INSERT INTO t_role_user
+	 	( id,
+		role_id,
+		user_id,
+		role_code,
+		tenant_id
+		 )  VALUES 
+	 	( #{id,jdbcType=VARCHAR},
+		#{roleId,jdbcType=VARCHAR},
+		#{userId,jdbcType=VARCHAR},
+		#{roleCode,jdbcType=VARCHAR},
+		#{tenantId,jdbcType=VARCHAR} )
+  </insert>
+
+    <insert id="insertRoleUserTD" parameterType="com.xin.portal.system.model.RoleUser">
+      	INSERT INTO t_role_user
+	 	( id,
+		role_id,
+		user_id,
+		role_code,
+		tenant_id
+		 )  VALUES
+	 	( #{id,jdbcType=VARCHAR},
+		#{roleId,jdbcType=VARCHAR},
+		#{userId,jdbcType=VARCHAR},
+		#{roleCode,jdbcType=VARCHAR},
+		#{tenantId,jdbcType=VARCHAR} )
+    </insert>
+
+
+</mapper>

@@ -1,0 +1,439 @@
+ <#include "common/common.html" />
+ <#include "common/common_ztree.html" />
+ <script type="text/javascript" src="${basePath}/plugins/ueditor/ueditor.email.config.js"></script>
+ <script type="text/javascript" src="${basePath}/plugins/ueditor/ueditor.all.min.js"></script>
+ <script type="text/javascript" src="${basePath}/plugins/ueditor/ueditor.parse.js"></script>
+ <#if SYS_LOCALE=='zh_CN'>
+	 <script type="text/javascript" charset="utf-8" src="${basePath}/plugins/ueditor/lang/zh-cn/zh-cn.js"></script>
+	 <#elseif (SYS_LOCALE=='zh_TW' || SYS_LOCALE=='en_US')>
+		 <script type="text/javascript" charset="utf-8" src="${basePath}/plugins/ueditor/lang/en/en.js"></script>
+		 <#else>
+			 <script type="text/javascript" charset="utf-8" src="${basePath}/plugins/ueditor/lang/zh-cn/zh-cn.js"></script>
+ </#if>
+ 		<input type="hidden" id="SYS_NAME" name="SYS_NAME" value = "${SYS_NAME}">
+		<form id="form_add" class="layui-form" action=""
+			style="padding-top:10px;" lay-filter="form">
+			<div>
+				<input type="hidden" name="orgId" id="orgId">
+				<input type="hidden" name="orgCode" id="orgCode">
+				<div class="layui-form-item">
+					<label class="layui-form-label label-required-diy"><@spring.message 'userInfo.organization'/></label>
+					<div class="layui-inline" style="width:80%">
+						<input type="text" id="orgName" name="orgName" readonly value=""
+							class="layui-input">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<div class="layui-inline">
+						<label class="layui-form-label my-label label-required-diy"><@spring.message 'userInfo.Login_account'/></label>
+						<div class="layui-input-inline">
+							<input type="text" id="username" name="username"  lay-verify="required" placeholder="<@spring.message 'userInfo.Please_enter_your_account_number'/>"
+								autocomplete="off" class="layui-input"onchange="checkParameter1()" >
+						</div>
+					</div>
+					<div class="layui-inline">
+					<label class="layui-form-label my-label label-required-diy"><@spring.message 'user.realname'/></label>
+					<div class="layui-input-inline">
+						<input type="text" id="realname" name="realname" placeholder="<@spring.message 'userInfo.Please_enter_a_name'/>"
+							autocomplete="off" class="layui-input">
+					</div>
+					</div>
+					<!-- <div class="layui-inline">
+						<label class="layui-form-label my-label">密码</label>
+						<div class="layui-input-inline">
+							<input type="text" id="password" name="password"  lay-verify="required" placeholder="请输入名称"
+								autocomplete="off" class="layui-input">
+						</div>
+					</div> -->
+				</div>
+				<!-- <div class="layui-form-item">
+					
+						<div class="layui-inline">
+							<label class="layui-form-label my-label">学号</label>
+							<div class="layui-input-inline">
+								<input type="text" id="code" name="code"  lay-verify="required" placeholder="请输入名称"
+									autocomplete="off" class="layui-input">
+							</div>
+						</div>
+				</div>
+				 -->
+				<div class="layui-form-item">
+				</div>
+				<div class="layui-form-item">
+					<div class="layui-inline">
+						<label class="layui-form-label my-label"><@spring.message 'userInfo.telephone'/></label>
+						<div class="layui-input-inline">
+							<input type="text" id="phone" name="phone" placeholder="<@spring.message 'userInfo.Please_enter_the_telephone_number'/>"
+								autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-inline">
+						<label class="layui-form-label my-label"><@spring.message 'userInfo.email'/></label>
+						<div class="layui-input-inline">
+							<input type="email" id="email" name="email" placeholder="<@spring.message 'userInfo.Please_enter_your_mailbox'/>"
+								autocomplete="off" class="layui-input" onchange="checkParameter2()">
+						</div>
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label my-label"><@spring.message 'user.activateTime'/></label>
+					<div class="layui-input-inline">
+						<input type="text" id="activate_time"  placeholder="<@spring.message 'tips.choos'/>"
+							autocomplete="off" class="layui-input">
+						<input type="hidden" id="activate_start_time" name="activateStartTime" placeholder="<@spring.message 'tips.choos'/>"
+							autocomplete="off" class="layui-input">
+						<input type="hidden" id="activate_end_time" name="activateEndTime"  placeholder="<@spring.message 'tips.choos'/>"
+							autocomplete="off" class="layui-input">
+					</div>
+					<div class="layui-inline ">
+						<label class="layui-form-label my-label label-required-diy"><@spring.message 'userInfo.Permanent_validity'/></label>
+					    <div class="layui-input-block">
+					      <input id="forever" type="checkbox"  checked="" name="close" lay-skin="switch" lay-filter="switchTest" lay-text="YES|NO">
+					    </div>
+					</div>
+					<div id="isEmailHidden"  class="layui-inline" style="display:none">
+						<label class="layui-form-label my-label"><@spring.message 'userInfo.IS_Mail_notification'/></label>
+						<div class="layui-input-block">
+							<input id="isEmail"  type="checkbox" lay-skin="switch" lay-filter="isEmail" lay-text="<@spring.message 'tips.yes'/>|<@spring.message 'tips.no'/>" >
+							<input id="hiddenValue" type="hidden" value = '0'>
+						</div>
+					</div>
+					
+				</div>
+				<div class="layui-form-item">
+					<div class="layui-inline">
+						<label class="layui-form-label my-label label-required-diy"><@spring.message 'user.gender'/></label>
+						<div class="layui-input-inline">
+							<input type="radio" name="gender" value="1" title="<@spring.message 'user.male'/>" checked>
+			      			<input type="radio" name="gender" value="2" title="<@spring.message 'user.female'/>" >
+						</div>
+					</div>
+
+				</div>
+				
+				<div class="layui-form-item ${(SYS_SYNC_CREATE_MSTR_USER==0)?string('layui-hide','')}">
+					<div class="layui-inline">
+						<label class="layui-form-label my-label"><@spring.message 'user.MSTRUser'/></label>
+						<div class="layui-input-inline">
+							<input type="checkbox" value="1" name="mstrUser" id="mstrUser" lay-skin="switch" lay-filter="mstrUser" lay-text="<@spring.message 'tips.yes'/>|<@spring.message 'tips.no'/>">
+						</div>
+					</div>
+					<div class="layui-inline layui-hide" id="remberDiv" >
+						<label class="layui-form-label my-label"><@spring.message 'userInfo.Remember_MSTR_Selection'/></label>
+						<div class="layui-input-inline">
+							<input type="checkbox" value="1" ${(indepenProject!='null')?string('checked','')} name="remberMstrChoice" id="remberMstrChoice" lay-skin="switch" lay-filter="remberMstrChoice" lay-text="<@spring.message 'tips.yes'/>|<@spring.message 'tips.no'/>">
+						</div>
+					</div>
+				</div>
+				
+				<div class="layui-form-item" id="mstrServer" style="display:none">
+					<label class="layui-form-label my-label">MSTR-Server</label>
+						<div class="layui-input-inline">
+						<select style="width:300px;" id="mstrServerId" name="mstrServerId"  lay-filter="mstrServerId" >
+							<option value=""><@spring.message 'tips.choos'/></option>
+							<#list biServer as rec>
+								<option value="${rec.id}">${rec.name}</option>
+							</#list>
+						</select>	
+						</div>
+					<label class="layui-form-label my-label">MSTR-Project</label>
+						<div class="layui-input-inline">
+							<select style="width:300px;" id="mstrProjectId" name="mstrProjectId"  lay-filter="mstrProjectId" >
+								<option value=""><@spring.message 'tips.choos'/></option>
+							</select>
+						</div>
+				</div>
+				
+				<div class="layui-form-item" id="contentFormDiv" style="display:none">
+					<label class="layui-form-label" style=""><@spring.message 'userInfo.Mail_notification'/></label>
+				    <div class="layui-input-block wide-input" id="contentDiv" style="">
+				    	<script id="container" name="content" type="text/plain"></script>
+				    </div>
+				</div>
+				<div class="layui-form-item">
+					<div class="layui-input-block" style="width:70%">
+						<blockquote class="layui-elem-quote layui-quote-nm"><@spring.message 'user.defaultPwd'/>：${defaultPassword!}</blockquote>
+					</div>
+				</div>
+				<input type="hidden" id="userEmail" name="userEmail"/>
+			</div>
+		</form>
+    <div class="layui-tab-item">
+    	<ul id="tree" class="ztree" style="overflow:auto;"></ul>
+    </div>
+
+
+<script type="text/javascript">
+
+	var ue = UE.getEditor('container');
+    var isopen=true;
+    var indepenProject = '${indepenProject}';
+    var isCheckSYNCMstr = false;
+    var isEmailSend = '${SYS_USER_EMAIL}';
+	
+	function init (parentNode) {
+		$('#orgName').val(parentNode.name);
+		$('#orgCode').val(parentNode.code);
+		$('#orgId').val(parentNode.id);
+	}
+	function check() {
+		//var selectors = ["#username","#phone","#email"];
+		var selectors = ["#username","#realname"];//不验证电话邮箱了
+		var result = true;
+		$.each(selectors,function(index, rec){
+			if (!checkField(rec)) {
+				result = false;
+				return false;//调出循环
+			}
+		});
+  		return result;
+  	}
+
+    function checkParameter1(){
+
+        var username = $("#username").val();
+        ue.setContent("");
+        if(typeof username == "undefined" || username == null || username == ""){
+            $("#isEmailHidden").hide();
+            $("#contentFormDiv").hide();
+        }else{
+			if($("#hiddenValue").val()=='1'){
+                var url =  getUrl();
+                ue.setContent(
+                    "<h1>"+$("#SYS_NAME").val()+"<@spring.message 'userInfo.accountHasBeenOpened'/>！"+"</h1>" +
+                    "<h4><@spring.message 'userInfo.Login_account'/>："+$("#username").val()+"</h4>"+
+                    "<h4><@spring.message 'userInfo.InitialPassword'/>：123456</h4>"+
+                    "<a style='font-size: 17px;' href="+url+"><@spring.message 'userInfo.SystemEntry'/></a>"
+                );
+			}
+            checkParameter2();
+        }
+    }
+    function checkParameter2(){
+        var email = $("#email").val();
+        if(isEmailSend && isEmailSend=='1' && typeof email != "undefined" && email != null & email != ""){
+            $("#isEmailHidden").show();
+        }
+    }
+	//得到项目的登录页面的路径
+    function getUrl(){
+        var url = window.location.href
+        var x=url.indexOf("/");
+        for(var i=0;i<3;i++){
+            x=url.indexOf("/",x+1);
+        }
+        return url.slice(0, x)+"/login";
+	}
+
+	layui.use([ 'form', 'element','laydate' ],function(){
+        var form = layui.form
+            ,layer = layui.layer
+        //监听指定开关
+        form.on('switch(isEmail)', function(data){
+            if(this.checked){
+                $("#hiddenValue").val('1');
+                layer.tips('<@spring.message "userInfo.Send_Email_To"/>'+$("#email").val(), data.othis);
+                var url =  getUrl();
+                ue.setContent(
+                    "<h1>"+$("#SYS_NAME").val()+"<@spring.message 'userInfo.accountHasBeenOpened'/>！"+"</h1>" +
+                    "<h4><@spring.message 'userInfo.Login_account'/>："+$("#username").val()+"</h4>"+
+                    "<h4><@spring.message 'userInfo.InitialPassword'/>：123456</h4>"+
+                    "<a style='font-size: 17px;' href="+url+"><@spring.message 'userInfo.SystemEntry'/></a>"
+                );
+
+                $("#contentFormDiv").show();
+            }else{
+                $("#hiddenValue").val('0');
+                $("#contentFormDiv").hide();
+                ue.setContent("");
+            }
+        });
+        form.on('switch(mstrUser)', function(data){//是否同步创建mstr用户监听
+            if(this.checked){//同步
+            	isCheckSYNCMstr = true;
+				$("#mstrServer").css("display","block");
+				$("#remberDiv").removeClass("layui-hide");
+				if(indepenProject!='null'){//已经设置默认，需要自动选择触发监听
+					var iProject = indepenProject!=null?JSON.parse(indepenProject):{};
+					var serverId = iProject.biServerId;
+					$('#mstrServerId').siblings("div.layui-form-select").find('dl dd[lay-value=' + serverId + ']').click();
+				}
+            }else{//不同步
+            	isCheckSYNCMstr = false;
+            	$("#mstrServer").css("display","none");
+            	$("#remberDiv").addClass("layui-hide");
+            }
+        });
+        form.on('select(mstrServerId)', function(data){//监听mstrServer选择，展示project
+        	var selectServerId = data.value;
+        	iProject = indepenProject!=null?JSON.parse(indepenProject):{};
+        	var projectSelect = $("#mstrProjectId");
+        	projectSelect.empty();  
+        	if(selectServerId!=null && selectServerId!=""){
+        		//通过serverId获取到project内容
+        		var projectList = getProjectByServerId(selectServerId);
+        		if(projectList!=null && projectList.length>0){//有项目
+        			//展示项目
+        			showProjectSelect(projectList,projectSelect,layui);
+        			if(iProject!=null && selectServerId==iProject.biServerId){//记住
+        				//根据记住项目更改选择
+        				var select = 'dd[lay-value=' + iProject.id + ']';
+        				$('#mstrProjectId').siblings("div.layui-form-select").find('dl').find(select).click();
+        			}
+        		}else{//无项目,置空
+            		projectSelect.append("<option value=''><@spring.message 'userInfo.No_Project'/></option>");
+            		layui.form.render('select');
+        		}
+        	}else{//服务选择空  ，项目置为空
+        		projectSelect.append("<option value=''><@spring.message 'tips.choos'/></option>");
+        		layui.form.render('select');
+        	}
+		});
+    });
+	
+	function getProjectByServerId(serverId){
+		var projectList;
+		$.ajax({
+            type: "POST",
+            url:'${basePath}/biProject/getProjectList',
+            data:{biServerId:serverId},
+            async: false,
+            error: function(request) {
+                parent.layer.msg("<@spring.message 'result.fail'/>");
+            },
+            success: function(result) {
+            	projectList = result;
+            }
+        });
+		return projectList;
+	}
+	
+	function showProjectSelect(projectList,projectSelect,layui){
+		for(var i = 0;i<projectList.length;i++){
+			var option = "<option value='"+projectList[i].id+"'>"+projectList[i].title+"</option>"; 
+			projectSelect.append(option);
+		}
+		layui.form.render('select');
+	}
+	
+	//判断手机号码格式是否合法
+	function check_phone(value){
+	    var regx = /^[0-9-+ ]{5,20}$/;//电话通用的正则适配台湾和大陆
+		// var regx=/^(?:12\d|13\d|15\d|16\d|17\d|18\d|19[1234567890])-?\d{5}(\d{3}|\*{3})$/;
+		 if(regx.test(value)){
+			return true;
+		 }else{
+			$('#phone').addClass("layui-form-danger");
+				$('#phone').focus();
+				layer.tips('<@spring.message "userInfo.Please_enter_the_correct_number"/>', '#phone');
+			return false;
+		 }
+	}
+
+	 
+	//判断邮箱地址格式是否合法
+	function check_mail(value){
+		var regm = /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;//验证Mail的正则表达式,^[a-zA-Z0-9_.-]:开头必须为字母,下划线,数字,点,
+		if (regm.test(value)){
+	  		return true;
+	 	} else{
+			$('#email').addClass("layui-form-danger");
+			$('#email').focus();
+			layer.tips('<@spring.message "userInfo.Please_enter_the_correct_mailbox"/>', '#email');
+	  		return false;
+	 	}
+	}
+  	
+  	function checkField(selector){
+  		var value = $(selector).val();
+  		if (value==null || value == '') {
+  			$(selector).addClass("layui-form-danger");
+  			$(selector).focus();
+  			layer.tips('<@spring.message "tips.inputSome"/>', selector);
+  			return false;
+  		}
+  		if (selector=='#phone') {
+  			return check_phone(value);
+  		} else if (selector=='#email') {
+  			return check_mail(value);
+  		} 
+  		return true;
+  		
+  	}
+	function getData(){
+		if (check()) {
+			var content = UE.getEditor('container').getContent();
+			if (content!=null && content!='') {
+				$('#userEmail').val(content);
+			}
+			//判断如果是否永久有效为关闭状态，有效期就不能为空
+			if(!isopen){
+				$("#activate_time").addClass("layui-form-danger");
+	  			$("#activate_time").focus();
+	  			layer.tips('<@spring.message "userInfo.Please_select_the_user_valid_time"/>', "#activate_time");
+	  			return;
+			}
+			if(isCheckSYNCMstr){
+				var serverId = $('#mstrServerId').val();
+				var projectId = $('#mstrProjectId').val();
+				if(utils.tmFile.isEmpty(serverId)){
+					$("#mstrServerId").addClass("layui-form-danger");
+		  			$("#mstrServerId").focus();
+		  			layer.tips('<@spring.message "userInfo.Select_Service_Sync_Creat_MSTR_User"/>', $("#mstrServerId").siblings('.layui-form-select'));
+		  			return;
+				}
+				if(utils.tmFile.isEmpty(projectId)){
+					$("#mstrProjectId").addClass("layui-form-danger");
+		  			$("#mstrProjectId").focus();
+		  			layer.tips('<@spring.message "userInfo.Select_Project_Sync_Creat_MSTR_User"/>', $("#mstrProjectId").siblings('.layui-form-select'));
+		  			return;
+				}
+			}
+			return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+  	}
+
+	layui.use([ 'form', 'element','laydate' ],function() {
+		var form = layui.form, 
+			laydate = layui.laydate,
+			element = layui.element;
+		
+			laydate.render({ 
+			  elem: '#activate_time'
+			  ,range: true //或 range: '~' 来自定义分割字符
+			  ,min:0
+			  ,done: function(value, date, endDate){
+				  if (value!=null && value!='') {
+				    $('#activate_start_time').val(date.year+'-'+date.month+'-'+date.date);
+				    $('#activate_end_time').val(endDate.year+'-'+endDate.month+'-'+endDate.date);
+				    $("#forever").attr("name","close");
+				    $("#forever").removeAttr("checked","");
+				    isopen=true;
+				    form.render();
+				  }
+				}
+			});
+			 //监听指定开关
+			form.on('switch(switchTest)', function(data){
+			    if(this.checked==true){
+			    	 layer.tips('<@spring.message "userInfo.Tip_Open_to_indicate_that_the_user_is_permanently_valid"/>', data.othis);
+			    	 $("#activate_time").val("");
+			    	 isopen=true;
+			    }else{
+			    	 isopen=false;
+			    }
+			});
+	})
+	
+    /* function init(userId) {
+    	$.post('${basePath}/roleUser/findRoleByUser',{userId:userId},function(result){
+    		for (var i=0, l=result.length; i < l; i++) {
+    			var node = zTreeRole.getNodesByParam("id", result[i], null);
+				zTreeRole.checkNode(node[0], true, false);
+			}
+    	});
+    } */
+    
+</script>

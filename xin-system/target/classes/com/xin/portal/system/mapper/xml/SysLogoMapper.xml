@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.SysLogoMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.SysLogo">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="file_id" property="fileId" />
+        <result column="path_url" property="pathUrl" />
+        <result column="creater" property="creater" />
+        <result column="createName" property="createName" />
+        <result column="create_time" property="createTime" />
+        <result column="updater" property="updater" />
+        <result column="updateName" property="updateName" />
+        <result column="update_time" property="updateTime" />
+        <result column="is_enable" property="isEnable" />
+        <result column="introduce" property="introduce" />
+        <result column="type" property="type" />
+        <result column="tenant_id" property="tenantId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        sl.id, sl.name, sl.file_id, sl.path_url, sl.creater, sl.create_time, sl.updater, sl.update_time, 
+        sl.is_enable, sl.introduce, sl.type, sl.tenant_id
+    </sql>
+    
+    <select id="findLogoPage" resultMap="BaseResultMap" >
+    	SELECT 
+			sl.id,
+			sl.name,
+			sl.file_id,
+			sl.path_url,
+			sl.creater,
+			sl.create_time,
+			sl.updater,
+			sl.update_time,
+			sl.is_enable,
+			sl.introduce,
+			sl.type,
+			uic.realname AS createName,
+			uiu.realname AS updateName
+		 FROM t_sys_logo sl 
+		LEFT JOIN t_user_info uic ON uic.id=sl.creater
+		LEFT JOIN t_user_info uiu ON uiu.id = sl.updater
+		<where>
+			<if test="name!=null and name!=''">
+			  	<bind name="patternName" value="'%'+name+'%'"/>
+				sl.name like #{patternName}
+			</if>
+			<if test="type!=null and type!=''">
+				and sl.type = #{type}
+			</if>
+		</where>
+		order by sl.create_time desc
+    </select>
+
+</mapper>

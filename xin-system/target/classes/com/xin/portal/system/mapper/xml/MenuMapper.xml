@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.MenuMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.Menu">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="link_url" property="linkUrl" />
+        <result column="code" property="code" />
+        <result column="status" property="status" />
+        <result column="parent_id" property="parentId" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="icon_name" property="iconName" />
+        <result column="sort" property="sort" />
+        <result column="type" property="type" />
+        <result column="link_type" property="linkType" />
+        <result column="state" property="state" />
+        <result column="lv" property="lv" />
+        <result column="introduce" property="introduce" />
+        <result column="creater" property="creater" />
+        <result column="tenant_id" property="tenantId" />
+        <result column="resource_name" property="resourceName" />
+        <result column="resource_id" property="resourceId" />
+        <result column="view_num" property="viewNum" />
+        <result column="is_mobile" property="isMobile" />
+        <result column="show_style" property="showStyle" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, link_url, code, status, parent_id, create_time, update_time, icon_name, sort, type, link_type, state, lv, introduce, creater, is_mobile, show_style, tenant_id
+    </sql>
+    
+    <select id="findUserMenus" resultMap="BaseResultMap" parameterType="java.lang.String">
+		SELECT 
+			  m.id,
+			  m.name,
+			  m.link_url,
+			  m.code,
+			  m.status,
+			  m.parent_id,
+			  m.create_time,
+			  m.update_time,
+			  r.icon_name,
+			  m.sort,
+			  r.type,
+			  r.link_type,
+			  m.state,
+			  m.lv,
+			  m.introduce,
+			  m.creater,
+			  m.tenant_id,
+			  m.resource_id,
+			  m.is_mobile,
+			  m.show_style,
+			  r.view_num,
+			  r.thumbnail,
+			  r.file_id 
+		FROM
+			t_menu m 
+			LEFT JOIN t_resource r  ON m.resource_id = r.id 
+		<where>
+		<if test = "isMobile!=null" > 
+		  AND m.is_mobile = #{isMobile}
+		</if> 
+		  AND r.id IS NULL 
+		  OR r.id IN 
+		  (SELECT 
+		    resource_id 
+		  FROM
+		    t_role_permission rp 
+		    LEFT JOIN t_role_user ru 
+		      ON rp.role_id = ru.role_id 
+		    LEFT JOIN t_resource res 
+		      ON rp.resource_id = res.id 
+		  WHERE ru.user_id = #{userId} and rp.code='view'
+		    <if test = "isMobile!=null" > 
+		    AND res.is_mobile = #{isMobile}
+		    </if>)
+		</where>
+		ORDER BY m.lv ASC,
+		  m.sort ASC 
+    </select>
+    
+    <select id="findList" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.Menu">
+    	SELECT
+			m.id ,
+			m.name,
+			m.link_url ,
+			m.code,
+			m.status,
+			m.parent_id ,
+			m.create_time,
+			m.update_time ,
+			m.icon_name ,
+			m.sort,
+			m.type,
+			m.link_type ,
+			m.state,
+			m.lv,
+			m.introduce,
+			m.creater,
+			r.project_id ,
+			r.report_id ,
+			r.type_name ,
+			r.type_value ,
+			r.hidden_sections,
+			m.resource_id ,
+			m.tenant_id ,
+			m.is_mobile,
+			m.show_style,
+			r.name as resource_name
+		FROM
+			t_menu m 
+		left join t_resource r on m.resource_id = r.id
+		<where>
+    		<if test="isMobile!=null">
+    			m.is_mobile = #{isMobile}
+    		</if>
+    	</where>
+		order by sort asc
+    </select>
+    
+    <select id="findMenuFromResourceIds" resultMap="BaseResultMap" parameterType="java.util.List">
+    	SELECT 
+    	 	m.id ,
+			m.name,
+			m.link_url ,
+			m.code,
+			m.status,
+			m.parent_id ,
+			m.create_time,
+			m.update_time ,
+			m.icon_name ,
+			m.sort,
+			m.type,
+			m.link_type ,
+			m.state,
+			m.lv,
+			m.introduce,
+			m.creater,
+			r.project_id ,
+			r.report_id ,
+			r.type_name ,
+			r.type_value ,
+			r.hidden_sections,
+			m.resource_id ,
+			m.tenant_id ,
+			m.is_mobile,
+			r.name as resource_name
+    	FROM 
+    	t_menu m
+    	left join t_resource r on m.resource_id = r.id 
+    	WHERE 
+    	m.resource_id IN 
+    	<foreach item="item" index="index" collection="resourceIds" open="(" separator="," close=")">
+        	#{item}
+    	</foreach>
+    </select>
+
+	<select id="selectMenuByUserPermission" resultMap="BaseResultMap" parameterType="java.lang.String">
+		SELECT 
+		<include refid="Base_Column_List"></include>
+		FROM
+		  t_menu 
+		WHERE resource_id in 
+		  (SELECT DISTINCT 
+		    rp.resource_id 
+		  FROM
+		    t_role_permission rp 
+		    LEFT JOIN t_permission p 
+		      ON p.id = rp.permission_id 
+		  WHERE role_id IN 
+		    (SELECT DISTINCT 
+		      role_id 
+		    FROM
+		      t_role_user 
+		    WHERE user_id = #{userId}) 
+		<if test="noRoleId!=null and noRoleId!=''">
+			AND rp.role_id != #{noRoleId}
+		</if>    
+		<if test="code!=null and code!=''">
+			AND p.code = #{code}
+		</if>
+		<if test="resourceId!=null and resourceId!=''">
+			AND rp.resource_id = #{resourceId}
+		</if>
+		)
+	</select>
+	
+	<select id="findUserResourceMenus" resultMap="BaseResultMap" parameterType="java.lang.String">
+		SELECT   
+			m.id,
+		  	m.name,
+		  	re.link_url,
+		  	re.code,
+		  	re.icon_name,
+		  	m.sort,
+		 	re.link_type,
+		 	re.view_num
+		FROM t_menu m
+		LEFT JOIN t_resource re ON re.id = m.resource_id
+		WHERE ((m.link_url IS NOT NULL AND TRIM(m.link_url) !='') OR (re.file_id IS NOT NULL AND TRIM(re.file_id) != '') OR (re.report_id IS NOT NULL AND TRIM(re.report_id) != ''))
+		AND re.id IN 
+		  (SELECT 
+		    resource_id 
+		  FROM
+		    t_role_permission rp 
+		    LEFT JOIN t_role_user ru 
+		      ON rp.role_id = ru.role_id 
+		    LEFT JOIN t_resource res 
+		      ON rp.resource_id = res.id 
+		  WHERE ru.user_id = #{userId}
+		    AND rp.code = 'view') 
+		ORDER BY re.view_num desc
+    </select>
+	
+	<insert id="insertMenuAllColunmForNewTenant" parameterType="com.xin.portal.system.model.Menu"
+	useGeneratedKeys="true" keyProperty="id" >
+		INSERT INTO t_menu 
+	 	( id,
+		name,
+		link_url,
+		code,
+		status,
+		parent_id,
+		create_time,
+		update_time,
+		icon_name,
+		sort,
+		type,
+		link_type,
+		state,
+		lv,
+		introduce,
+		creater,
+		resource_id,
+		show_style,
+		is_mobile,
+		tenant_id
+		 )  VALUES 
+	 	( #{id,jdbcType=VARCHAR},
+		#{name,jdbcType=VARCHAR},
+		#{linkUrl,jdbcType=VARCHAR},
+		#{code,jdbcType=VARCHAR},
+		#{status,jdbcType=INTEGER},
+		#{parentId,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{updateTime,jdbcType=TIMESTAMP},
+		#{iconName,jdbcType=VARCHAR},
+		#{sort,jdbcType=INTEGER},
+		#{type,jdbcType=VARCHAR},
+		#{linkType,jdbcType=INTEGER},
+		#{state,jdbcType=INTEGER},
+		#{lv,jdbcType=INTEGER},
+		#{introduce,jdbcType=VARCHAR},
+		#{creater,jdbcType=VARCHAR},
+		#{resourceId,jdbcType=VARCHAR},
+		#{showStyle,jdbcType=VARCHAR},
+		#{isMobile,jdbcType=INTEGER},
+		#{tenantId,jdbcType=VARCHAR} )
+	</insert>
+</mapper>

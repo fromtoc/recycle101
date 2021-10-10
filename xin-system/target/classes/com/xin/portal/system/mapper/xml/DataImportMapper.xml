@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.DataImportMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.DataImport">
+        <result column="file_id" property="fileId" />
+        <result column="table_name" property="tableName" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        file_id AS fileId, table_name AS tableName
+    </sql>
+    
+    
+    <insert id="saveBatch">
+    	insert into ${tableName}
+	    values 
+	   	<foreach collection="list" item="map" index="index" separator=",">  
+		  <foreach collection="map.values" item="item" open="(" close=")" separator=",">
+		    #{item}
+		  </foreach>
+		</foreach>  
+    </insert>
+
+</mapper>

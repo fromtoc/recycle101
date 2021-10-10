@@ -1,0 +1,133 @@
+/*
+ * form layui-input-block 布局输入框宽度调整
+ */
+.layui-input-block {
+    margin-left: 115px;
+    min-height: 36px;
+    margin-right: 20px;
+}
+/*
+ * form layui-input-block 文字宽度调整
+ */
+.layui-form-label {
+    width:100px;
+    padding: 9px 15px 0 0;
+}
+
+/*弹框title 背景色*/
+.layui-layer-title {
+    border-bottom: none!important;
+    background-color: #fff!important;
+}
+/*单选按钮颜色*/
+.layui-form-radio>i:hover, .layui-form-radioed>i {
+    color: #1e9fff!important;
+}
+/*复选框颜色*/
+ .layui-form-checked span, .layui-form-checked:hover span {
+    background-color: #1e9fff!important;
+} 
+/*复选框√颜色*/
+.layui-form-checked i, .layui-form-checked:hover i {
+    color: #1e9fff!important;
+}
+/*复选框对号高度*/
+/* .layui-form-checkbox i {
+    height: 30px!important;
+} */
+
+
+.layui-form-checked[lay-skin=primary] i {
+    border-color: #1e9fff!important;
+    background-color: #fff!important;
+    color: #fff;
+}
+.layui-form-checkbox[lay-skin=primary]:hover i {
+    border-color: #1e9fff!important;
+    color: #fff;
+}
+
+
+/*时间轴图标颜色*/
+.layui-timeline-axis {
+    color: #1e9fff!important;
+}
+/*输入框边距*/
+.layui-input-block {
+    margin-right: 10px;
+}
+/*底部和顶部边距*/
+.layui-layout-admin .layui-body {
+    top: 60px;
+    bottom: 0!important;
+}
+/*下拉列表背景色*/
+.layui-form-select dl dd.layui-this {
+    background-color: #1e9fff!important;
+}
+/*表单信息查看行对其*/
+.form-info {
+	line-height: 36px;
+    min-height: 36px;
+}
+/*上传图标颜色*/
+.layui-upload-drag .layui-icon {
+    color: #1e9fff!important;
+}
+
+/*开关颜色*/
+.layui-form-onswitch {
+    border-color: #1e9fff!important;
+    background-color: #1e9fff!important;
+}
+.layui-form-item .layui-input-inline {
+    width: 250px!important;
+}
+
+#admin-body {
+	overflow:hidden;
+}
+
+
+.layui-body {
+	left:0
+}
+/*必填项前标注红色 * （需要添加在label中添加layui-required 示例：layui-form-label layui-required）*/
+/* .layui-form-label.layui-required:after{//文字前面显示 
+	content:"*";
+	color:red;
+	position: absolute;
+	top:5px;
+	left:15px;
+} */
+.label-required-diy:after{
+	content: "*";
+    color: red;
+    position: absolute;
+    font-size: 120%;
+    font-weight: bold;
+    right: 0.4em;
+}
+/* .layui-form-label.layui-required:after{文字后面显示
+	content:"*";
+	color:red;
+} */
+.invisible{
+	background-image: url(../images/invisible.png);
+	background-size: 95% 95%;
+	background-repeat: no-repeat;
+}
+.bgImg{
+	width: 25px;
+	height: 15px;
+	position: absolute;
+	right: 5px;
+	margin-top: 12px;
+	top: 1px;
+	text-align: center;
+}
+.visible{
+	background-image: url(../images/visible.png);
+	background-size: 95% 95%;
+	background-repeat: no-repeat;
+}

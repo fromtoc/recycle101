@@ -1,0 +1,59 @@
+/*首页头部*/
+
+/*首页菜单下拉*/
+/*首页头部菜单栏*/
+.header-demo .layui-nav .layui-nav-item a{color: #d8d6d6!important;}
+.header-demo .layui-nav .layui-nav-item a:hover{color: #fff!important;text-shadow: 5px 5px 5px #093e09;}
+.header-demo .layui-nav {background-color: none;}
+/*左侧菜单背景色*/
+.head-menu-ul {background:none!important}
+
+.container {background-color: #1b1b1b;}
+
+	/*首页背景色*/
+	.main-body {
+		style:bottom: 0;
+		overflow: hidden;
+		background:#d8d6d6!important;
+		height: 100%;
+	}
+	.border-blue {
+		border:1px solid #1B1B1B!important;
+	}
+	.head-logo{
+	    width: 40px;
+	    display: inline;
+	    line-height: 60px;
+	    padding-left: 30px;
+	    color:#d8d6d6!important;
+	    font-size: 18pt;
+    	font-family: '微软雅黑';
+	
+	}
+	
+	.layui-nav-itemed .layui-nav-child {
+    	background-color: rgb(55, 80, 105)!important;
+	}
+	
+	.head-logo img {
+		background-repeat: no-repeat;
+	    width: 122px;
+	    height: 34px;
+	    background-position: center;
+	    background-size: contain;
+	
+	}
+	/*复选框颜色*/
+.layui-form-checked span, .layui-form-checked:hover span {
+    background-color: #1E9FFF!important;
+}
+.layui-form-checked i, .layui-form-checked:hover i {
+    color: #1E9FFF!important;
+}
+/*下拉选项颜色*/
+.layui-form-select dl dd.layui-this {
+    background-color: #1E9FFF!important;
+    color: #fff;
+}
+
+	

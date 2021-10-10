@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.UserLineWorkMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.UserLineWork">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="channel_id" property="channelId" />
+        <result column="line_userid" property="lineUserid" />
+        <result column="line_name" property="lineName" />
+        <result column="line_phone" property="linePhone" />
+        <result column="line_mail" property="lineMail" />
+        <result column="gender" property="gender" />
+        <result column="avatar" property="avatar" />
+        <result column="create_time" property="createTime" />
+        <result column="tenant_id" property="tenantId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id, channel_id, line_userid, line_name, line_phone, line_mail, gender, avatar, create_time, tenant_id
+    </sql>
+
+    <select id="findListForPush" resultMap="BaseResultMap" parameterType="java.lang.String">
+		SELECT 
+			ulw.id,
+			ulw.user_id,
+			ulw.channel_id,
+			ulw.line_userid,
+			ulw.line_name,
+			ulw.line_phone,
+			ulw.line_mail,
+			ulw.gender,
+			ulw.avatar,
+			ulw.create_time,
+			ulw.tenant_id
+		FROM t_user_line_work ulw
+		<if test="(orgIds!=null and orgIds!='') or (ids!=null and ids!='')">
+			LEFT JOIN t_user_info ui ON ui.id = ulw.user_id
+		</if>
+		<if test="roleIds!=null and roleIds!=''">
+			LEFT JOIN t_role_user ru ON ru.user_id = ulw.user_id
+		</if>
+		<where>
+			<if test="ids!=null and ids!=''">
+				ui.id in (${ids})
+			</if>
+			<if test="orgIds!=null and orgIds!=''">
+				AND ui.org_id in (${orgIds})
+			</if>
+			<if test="roleIds!=null and roleIds!=''">
+				AND ru.role_id IN (${roleIds})
+			</if>
+			<if test="tenantId!=null and tenantId!=''">
+				AND ulw.tenant_id = #{tenantId}
+			</if>
+		</where>
+		GROUP BY ulw.user_id
+    </select>
+</mapper>

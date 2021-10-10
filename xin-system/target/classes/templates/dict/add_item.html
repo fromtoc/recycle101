@@ -1,0 +1,100 @@
+ <#include "common/common.html" />
+ <style>
+ 	.my-label {
+ 		width:100px!important;
+ 	}
+ 	.wide-input {
+ 		width:85%;
+ 	}
+ </style>
+
+<form id="form_add" class="layui-form" action=""
+	style="padding-top:10px;">
+	<div>
+		<input type="hidden" name="dictCode" id="dictCode">
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label label-required-diy"><@spring.message 'dict.dictBelong'/></label>
+			<div class="layui-input-inline">
+				<input type="text" id="dictName" readonly 
+					class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label label-required-diy" style="width:100px"><@spring.message 'dict.dictItemName'/></label>
+		    <div class="layui-input-inline" >
+		      <input type="text" id="itemName" name="itemName"  autocomplete="off" class="layui-input">
+		    </div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label label-required-diy"style="width:100px"><@spring.message 'dict.dictItemVlaue'/></label>
+		    <div class="layui-input-inline" >
+		      <input type="text" id="itemValue" name="itemValue" autocomplete="off" class="layui-input">
+		    </div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label"style="width:100px"><@spring.message 'list.parentDictCode'/></label>
+		    <div class="layui-input-inline" >
+		      <input type="text" id="parentDictCode" name="parentDictCode" autocomplete="off" class="layui-input" placeholder="<@spring.message 'tips.inputParentDictCode'/>" >
+		    </div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label"style="width:100px"><@spring.message 'list.order'/></label>
+		    <div class="layui-input-inline" >
+		      <input type="number" min="1" max="99" value="1" id="itemOrder" name="itemOrder" autocomplete="off" class="layui-input">
+		    </div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label" style="width:100px"><@spring.message 'list.remark'/></label>
+		    <div class="layui-input-inline" style="width: 340px;">
+		    	<textarea placeholder="<@spring.message 'tips.inputSome'/>" class="layui-textarea" name="remark" id= "remark" ></textarea>
+		    </div>
+		</div>
+	</div>
+</form>
+
+<script type="text/javascript">
+	function init(dictCode,dictName) {
+		$('#dictCode').val(dictCode);
+		$('#dictName').val(dictName);
+	}
+	
+	function check() {
+		var selectors = ["#itemName","#itemValue","#itemOrder"];
+		var result = true;
+		$.each(selectors,function(index, rec){
+			if (!checkField(rec)) {
+				result = false;
+				return false;//调出循环
+			}
+			
+		});
+  		return result;
+  	}
+  	
+  	function checkField(selector){
+  		var value = $(selector).val();
+  		if (value==null || value == '') {
+  			$(selector).addClass("layui-form-danger");
+  			$(selector).focus();
+  			layer.tips('<@spring.message "tips.inputSome"/>', selector);
+  			return false;
+  		} else {
+  			return true;
+  		}
+  	}
+	
+	function getData(){
+		if (check()) {
+			return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+  	}
+	
+	layui.use([ 'form', 'layedit', 'laydate' ],function() {
+		var form = layui.form, 
+			layer = layui.layer, 
+			layedit = layui.layedit, 
+			laydate = layui.laydate;
+	});
+</script>

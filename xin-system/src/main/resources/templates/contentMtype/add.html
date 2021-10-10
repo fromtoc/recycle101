@@ -1,0 +1,58 @@
+<link rel="stylesheet" href="${basePath!}/plugins/layui-2.4.3/css/layui.css">
+<link rel="stylesheet" href="${basePath!}/css/system_layui.css">
+<script type="text/javascript" src="${basePath!}/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="${basePath!}/plugins/layui-2.4.3/layui.js"></script>
+<form id="form_add" lay-filter="form_add" class="layui-form " action="">
+	<div class="layui-form-item">
+		<label class="layui-form-label">contentId</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="contentId" name="contentId"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">mtypeId</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="mtypeId" name="mtypeId"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<button class="layui-hide" lay-submit  id="btn_submit" lay-filter="btn_submit"><@spring.message 'action.save'/></button>
+</form>
+
+<script type="text/javascript">
+	var is_verify = false;
+	layui.use([ 'form'],function() {
+		var form = layui.form;
+		form.verify({
+			  length: function(value,item){
+				  if(value.length<2 || value.length>30){
+				      return '<@spring.message "biMapping.please_enter_2_to_30_characters"/>';
+				  }
+			  },
+			  textarea: function(value,item){
+				  if(value.length>250){
+				      return '<@spring.message "biMapping.Length_should_not_exceed_250"/>';
+				  }
+			  }
+			})  
+		form.on('submit(btn_submit)', function(data){
+			is_verify = true;
+			return false;
+		})
+	});
+	
+	function init (type,typeCase) {
+		
+	}
+	
+  	
+	function getData(){
+		$('#btn_submit').click();
+		if (is_verify) {
+			return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+  	}
+	
+	
+</script>

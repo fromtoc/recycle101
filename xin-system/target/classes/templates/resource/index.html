@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title><@spring.message 'resource.resource_management'/></title>
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<#include "common/common_ztree.html" />
+	<script type="text/javascript" src="${basePath}/js/system.js"></script>
+<link rel="stylesheet" href="${basePath}/plugins/font-awesome-4.7.0/css/font-awesome.css" media="all">
+<script type="text/javascript">
+
+	//var dictInputType = '${inputType!}';
+	var dictInputTypeArr = [];
+	//var dictInputTypeData = JSON.parse(dictInputType);
+	var dictInputTypeData = top.window.dicts['input_type'];
+	$.each(dictInputTypeData,function(i,rec){
+		dictInputTypeArr[rec.itemValue]=rec.itemName;
+	});
+	
+	var tableServerUrl = '';
+
+	layui.use([ 'form','element'],function() {
+		var form = layui.form, 
+			layer = layui.layer,
+			element = layui.element;
+		$('#btn_add_resource').on('click',function(data){
+			addResource();
+		});
+		
+		$('.reset').on('click',function(){
+			$('#query_form')[0].reset();
+            $('#table').bootstrapTable('refresh',null);
+		});
+		
+		$('#query').on('click',function(){
+        	var name = $.trim($('#name').val());
+        	var introduce = $.trim($('#introduce').val());
+        	var code = $.trim($('#code').val());
+        	$('#table').bootstrapTable('refresh', {query: {name: name,introduce:introduce,code:code}});
+        });
+	})
+	
+ 	var zTree;
+    var resourceTreeSetting = {
+        check: {
+            enable: false
+        },
+        view: {
+			<@shiro.lacksRole name='role_test' >
+        	addHoverDom:addHoverDom,
+        	removeHoverDom:removeHoverDom,
+			</@shiro.lacksRole>
+            dblClickExpand: false,
+            showLine: true,
+            selectedMulti: false,
+        },
+        data: {
+            simpleData: {
+                enable:true,
+                idKey: "id",
+                pIdKey: "parentId",
+                rootId:"0"
+            }
+        },
+        async: {
+        	//autoParam:['id'],
+			enable: false,
+			url: "${basePath}/resourceType/list",
+			type:'GET'
+		},
+        callback: {
+            onClick: zTreeOnClick,
+            onAsyncSuccess: onAsyncSuccess
+        }
+    };
+    
+    
+    
+    function zTreeOnClick(event, treeId, treeNode) {
+    	$('#checkedId').val(treeNode.id);
+    	$('#table').bootstrapTable('refresh');
+    }
+    
+    
+    function onAsyncSuccess(){
+    	var treeObj = $.fn.zTree.getZTreeObj("tree");
+    	treeObj.expandAll(true);
+    }
+
+
+    var parentResIds='';
+	function getParentNodes(node,allNode){
+		if(node!=null){
+			if (allNode=='') {
+				allNode = node['id'];
+			}else {
+				allNode += ","+node['id'];
+			}
+			curNode = node.getParentNode();
+			getParentNodes(curNode,allNode);
+		}else{
+			//根节点
+			parentResIds = allNode;
+		}
+	}
+
+	//是否是测试用户
+	var isTestRole = "<@shiro.hasRole name='role_test' >true</@shiro.hasRole>" ? true : false;
+	function opeFormatter(value,row,index) {
+		if (isTestRole) {
+			return '<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled " disabled title='+"<@spring.message'action.disable'/>"+' ><i class="layui-icon layui-icon-more"></i> </button>';
+		}
+		var v='<div class="layui-btn-group layui-btn-group-xs">'
+				+'<button class="layui-btn layui-btn-normal layui-btn-sm" title='+"<@spring.message'action.edit'/>"+' onclick="javascript:editResource(\'%\')"><i class="fa fa-edit"></i></button>'
+				+'<button class="layui-btn layui-btn-normal layui-btn-sm" title='+"<@spring.message'resource.View_permission'/>"+' onclick="javascript:permissionInfo(\'%\')"><i class="fa fa-user"></i></button>';
+        v+='<button class="layui-btn layui-btn-normal layui-btn-sm" title='+"<@spring.message 'resource.reource_dict'/>"+' onclick="javascript:resourceDict(\'%\')"><i class="fa fa-book"></i></button>';
+        if (row.state==1) {
+			v+='<button class="layui-btn layui-btn-normal layui-btn-sm" title='+"<@spring.message'action.delete'/>"+' onclick="javascript:delResource(\'%\')"><i class="fa fa-trash-o"></i></button>';
+		} else {
+			v+='<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled" title='+"<@spring.message'action.delete'/>"+' onclick="javascript:"><i class="fa fa-trash-o"></i></button>';
+		}
+		v+='</div>';
+		return v.replace(new RegExp(/(%)/g),row.id);
+	}
+
+	function initTree(){
+		//var treeHeight = $('body').height()-$('.mycontent').offset().top;
+		var treeHeight = document.documentElement.clientHeight-$('.mycontent').offset().top;
+		$('#treeDiv').height(treeHeight);
+	}
+    
+    $(function(){
+
+    	$.get({url:'${basePath}/resourceType/list'},function(result){
+	        $.fn.zTree.init($("#tree"), resourceTreeSetting,result.list);
+	        zTree = $.fn.zTree.getZTreeObj("tree");
+	        zTree.expandAll(true);
+
+    	});
+        
+        $('#table').bootstrapTable({
+	            url: '${basePath!}/resource/page',         //请求后台的URL（*）
+	            contentType : 'application/x-www-form-urlencoded',
+	            method: 'get',                      //请求方式（*）
+	            striped: false,                      //是否显示行间隔色
+	            cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+	            pagination: true,                   //是否显示分页（*）
+	            sortable: true,                     //是否启用排序
+	            sortOrder: "desc",                   //排序方式
+	            queryParamsType:"",
+	            queryParams: queryParams,//传递参数（*）
+	            sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+	            pageNumber: 1,                       //初始化加载第一页，默认第一页
+	            pageSize: 10,                       //每页的记录行数（*）
+	            uniqueId:'id',
+	            undefinedText:'',
+	            fixedColumns:true,
+		        fixedNumber:1,
+	            columns: [
+					{
+					       field: "opt",
+					       title: "<@spring.message'comment.operation'/>",
+					    	align: 'center',
+					    	halign: 'center',
+					    	valign: 'middle',
+					    	formatter: opeFormatter
+					   },
+	                {
+   	                field: "resourceType1",
+   	                title: "<@spring.message'resource.Resource_type'/>",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	             	formatter: function(value,row,index) {
+   	             		var node = zTree.getNodesByParam("id", value, null)[0];
+   	             		if (node!=null){
+		   	            	return node.name;
+   	             		} else {
+   	             			return '';
+   	             		}
+   	             		
+		            }
+   	            },
+   	         	{
+   	                field: "resourceType2",
+   	                title: "<@spring.message'resource.Resource_classification'/>",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+	   	            formatter: function(value,row,index) {
+	   	            	if (value!=null && value!='') {
+	   	            		var node = zTree.getNodesByParam("id", value, null)[0];
+	   	             		if (node!=null){
+			   	            	return node.name;
+	   	             		} else {
+	   	             			return '';
+	   	             		}
+	   	            	}
+		            }
+   	            },
+   	     		
+   	         	{
+   	                field: "name",
+   	                title: "<@spring.message'comment.Resource_name'/>",
+   	             	align: 'left',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	             	formatter:nameFormatter
+   	            },
+   	         	{
+   	                field: "code",
+   	                title: "<@spring.message'resource.Shortcut_code'/>",
+   	             	align: 'left',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	            },
+   	         	{
+   	                field: "path",
+   	                title: "<@spring.message'resource.original_path'/>",
+   	             	align: 'left',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	            },
+   	         	{
+   	                field: "introduce",
+   	                title: "<@spring.message'resource.Detailed_description'/>",
+   	             	align: 'left',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	            },
+   	         {
+   	                field: "sort",
+   	                title: "<@spring.message'list.order'/>",
+   	             	align: 'left',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	            },
+   	         	{
+   	                field: "viewNum",
+   	                title: "<@spring.message'action.view'/>",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	             	formatter:function(value,row,index){
+   	             		if (value==0) {
+	             			return value;
+	             		}
+   	             		return '<a href="javascript:showDetail(\''+row.id+'\',1,\''+row.name+'\',\'<@spring.message "action.view"/>\')" >'+value+'</a>';
+   	             	}
+   	            },
+   	        	{
+   	                field: "downloadNum",
+   	                title: "<@spring.message'action.download'/>",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	             	formatter:function(value,row,index){
+   	             		if (value==0) {
+	             			return value;
+	             		}
+	             		return '<a href="javascript:showDetail(\''+row.id+'\',2,\''+row.name+'\',\'<@spring.message "action.download"/>\')" >'+value+'</a>';
+	             	}
+   	            },
+   	         	{
+   	                field: "collectNum",
+   	                title: "<@spring.message'action.collect'/>",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	             	formatter:function(value,row,index){
+	             		return '<a href="javascript:showDetail(\''+row.id+'\',3,\''+row.name+'\',\'<@spring.message "action.collect"/>\')" >'+value+'</a>';
+	             	}
+   	            },
+   	         	{
+   	                field: "commentNum",
+   	                title: "<@spring.message'comment.comment'/>",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	             	formatter:function(value,row,index){
+	             		return '<a href="javascript:showDetail(\''+row.id+'\',5,\''+row.name+'\',\'<@spring.message "comment.comment"/>\')" >'+value+'</a>';
+	             	}
+   	            },
+			]
+		});
+
+
+        
+    });
+    
+    
+    function addHoverDom(treeId, treeNode) {
+    	if (treeNode.parentId==0) {
+    		return false;
+    	}
+        var sObj = $("#" + treeNode.tId + "_span");
+        if (sObj[0].innerText.length>20) {
+        	sObj.html(sObj[0].innerText.substring(0, 20) + "...");
+        }
+        
+        if (treeNode.editNameFlag || $("#editBtn_"+treeNode.tId).length>0) return;
+        var addStr = "";
+        if (treeNode.level==0) {
+        	addStr =  "<span class='button add' id='addBtn_" + treeNode.tId
+	                + "' title="+"<@spring.message 'action.add'/>"+" onfocus='this.blur();'></span>";
+        	
+        }
+
+        addStr += "<span class='button edit' id='editBtn_" + treeNode.tId + "' title="+"<@spring.message 'action.edit'/>"+"  onfocus='this.blur();'></span>";
+        if (!treeNode.isParent && treeNode.id!=1 && treeNode.level != 0) {
+	        addStr += "<span class='button remove' id='removeBtn_" + treeNode.tId + "'  title="+"<@spring.message 'action.delete'/>"+" onfocus='this.blur();'></span>";
+        }
+        sObj.after(addStr);
+        var btn = $("#addBtn_"+treeNode.tId);
+        if (btn) btn.bind("click", function(){
+        	addResourceType(treeNode);
+        	/* $('#body').load('${basePath}/resource/add',function(){
+        		$('#parentId').val(treeNode.id);
+        		$('#parentName').val(treeNode.name);
+        	}); */
+            return false;
+        });
+        
+        var btn = $("#editBtn_"+treeNode.tId);
+        if (btn) btn.bind("click", function(){
+        	editResourceType(treeNode);
+            return false;
+        });
+        
+        
+        
+        var btnDel = $("#removeBtn_"+treeNode.tId);
+        if (btnDel) btnDel.bind("click", function(){
+            delResourceType(treeNode);
+            return false;
+        });
+        
+    };
+    
+    function showDetail(resourceId,type,resourceName,typeName){
+    	var title = '【'+resourceName+'】'+typeName +' <@spring.message "resource.Record"/>'
+    	parent.layer.open({
+			title: title,
+			type:2,
+			content:'${basePath}/resourceLog/index',
+			area: ['50%', '60%'],
+			btn:['<@spring.message "banner.Determine"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				iframeWin.init(resourceId,type);
+			},
+		});
+    }
+    
+    function addResourceType(treeNode) {
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: "<@spring.message 'action.add'/>",
+			type:2,
+			content:'${basePath}/resourceType/add',
+			area: ['70%', '80%'],
+			btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				iframeWin.init(treeNode);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath}/resourceType/save',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg("<@spring.message 'result.fail'/>");
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									layer.msg("<@spring.message 'result.success'/>");
+									zTree.addNodes(treeNode, result.data);
+			                		
+			                	}else{
+			                		parent.layer.msg("<@spring.message 'result.fail'/>");
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+					}else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+    
+    function delResourceType(treeNode) {
+    	var zTree = $.fn.zTree.getZTreeObj("tree");
+        if (treeNode.isParent) {
+        	parent.layer.alert('<@spring.message "tips.treeDelete"/>!');
+         	return;
+        } else {
+        	parent.layer.confirm("<@spring.message 'action.delete'/>", {title:'<@spring.message "action.info"/>',
+        		btn:["<@spring.message 'action.ok'/>","<@spring.message 'action.cancel'/>"],
+				yes: function(index, layero){
+			  		$.ajax({
+			  			url:'${basePath}/resourceType/delete/'+treeNode.id,
+			  			type:"DELETE",
+			  			success:function(result){
+				    		parent.layer.close(index);
+				    		if (result.code==0) {
+				    			zTree.removeNode(treeNode);
+					    		parent.layer.msg("<@spring.message 'result.success'/>");
+				    		} else {
+				    			parent.layer.msg("<@spring.message 'result.fail'/>");
+				    		}
+				    		
+					    }
+			  		});
+				}
+         	});
+        }
+    }
+    
+    function editResourceType(treeNode) {
+    	var isSubmit = false;
+    	parent.layer.open({
+    		title: "<@spring.message 'action.edit'/>",
+			type:2,
+			content:'${basePath}/resourceType/edit?id='+treeNode.id,
+			area: ['70%', '80%'],
+			btn:["<@spring.message 'action.ok'/>","<@spring.message 'action.cancel'/>"],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				var iframeWin = top.window[layero.find('iframe')[0]['name']];
+
+				var parentNodes = zTree.getNodesByParam("id", treeNode.parentId, null);
+				  if(treeNode.isParent==false){
+					  treeNode.parentName = parentNodes[0].name;
+				  }
+                    iframeWin.init(treeNode);
+
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+						$.ajax({
+			                type: "POST",
+			                url:'${basePath}/resourceType/update',
+			                data:data,
+			                error: function(request) {
+			                	parent.layer.msg("<@spring.message 'result.fail'/>");
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									layer.msg("<@spring.message 'result.success'/>");
+									treeNode.name = utils.getQueryString(this.data,'name');
+									treeNode.title = utils.getQueryString(this.data,'name');
+									treeNode.sort = utils.getQueryString(this.data,'sort');
+									treeNode.remark = utils.getQueryString(this.data,'remark');
+									zTree.updateNode(treeNode);
+			                	}else{
+			                		parent.layer.msg("<@spring.message 'result.fail'/>");
+			                	}
+		                		isSubmit = false;
+			                }
+			            });
+					}else {
+						isSubmit = false;
+					}
+				}
+   		    	
+    		}
+		});
+    }
+
+    function removeHoverDom(treeId, treeNode) {
+        $("#addBtn_"+treeNode.tId).unbind().remove();
+        $("#removeBtn_"+treeNode.tId).unbind().remove();
+        $("#editBtn_"+treeNode.tId).unbind().remove();
+    };
+    
+    
+    
+    function queryParams(params) {
+    	if (zTree!=null) {
+    		var nodes = zTree.getSelectedNodes();
+	    	if (nodes!=null && nodes.length>0) {
+	    		if (nodes[0].level==0) {
+	    			params.resourceType1 = nodes[0].id;
+	    		}else{
+	    			params.resourceType2 = nodes[0].id;
+	    			params.resourceType1 = zTree.getNodesByParam("id", nodes[0].parentId, null)[0].id;
+	    		} 
+				
+	    	}
+    	}
+		params.manage = true;
+		return params;
+	}
+    
+
+	function typeFormatter(value,row,index){
+		var v = '<@spring.message "resource.Button"/>';
+		//var value='<input name="open" type="checkbox" checked="" lay-skin="switch" lay-filter="switchTest" lay-text="ON|OFF">';
+        //return value.replace(new RegExp(/(%)/g),row.id);
+        if (value==2) {
+        	v = '<@spring.message "resource.link"/>';
+        }
+        return v;
+	}
+	
+	function stateFormatter(value,row,index){
+		var v = '<@spring.message "action.enable"/>';
+        if (value===0) {
+        	v = '<@spring.message "action.disable"/>';
+        }
+        return v;
+	}
+	
+	function nameFormatter(value,row,index){
+		var thumbnail = (row.thumbnail==null||row.thumbnail=='')?'/images/thumbnail.png':row.thumbnail;
+	//var v = '<span class="btn-opt" tip-type="2" data-tip="<i class=\'fa fa-2x '+iconName+'\'></i>" >'+row.name+'</span>';
+		var v = '<a style="margin-left:10px;" href="javascript:window.open(\'${basePath}/resource/view/'+row.id+'?from=review\')" class="btn-opt" tip-type="2" data-tip="<img style=\'width: 100px;\' src=\'${basePath}'+thumbnail+'\'/>" >'+row.name+'</a>';
+		//var v = '<span onmouseover="ShowFloatingImage(this, 250, 200);" style="width: 100px;   height: 80px;    margin-top: -6px;cursor: pointer;" src='+row.iconName+' alt="图片丢失了" >'+value+'</span>';
+      return v;
+	}
+    
+    function addResource() {
+    	var isSubmit = false;
+    	var resourceId = $('#checkedId').val();
+    	if (resourceId==null || resourceId=='') {
+    		parent.layer.msg("<@spring.message 'resourceType.notselect'/>");
+    		return;
+    	}
+    	var treeNode1 = zTree.getSelectedNodes()[0];
+
+    	var treeNode2 = null;
+    	if (treeNode1.getParentNode()!=null) {
+    		treeNode2 = treeNode1;
+    		treeNode1 = treeNode1.getParentNode();
+    	}
+    	var pageUrl = "${basePath}/resource/add/";
+    	/*//资源类型
+    	if (treeNode1.id==1 || treeNode1.id==2) {
+    		pageUrl += "function";
+    	} else if (treeNode1.id==3){
+    		pageUrl += "dossier";
+    	}else if(treeNode1.id==4 || treeNode1.id==5){
+    		pageUrl += "mstr";
+    	} else if (treeNode1.id==6){//tableau
+    		pageUrl += "tableau";
+    	} else if (treeNode1.id==7){//finereport
+    		pageUrl += "finereport";
+    	} else if (treeNode1.id==8){
+    		pageUrl += "bo";
+    	} else if (treeNode1.id==9){
+    		pageUrl += "document";
+    	}else if(treeNode1.id==10){
+            pageUrl += "smartbi";
+		}*/
+        //资源类型
+        if (treeNode1.code==1) {//系统资源
+            pageUrl += "function";
+        }else if(treeNode1.code==2){//链接资源
+        	pageUrl += "link";
+        }else if (treeNode1.code==3){//dossier
+            pageUrl += "dossier";
+        }else if(treeNode1.code==4 || treeNode1.code==5){//MSTR-report|document
+            pageUrl += "mstr";
+        } else if (treeNode1.code==6){//tableau
+            pageUrl += "tableau";
+        } else if (treeNode1.code==7){//finereport
+            pageUrl += "finereport";
+        } else if (treeNode1.code==8){//bo
+            pageUrl += "bo";
+        } else if (treeNode1.code==9){//文档/文件
+            pageUrl += "document";
+        } else if(treeNode1.code==10){//smartbi
+            pageUrl += "smartbi";
+        } else if(treeNode1.code==11){//Qlik 具体逻辑还未开发
+            pageUrl += "qlik";
+        } else if(treeNode1.code==12){//Cognos
+            pageUrl += "cognos";
+        }
+    	pageUrl += "?resourceType1="+treeNode1.id;
+    	parent.layer.open({
+			title: "<@spring.message 'action.add'/>",
+			type:2,
+			content:pageUrl,
+			area: ['70%', '80%'],
+			btn:["<@spring.message 'action.ok'/>","<@spring.message 'action.cancel'/>"],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				iframeWin.init(treeNode1,treeNode2);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+		   		    	$.ajax({
+			                url:'${basePath}/resource/save',
+			                enctype: 'multipart/form-data',
+		   		            data: data,
+		   		            processData: false, 
+		   		            contentType: false,
+		   		            cache: false,
+			                type: "POST",
+			                error: function(request) {
+			                	parent.layer.msg("<@spring.message 'result.fail'/>");
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		if (treeNode1.id==4||treeNode1.id==5) {//treeNode1.id==3 暂时去掉dossier类型
+			                			var promptRelData = iframeWin.promptRels();
+			                			if (promptRelData!=null && promptRelData.length>0) {
+				                			var promptRels = [];
+				                			$.each(promptRelData,function(i,rec){
+				                				var prompt = {
+				                						promptId:rec.id,
+				                						resourceId: result.data.id,
+				                						sort: i+1
+				                				}
+				                				promptRels.push(prompt);
+				                			});
+				                			$.post('${basePath}/promptRel/saveBatch',{"promptRelsJSON":JSON.stringify(promptRels)},function(r){
+					                			parent.layer.close(index);
+						                		parent.layer.msg("<@spring.message 'result.success'/>");
+						                		$('#table').bootstrapTable('refresh');
+						                		isSubmit = false;
+				    						});
+			                				
+			                			} else {
+			                				parent.layer.close(index);
+					                		parent.layer.msg("<@spring.message 'result.success'/>");
+					                		$('#table').bootstrapTable('refresh');
+					                		isSubmit = false;
+			                			}
+			                			/* $.ajax({
+			                				type:"POST",
+			                				url:'${basePath}/resource/save',
+			                				data:null,
+			                				success:function(response){
+			                					console.log(response);
+			                					parent.layer.close(index);
+						                		parent.layer.msg("<@spring.message 'result.success'/>");
+						                		$('#table').bootstrapTable('refresh');
+						                		isSubmit = false;
+			                				}
+			                			}) */
+			                		} else {
+				                		parent.layer.close(index);
+                                        parent.layer.msg("<@spring.message 'result.success'/>");
+				                		$('#table').bootstrapTable('refresh');
+				                		isSubmit = false;
+			                		}
+			                	}else if(result.code==3){
+			                		parent.layer.msg("<@spring.message 'resource.Shortcut_code_already_exists'/>");
+			                		isSubmit = false;
+			                	}else if(result.code==-1){
+                                    parent.layer.msg("<@spring.message 'result.fail'/>");
+                                    isSubmit = false;
+                                }
+			                }
+			            });
+					}else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+
+    function   resourceDict(id){
+        parent.layer.open({
+            title: "<@spring.message 'resource.reource_dict'/>",
+            type:2,
+            content:"${basePath}/resourceDict/index/"+id,
+            area: ['72%', '83%'],
+            btn:["<@spring.message 'action.ok'/>","<@spring.message 'action.cancel'/>"],
+            success: function(layero){
+
+            },
+            yes:function(index,layero){
+                var iframeWin = top.window[layero.find('iframe')[0]['name']];
+                var data = iframeWin.getData();
+                if(data){
+                    $.ajax({
+                        url : '${basePath!}/resourceDict/save',
+                        type : 'post',
+                        data:{ JsonData:JSON.stringify(data),resourceId:id},
+                        dataType:'json',
+                        success : function(result) {
+                            if (result.code == 0) {
+                                parent.layer.close(index);
+                                parent.layer.msg("<@spring.message 'result.success'/>");
+                            } else {
+                                parent.layer.close(index);
+                                parent.layer.msg("<@spring.message 'result.fail'/>");
+                            }
+                        }
+                    });
+				}
+            }
+        });
+	}
+    
+    function editResource(id){
+    	var isSubmit = false;
+    	var pageUrl = "${basePath}/resource/edit/";
+    	var data = $('#table').bootstrapTable('getRowByUniqueId',id);
+    	var treeNode1 = zTree.getNodesByParam("id", data.resourceType1, null)[0];
+    	var treeNode2 =zTree.getNodesByParam("id", data.resourceType2, null)[0];
+    	
+    	//资源类型
+    	//资源类型
+    	/*if (treeNode1.id==1 || treeNode1.id==2) {
+    		pageUrl += "function";
+    	} else if (treeNode1.id==4 || treeNode1.id==5){
+    		pageUrl += "mstr";
+    	} else if(treeNode1.id==3){
+    		pageUrl += "dossier";
+    	} else if (treeNode1.id==6){//tableau
+    		pageUrl += "tableau";
+    	} else if (treeNode1.id==7){//finereport
+    		pageUrl += "finereport";
+    	} else if (treeNode1.id==8){
+    		pageUrl += "bo";
+    	} else if ( treeNode1.id==9){
+    		pageUrl += "document";
+    	}else if(treeNode1.id==10){
+            pageUrl += "smartbi";
+        }*/
+        if (treeNode1.code==1) {
+            pageUrl += "function";
+        }else if(treeNode1.code==2){
+        	pageUrl += "link";
+        }else if (treeNode1.code==3){
+            pageUrl += "dossier";
+        }else if(treeNode1.code==4 || treeNode1.code==5){
+            pageUrl += "mstr";
+        } else if (treeNode1.code==6){//tableau
+            pageUrl += "tableau";
+        } else if (treeNode1.code==7){//finereport
+            pageUrl += "finereport";
+        } else if (treeNode1.code==8){
+            pageUrl += "bo";
+        } else if (treeNode1.code==9){
+            pageUrl += "document";
+        }else if(treeNode1.code==10){//smartbi
+            pageUrl += "smartbi";
+        } else if(treeNode1.code==11){//Qlik 具体逻辑还未开发
+            pageUrl += "qlik";
+        } else if(treeNode1.code==12){//Cognos
+            pageUrl += "cognos";
+        }
+    	pageUrl+='/'+id+"?resourceType1="+treeNode1.id;
+    	parent.layer.open({
+			title: "<@spring.message 'action.edit'/>",
+			type:2,
+			content:pageUrl,
+			area: ['70%', '80%'],
+			btn:["<@spring.message 'action.ok'/>","<@spring.message 'action.cancel'/>"],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; //cao得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				
+				iframeWin.init(treeNode1,treeNode2);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+
+					if (data!=null) {
+		   		    	$.ajax({
+		   		    		enctype: 'multipart/form-data',
+		   		            url: "${basePath}/resource/update",
+		   		            data: data,
+		   		            processData: false, 
+		   		            contentType: false,
+		   		            cache: false,
+			                type: "POST",
+			                error: function(request) {
+			                	parent.layer.msg("<@spring.message 'result.fail'/>");
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		if (treeNode1.code==4||treeNode1.code==5) {//treeNode1.id==3 暂时去掉dossier
+			                			var promptRelData = iframeWin.promptRels();
+			                			if (promptRelData!=null) {
+				                			/* var promptRels = [];
+				                			$.each(promptRelData,function(i,rec){
+				                				var prompt = {
+				                						promptId:rec.id,
+				                						resourceId: id,
+				                						sort: i+1
+				                				}
+				                				promptRels.push(prompt);
+				                			}); */
+				                	/*		$.post('${basePath}/promptRel/saveBatch',{resourceId:id,"promptRelsJSON":JSON.stringify(promptRelData)},function(r){
+					                			parent.layer.close(index);
+						                		parent.layer.msg("<@spring.message 'result.success'/>");
+						                		$('#table').bootstrapTable('refresh');
+						                		isSubmit = false;
+				    						});*/
+                                            parent.layer.close(index);
+                                            parent.layer.msg("<@spring.message 'result.success'/>");
+                                            $('#table').bootstrapTable('refresh');
+                                            isSubmit = false;
+			                			} else {
+			                				parent.layer.close(index);
+					                		parent.layer.msg("<@spring.message 'result.success'/>");
+					                		$('#table').bootstrapTable('refresh');
+					                		isSubmit = false;
+			                			}
+			                			/* $.ajax({
+			                				type:"POST",
+			                				url:'${basePath}/resource/save',
+			                				data:null,
+			                				success:function(response){
+			                					console.log(response);
+			                					parent.layer.close(index);
+						                		parent.layer.msg("<@spring.message 'result.success'/>");
+						                		$('#table').bootstrapTable('refresh');
+						                		isSubmit = false;
+			                				}
+			                			}) */
+			                		} else {
+				                		parent.layer.close(index);
+                                        parent.layer.msg("<@spring.message 'result.success'/>");
+				                		$('#table').bootstrapTable('refresh');
+				                		isSubmit = false;
+			                		}
+			                	}else if(result.code==3){
+			                		parent.layer.msg("<@spring.message 'resource.Shortcut_code_already_exists'/>");
+			                		isSubmit = false;
+			                	}else{
+                                    parent.layer.msg("<@spring.message 'result.fail'/>");
+                                    isSubmit = false;
+                                }
+
+			                }
+			            });
+					}else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+    
+    
+    
+    function permissionInfo(id) {
+    	parent.layer.open({
+			title: "<@spring.message 'role.Resource_permissions'/>",
+			type:2,
+			content:"${basePath}/resource/permissions",
+			area: ['70%', '80%'],
+			btn:["<@spring.message 'issue.quit'/>"],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				iframeWin.init(id);
+			}
+    	})
+    }
+    
+    
+    function delResource(id) {
+    	$.get('${basePath}/menu/page',{resourceId:id,pageNumber:1,pageSize:10},function(result){
+    		var title = "<@spring.message 'action.delete'/>？";
+    		if (result.total>0) {
+    			title = "<@spring.message 'resource.Delete_this_resource_will_delete_the_corresponding_menu_confirm_the_delete'/>？";
+    		}
+        	parent.layer.confirm(title, {title:'<@spring.message "action.info"/>',
+        		btn:["<@spring.message 'action.ok'/>","<@spring.message 'action.cancel'/>"],
+				yes: function(index, layero){
+					$.post('${basePath}/resource/delete',{id:id},function(result){
+						parent.layer.close(index);
+			    		if (result.code==0) {
+				    		parent.layer.msg("<@spring.message 'result.success'/>");
+			    		} else {
+			    			parent.layer.msg("<@spring.message 'result.fail'/>");
+			    		}
+			  			$('#table').bootstrapTable('refresh');
+			    		parent.layer.close(index);
+			    		
+				    });
+				}
+         	});
+    			
+    	});
+    	
+    }
+    
+    
+    
+</script>
+
+</head>
+<body  onload="initTree()">
+	<div class="layui-fluid">
+	<@system.path id="${menuId!}"></@system.path>
+		<div class="layui-row mycontent" >
+		    <div class="layui-col-md2" id="treeDiv" style="height: 100%;overflow: auto">
+				<ul id="tree" class="ztree" ></ul>
+		    </div>
+		    <div class="layui-col-md10">
+				    <input type="hidden" id="checkedId" />
+				    <div class="layui-tab-item layui-show" id="tab_item_1">
+				    	<form id="query_form" class="layui-form " style="padding-bottom: 5px;">
+					     	<div class="layui-inline">
+					     		<button type="button" id="btn_add_resource" class="layui-btn layui-btn-sm layui-btn-normal <@shiro.hasRole name='role_test' >layui-btn-disabled</@shiro.hasRole>" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole>>
+								  <i class="layui-icon">&#xe608;</i> <@spring.message "resource.add_resource"/>
+								</button>
+						    </div>
+						    <div class="layui-inline">
+							    <label class="layui-form-label"><@spring.message "comment.Resource_name"/></label>
+							  	<div class="layui-input-inline">
+							        <input type="text" id="name" name="name" placeholder=""
+									autocomplete="off" class="layui-input">
+								</div>
+							</div>
+							<!-- <div class="layui-inline">
+							    <label class="layui-form-label"><@spring.message "list.describe"/></label>
+							  	<div class="layui-input-inline">
+							        <input type="text" id="introduce" name="introduce" placeholder=""
+									autocomplete="off" class="layui-input">
+								</div>
+							</div> -->
+							<div class="layui-inline">
+							    <label class="layui-form-label"><@spring.message "resource.Shortcut_code"/></label>
+							  	<div class="layui-input-inline">
+							        <input type="text" id="code" name="code" placeholder=""
+									autocomplete="off" class="layui-input">
+								</div>
+							</div>
+							<div class="layui-inline">
+								<div class="layui-input-inline">
+					            	<button type="button" id="query" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/></button>
+							    	<button type="button" class="reset layui-btn layui-btn-sm layui-btn-normal"><i class="glyphicon glyphicon-refresh"></i> <@spring.message 'action.reset'/></button>
+							    </div>
+							</div>
+					    </form>
+				    	<table id="table" class="table-condensed"></table>
+				    </div>
+		    </div>
+	  	</div>
+	  	</div>
+</body>
+
+</html>

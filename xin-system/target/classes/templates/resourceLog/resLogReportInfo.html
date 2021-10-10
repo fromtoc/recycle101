@@ -1,0 +1,86 @@
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<style>
+.fixed-table-body {
+	height: auto;
+}
+</style>
+<div id="body" class="layui-body" style="">
+	<div class="layui-tab" style="-webkit-box-sizing: initial;">
+		<div id="toolbar" class="layui-form layui-form-pane" action="">
+			<input type="hidden" id="resourceId" name="resourceId" value="${(record.resourceId)!}">
+			<input type="hidden" id="createTimeEnd" name="createTimeEnd" value="${(record.createTimeEnd)!}">
+			<input type="hidden" id="createTimeStart" name="createTimeStart" value="${(record.createTimeStart)!}">
+			<div class="layui-inline">
+				<label class="layui-form-label"><@spring.message "resourceLog.User_Name"/></label>
+				<div class="layui-input-inline">
+					<input type="text" id="createrName" name="createrName" lay-filter="createrName"
+						autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-inline">
+				<button type="button" id="query" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/></button>
+			</div>
+		</div>
+		<div class="layui-tab-content">
+			<div class="layui-tab-item layui-show">
+				<table id="table" data-toolbar="#toolbar"
+					data-click-to-select="true" data-toggle="table" data-search="false"
+					data-side-pagination="server" data-pagination="true"
+					data-query-params-type="" data-url="${basePath}/resourceLog/paramPage"
+					data-query-params="queryParams">
+					<thead>
+						<tr>
+							<th data-align="center" data-halign="center"
+								data-formatter="indexFormatter" data-width="1%"><@spring.message
+								'list.serialNum'/></th>
+							<th data-align="center" data-halign="center"
+								data-field="createTime" data-formatter="dateTimeFormatter"><@spring.message "resource.Time"/></th>
+							<th data-align="center" data-halign="center"
+								data-field="ip">ip</th>
+							<th data-align="left" data-halign="center"
+								data-field="createrName" ><@spring.message "list.actionMan"/></th>
+							<th data-align="left" data-halign="center"
+								data-field="typeName" ><@spring.message "resource.Record_type"/></th>
+							<th data-align="left" data-halign="center"
+								data-field="name" ><@spring.message "comment.Resource_name"/></th>
+							<th data-align="left" data-halign="center"
+								data-field="resourceTypeName" ><@spring.message "resource.Resource_type"/></th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	$('#query').on('click', function() {
+		var resourceId = $("#resourceId").val();
+		var createTimeEnd = $('#createTimeEnd').val();
+		var createTimeStart = $('#createTimeStart').val();
+		var createrName = $('#createrName').val();
+		$('#table').bootstrapTable('refresh', {
+			query : {
+				resourceId : resourceId,
+				createTimeEnd : createTimeEnd,
+				createTimeStart : createTimeStart,
+				createrName : createrName
+			}
+		});
+	});
+
+	function init() {
+	}
+
+	function queryParams(params) {
+		var resourceId = $("#resourceId").val();
+		var createTimeEnd = $('#createTimeEnd').val();
+		var createTimeStart = $('#createTimeStart').val();
+		var createrName = $('#createrName').val();
+		params.resourceId = resourceId;
+		params.createTimeEnd = createTimeEnd;
+		params.createTimeStart = createTimeStart;
+		params.createrName = createrName;
+		return params;
+	}
+</script>

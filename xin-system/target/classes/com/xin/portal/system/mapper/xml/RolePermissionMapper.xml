@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.RolePermissionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.RolePermission">
+        <result column="id" property="id" />
+        <result column="resource_id" property="resourceId" />
+        <result column="role_id" property="roleId" />
+        <result column="permission_id" property="permissionId" />
+        <result column="tenant_id" property="tenantId" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    	<result column="creater" property="creater" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, resource_id, role_id, permission_id, tenant_id
+    </sql>
+    
+    <select id="findPermissionRoleUser" resultMap="BaseResultMap" >
+    	SELECT  
+	    	rpl.id,
+			rpl.role_id,
+			rpl.name AS rolename,
+			rpl.creater,
+			uc.username AS createName,
+			rpl.create_time,
+			rpl.user_id ,
+			ui.realname AS realname,
+			u.username AS username,
+			rpl.resource_id  
+		FROM (	
+		SELECT  rp.id,rp.role_id ,rp.creater,rp.create_time,rp.resource_id,r.name,ru.user_id FROM  t_role_permission rp 
+		LEFT JOIN t_role r ON r.id =rp.role_id
+		LEFT JOIN t_role_user ru ON ru.role_id = rp.role_id
+		<where>
+			<if test="code!=null and code!=''">
+				rp.code = #{code}
+			</if>
+			<if test="resourceId!=null and resourceId!=''">
+				AND rp.resource_id=#{resourceId}
+			</if>
+			<if test="roleId!=null and roleId!=''">
+				AND rp.role_id = #{roleId}
+			</if>
+		</where>
+		) rpl
+		LEFT JOIN t_user_info ui  ON ui.id = rpl.user_id 
+		LEFT JOIN t_user u ON u.id = rpl.user_id
+		LEFT JOIN t_user uc ON uc.id = rpl.creater
+  </select>
+	
+	<select id="findDistinctResourceIdByRoleId" resultType="java.lang.String" >
+    	SELECT DISTINCT 
+		  rp.resource_id 
+		FROM
+		  t_role_permission rp
+		LEFT JOIN t_permission p ON  p.id=rp.resource_id
+		WHERE rp.role_id IN 
+		<foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+        	#{item}
+    	</foreach>
+    	<if test="code!=null and code!=''">
+    		AND p.code = #{code}
+    	</if>
+  </select>
+  
+  <select id="findDistinctResourceIdByUserIdAndNotEqualRoleId" resultType="java.lang.String" parameterType="java.lang.String" >
+    	SELECT DISTINCT 
+		 rp.resource_id 
+		FROM
+		  t_role_permission rp
+		LEFT JOIN t_permission p ON  p.id=rp.resource_id
+		WHERE rp.role_id != #{roleId} 
+		AND rp.role_id IN 
+		  (SELECT 
+		    DISTINCT ru.role_id
+		  FROM
+		    t_role_user ru 
+		  WHERE ru.user_id = #{userId})
+		<if test="code!=null and code!=''">
+    		AND p.code = #{code}
+    	</if>
+  </select>
+
+	<insert id="insertRolePermission" useGeneratedKeys="true" keyProperty="id" parameterType="com.xin.portal.system.model.RolePermission">
+		insert into  t_role_permission
+		(id,resource_id,role_id,permission_id,code,tenant_id)
+		VALUES (
+		#{id,jdbcType=VARCHAR},
+		#{resourceId,jdbcType=VARCHAR},
+		#{roleId,jdbcType=VARCHAR},
+		#{permissionId,jdbcType=VARCHAR},
+		#{code,jdbcType=VARCHAR},
+		#{tenantId,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	
+</mapper>

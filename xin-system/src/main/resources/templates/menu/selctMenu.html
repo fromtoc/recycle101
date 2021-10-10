@@ -1,0 +1,81 @@
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<div class="layui-tab" style="-webkit-box-sizing: initial;">
+<form id="form_add" lay-filter="form_add" class="layui-form " action="">
+	<input type="hidden" name="type" id="type">
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message 'list.name'/></label>
+	    <div class="layui-input-inline" >
+	      <input type="text" id="name" name="name"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	    <div class="layui-input-inline">
+           	<button type="button" id="query" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon">&#xe615;</i><@spring.message 'action.query'/> </button>
+	    </div>
+	</div>
+</form>
+	<div class="layui-tab-content">
+	    <div class="layui-tab-item layui-show">
+	    	<table id="table"
+	    		   data-toolbar="#toolbar"
+	    		   data-click-to-select="true"
+	    		   data-single-select="true"
+	               data-toggle="table"
+	               data-search="false"
+	               data-side-pagination="client"
+	               data-pagination="true"
+	               data-query-params-type=""
+	               data-url="${basePath}/menu/findMenu"
+	               data-query-params="queryParams">
+	            <thead>
+	            <tr>
+	            	<th data-align="center"
+	                	data-halign="center"
+	                	data-checkbox="true"
+	                	data-width="1%"></th>
+	                <th data-align="center"
+	                	data-halign="center"
+	                	data-formatter="indexFormatter"
+	                	data-width="1%"><@spring.message 'list.serialNum'/></th>
+	                <th data-align="center" 
+	                	data-halign="center"
+	                	data-field="name" ><@spring.message 'list.name'/></th>
+	                <th data-align="center" 
+	                	data-halign="center"
+	                	data-field="introduce" ><@spring.message 'resource.Detailed_description'/></th>
+	            </tr>
+	            </thead>
+	        </table>
+	    </div>
+	  </div>
+</div>
+<script type="text/javascript">
+	var type = '${type!}';
+	$('#type').val(type);
+	
+	$('#query').on('click',function(){
+    	$('#table').bootstrapTable('refresh');
+	});
+	
+	function init (type,typeCase) {
+	}
+  	
+	function getData() {
+		var records = $('#table').bootstrapTable('getSelections');
+		if (records!=null && records.length>0) {
+			return records;
+		} else {
+			return null;
+		}
+	}
+	
+	function queryParams(params) {
+		var menutype = $('#type').val();
+		var name = $('#name').val();
+    	if (name !=null && name!='') {
+			params.name = name;
+    	}
+    	params.type = menutype;
+		return params;
+	}
+	
+</script>

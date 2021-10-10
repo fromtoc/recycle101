@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.BiIndependentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.BiIndependent">
+        <id column="id" property="id" />
+        <result column="bi_user_id" property="biUserId" />
+        <result column="bi_project_id" property="biProjectId" />
+        <result column="bi_server_id" property="biServerId" />
+        <result column="bi_own_folder_id" property="biOwnFolderId" />
+        <result column="bi_own_folder_name" property="biOwnFolderName" />
+        <result column="create_time" property="createTime" />
+        <result column="creater" property="creater" />
+        <result column="update_time" property="updateTime" />
+        <result column="updater" property="updater" />
+        <result column="tenant_id" property="tenantId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+       bid.id ,bid.bi_user_id as biUserId,bu.username ,bid.bi_project_id as biProjectId,bp.title ,
+       bid.bi_server_id as biServerId,bs.name , bid.bi_own_folder_id as biOwnFolderId , 
+       bid.bi_own_folder_name as biOwnFolderName,
+       bid.create_time as createTime,bid.creater ,uic.realname as createName , 
+       bid.update_time as updateTime,
+       bid.updater ,uiu.realname as updateName ,bid.tenant_id as tenantId
+    </sql>
+    
+    <select id="find" parameterType="com.xin.portal.system.model.BiIndependent" resultType="com.xin.portal.system.model.BiIndependent">
+    	select <include refid="Base_Column_List"></include>
+    	from t_bi_independent bid 
+    	left join t_bi_user bu on bu.id = bid.bi_user_id
+    	left join t_bi_project bp on bp.id = bid.bi_project_id
+    	left join t_bi_server bs on bs.id = bid.bi_server_id
+    	left join t_user_info uic on uic.id = bid.creater
+    	left join t_user_info uiu on uiu.id = bid.updater
+    	<where>
+    		<if test="biServerId!=null and biServerId!=''">
+    			and bid.bi_server_id = #{biServerId}
+    		</if>
+    		<if test="biProjectId!=null and biProjectId!=''">
+    			and bid.bi_project_id = #{biProjectId}
+    		</if>
+    		<if test="username!=null and username!=''">
+    			and bu.username like concat(concat('%',#{username}),'%')
+    		</if>
+    	</where>
+    	order by bid.create_time desc
+    </select>
+    
+    <select id="findByQuery" parameterType="com.xin.portal.system.model.BiIndependent" resultType="com.xin.portal.system.model.BiIndependent">
+    	select <include refid="Base_Column_List"></include>
+    	from t_bi_independent bid 
+    	left join t_bi_user bu on bu.id = bid.bi_user_id
+    	left join t_bi_project bp on bp.id = bid.bi_project_id
+    	left join t_bi_server bs on bs.id = bid.bi_server_id
+    	left join t_user_info uic on uic.id = bid.creater
+    	left join t_user_info uiu on uiu.id = bid.updater
+    	<where>
+    		<if test="id!=null and id!=''">
+    			and bid.id = #{id}
+    		</if>
+    		<if test="biUserId!=null and biUserId!=''">
+    			and bid.bi_user_id = #{biUserId}
+    		</if>
+    		<if test="biProjectId!=null and biProjectId!=''">
+    			and bid.bi_project_id = #{biProjectId}
+    		</if>
+    		<if test="biServerId!=null and biServerId!=''">
+    			and bid.bi_server_id = #{biServerId}
+    		</if>
+    	</where>
+    </select>
+
+</mapper>

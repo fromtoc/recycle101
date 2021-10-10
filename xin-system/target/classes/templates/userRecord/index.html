@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+<link rel="stylesheet" href="${basePath}/plugins/vue/element-index.css">
+<script src="${basePath}/plugins/vue/vue.js"></script>
+<script src="${basePath}/plugins/vue/vue-resource.js"></script>
+<script src="${basePath}/plugins/vue/element-index.js"></script>
+</head>
+<body>
+	<div id="content">
+		<div id="top" >
+		</div>
+	
+		<div style="margin-top:15px">
+			<el-table 
+				ref="table"
+				:data="tableData"
+				style="width:100%"
+				border
+				>
+				<el-table-column 
+					prop="type"
+					label="<@spring.message 'list.type'/>"
+					align="center"
+					:formatter="typeFormatter">
+				</el-table-column>
+				<el-table-column 
+					prop="type"
+					label="<@spring.message 'versionNotice.linkaddress'/>"
+					align="center">
+				</el-table-column>
+				<el-table-column 
+					prop="createTime"
+					label="<@spring.message 'resource.Time'/>"
+					align="center"
+					:formatter="dateTimeFormatter">
+				</el-table-column>
+				
+			</el-table>
+			<div align="center">
+				<el-pagination
+					@size-change="handleSizeChange"
+					@current-change="handleCurrentChange"
+					:current-page="currentPage"
+					:page-sizes="[10,20,30,40]"
+					:page-size="pageSize"
+					layout="total,sizes,prev,pager,next,jumper"
+					:total="totalCount">
+				</el-pagination>
+			</div>
+		</div>
+	</div>
+	<script>
+		var vue = new Vue({
+			el:'#content',
+			data:{
+				tableData:[],
+				currentPage:1,
+				pageSize:10,
+				totalCount:0
+			},
+			methods: {
+				loadData: function(pageNum, pageSize){
+					this.$http.get('${basePath}/userRecord/page?pageNumber='+pageNum+'&pageSize='+pageSize).then(function(res){
+						console.log(res);
+						this.tableData = res.body.rows;
+						this.totalCount = res.body.total;
+					},function(){
+						console.log('get userRecord failed');
+					});
+				},
+				handleSizeChange: function(val){
+					this.pageSize = val;
+					this.loadData(this.currentPage,this.pageSize);
+				},
+				handleCurrentChange: function(val){
+					this.currentPage = val;
+					this.loadData(this.currentPage,this.pageSize);
+				}
+			}
+		});
+		vue.loadData(vue.currentPage,vue.pageSize);
+	</script>
+</body>
+</html>

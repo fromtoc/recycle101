@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="target/classes" path="src/main/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/resources">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry excluding="**" kind="src" output="target/test-classes" path="src/test/resources">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre1.8.0">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/WebApp.jar"/>
+	<classpathentry kind="lib" path="lib/WebAppAddons.jar"/>
+	<classpathentry kind="lib" path="lib/WebAppAdmin.jar"/>
+	<classpathentry kind="lib" path="lib/WebAppBeans.jar"/>
+	<classpathentry kind="lib" path="lib/WebAppDocs.jar"/>
+	<classpathentry kind="lib" path="lib/WebAppGui.jar"/>
+	<classpathentry kind="lib" path="lib/WebAppIPAClient.jar"/>
+	<classpathentry kind="lib" path="lib/WebAppServant.jar"/>
+	<classpathentry kind="lib" path="lib/WebAppTaglibs.jar"/>
+	<classpathentry kind="lib" path="lib/WebAppTransforms.jar"/>
+	<classpathentry kind="lib" path="lib/WebBeans.jar"/>
+	<classpathentry kind="lib" path="lib/WebBlocks.jar"/>
+	<classpathentry kind="lib" path="lib/WebObjects.jar"/>
+	<classpathentry kind="lib" path="lib/WebPlatform.jar"/>
+	<classpathentry kind="lib" path="lib/WebTags.jar"/>
+	<classpathentry kind="lib" path="lib/WebTasks.jar"/>
+	<classpathentry kind="lib" path="lib/WebTransform.jar"/>
+	<classpathentry kind="lib" path="lib/WebUtils.jar"/>
+	<classpathentry kind="lib" path="lib/WebXMLUtils.jar"/>
+	<classpathentry kind="lib" path="libsap/cecore.jar"/>
+	<classpathentry kind="lib" path="libsap/cesession.jar"/>
+	<classpathentry kind="lib" path="lib/JavaWebAPI.jar"/>
+	<classpathentry kind="lib" path="libsap/cryptojce.jar"/>
+	<classpathentry kind="lib" path="libsap/cryptojFIPS.jar"/>
+	<classpathentry kind="lib" path="libsap/cesdk.jar"/>
+	<classpathentry kind="lib" path="lib/jjwt-0.9.0.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

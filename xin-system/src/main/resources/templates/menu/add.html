@@ -1,0 +1,169 @@
+<#include "common/common.html" />
+<form id="form_add" lay-filter="form_add" class="layui-form " action="">
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message 'menu.Module_name'/></label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="name" name="name"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">linkUrl</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="linkUrl" name="linkUrl"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message 'menu.Module_number'/></label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="code" name="code"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">0<@spring.message 'serviceState.stateOn'/>  1<@spring.message 'action.disable'/></label>
+	    <div class="layui-input-block" >
+	      <input type="number" id="status" name="status"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message 'menu.Parent_level'/>id</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="parentId" name="parentId"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message 'user.registerTime'/></label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="createTime" name="createTime"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message 'list.updateTime'/></label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="updateTime" name="updateTime"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message 'menu.Icon_Name'/></label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="iconName" name="iconName"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message 'list.order'/></label>
+	    <div class="layui-input-block" >
+	      <input type="number" id="sort" name="sort"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">1:<@spring.message 'menu.menu'/>;2:<@spring.message 'wechat.report'/></label>
+	    <div class="layui-input-block" >
+	      <input type="number" id="type" name="type"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">1:<@spring.message 'menu.Intra-page_jump'/>;2:<@spring.message 'menu.Inside_the_system'/>;3<@spring.message 'menu.external'/></label>
+	    <div class="layui-input-block" >
+	      <input type="number" id="linkType" name="linkType"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message 'serviceState.state'/></label>
+	    <div class="layui-input-block">
+	      <input type="checkbox" value=1 lay-text="<@spring.message 'model.open'/>|<@spring.message 'action.close'/>" name="state" lay-skin="switch">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">lv</label>
+	    <div class="layui-input-block" >
+	      <input type="number" id="lv" name="lv"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">introduce</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="introduce" name="introduce"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">creater</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="creater" name="creater"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">projectId</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="projectId" name="projectId"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">reportId</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="reportId" name="reportId"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">typeName</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="typeName" name="typeName"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">typeValue</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="typeValue" name="typeValue"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">hiddenSections</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="hiddenSections" name="hiddenSections"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">tenantId</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="tenantId" name="tenantId"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<button class="layui-hide" lay-submit  id="btn_submit" lay-filter="btn_submit"><@spring.message "action.save"/></button>
+</form>
+
+<script type="text/javascript">
+	var is_verify = false;
+	layui.use([ 'form'],function() {
+		var form = layui.form;
+		form.verify({
+			  length: function(value,item){
+				  if(value.length<2 || value.length>30){
+				      return '<@spring.message "biMapping.please_enter_2_to_30_characters"/>';
+				  }
+			  },
+			  textarea: function(value,item){
+				  if(value.length>250){
+				      return '<@spring.message "biMapping.Length_should_not_exceed_250"/>';
+				  }
+			  }
+			})  
+		form.on('submit(btn_submit)', function(data){
+			is_verify = true;
+			return false;
+		})
+	});
+	
+	function init (type,typeCase) {
+		
+	}
+	
+  	
+	function getData(){
+		$('#btn_submit').click();
+		if (is_verify) {
+			return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+  	}
+	
+	
+</script>

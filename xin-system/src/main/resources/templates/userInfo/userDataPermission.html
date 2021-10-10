@@ -1,0 +1,174 @@
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<style>
+	.fixed-table-body {
+    	height: auto;
+    }
+</style>
+<div id="body" class="layui-body" style="">
+		<div id="toolbar" class="layui-form layui-form-pane" action="">
+			<div class="layui-inline">
+			    <button type="button" id="add_dp" class="layui-btn layui-btn-sm layui-btn-normal <@shiro.hasRole name='role_test' >layui-btn-disabled</@shiro.hasRole>" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole>><i class="layui-icon">&#xe654;</i>数据权限</button>
+			</div>
+			<input type="hidden" name="userId" id="userId" value="${userId}">
+			<input type="hidden" name="orgId" id="orgId" value="${orgId}">
+			<div class="layui-inline">
+				<label class="layui-form-label" title="<@spring.message 'dataPermission.data_per_name'/>"><@spring.message 'dataPermission.data_per_name'/></label>
+				<div class="layui-input-inline">
+		        	<input type="text" id="dpname" name="dpname" placeholder="<@spring.message 'tips.input'/>"
+				autocomplete="off" class="layui-input">
+				</div>
+			</div>
+           	<div class="layui-inline">
+           		<button type="button" id="query" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/></button>
+	    	</div>
+		</div>
+	  	<div class="layui-tab-content">
+			<div class="layui-tab-item layui-show">
+				<table id="table"
+	    		   data-toolbar="#toolbar"
+	    		   data-click-to-select="true"
+	               data-toggle="table"
+	               data-search="false"
+	               data-side-pagination="server"
+	               data-pagination="true"
+	               data-query-params-type=""
+	               data-url="${basePath}/dataPermission/userDataPage"
+	               data-query-params="queryParams">
+	            	<thead>
+	            		<tr>
+			                <th data-align="center"
+			                	data-halign="center"
+			                	data-formatter="optFormatter"
+			                	data-width="1%"><@spring.message 'action.action'/></th>
+			                <th data-align="center" 
+			                	data-width="20%"
+			                	data-halign="center"
+			                	data-field="dpname"><@spring.message 'dataPermission.data_per_name'/></th>
+			                <th data-align="center" 
+			                	data-width="20%"
+			                	data-halign="center"
+			                	data-field="extcode" ><@spring.message 'dataPermission.data_per_code'/></th>
+			                <th data-align="center" 
+			                	data-width="20%"
+			                	data-halign="center"
+			                	data-field="dptype" ><@spring.message 'dataPermission.data_per_type'/></th>
+			                <th data-align="center"
+			                	data-width="5%" 
+			                	data-halign="center"
+			                	data-field="sort" ><@spring.message 'list.order'/></th>
+			                <th data-align="center" 
+			                	data-width="5%"
+			                	data-halign="center"
+			                	data-formatter="isOrgDataPermission"
+			                	data-field="state" ><@spring.message 'dataPermission.org_data_per'/></th>
+	            		</tr>
+					</thead>
+				</table>
+			</div>
+		</div>
+</div>
+<script>
+	var isTestRole = "<@shiro.hasRole name='role_test' >true</@shiro.hasRole>" ? true : false;
+	$('#query').on('click',function(){
+		var orgId = $('#orgId').val();
+		var userId = $('#userId').val();
+       	var dpname = $('#dpname').val();
+       	$('#table').bootstrapTable('refresh', {query: {dpname: dpname, userId:userId, orgId:orgId}});
+    });
+	
+	$('#add_dp').on('click',function(){
+		var isSubmit = false;
+		var userId = $('#userId').val()
+		var orgId = $('#orgId').val()
+		parent.layer.open({
+			title: "<@spring.message 'dataPermission.add_data_per_to_other'/>",
+			type:2,
+			content:'${basePath}/dataPermission/userSelect?orgId=' + orgId + '&userId=' + userId,
+			area: ['70%', '90%'],
+			btn:["<@spring.message 'action.ok'/>","<@spring.message 'action.cancel'/>"],
+			success: function(layero){
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data==null) {
+						parent.layer.msg("<@spring.message'tips.choosUser'/>！");
+						isSubmit = false;
+						return;
+					}
+	   		    	$.ajax({
+		                type: "POST",
+		                url:'${basePath}/dataPermission/saveUserDataPermission',
+		                data:data,
+		                async: false,
+		                error: function(request) {
+		                    parent.layer.msg('<@spring.message "result.addFail"/>！');
+		                    isSubmit = false;
+		                },
+		                success: function(result) {
+		                	if(result.code==0){
+		                		parent.layer.close(index);
+								layer.msg('<@spring.message "result.addSuccess"/>！');
+								$('#table').bootstrapTable('refresh', null);
+		                	}else{
+		                		parent.layer.msg('<@spring.message "result.addFail"/>！');
+			                    isSubmit = false;
+		                	}
+		                }
+		            });
+				}	
+			}
+		});	
+	});
+
+	function queryParams(params) {
+		var dpname = $('#dpname').val();
+		var orgId = $('#orgId').val();
+		var userId = $('#userId').val();
+		params.dpname = dpname
+    	params.orgId = orgId;
+		params.userId = userId;
+		return params;
+	}
+	
+	function optFormatter(value,row,index){
+		if (isTestRole) {
+			return '<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled " disabled title='+"<@spring.message 'action.disable'/>"+' ><i class="layui-icon layui-icon-more"></i> </button>';
+		}
+		var v = '<div class="layui-btn-group layui-btn-group-xs ">';
+		if(row.state == 0){//组织权限不能操作 
+			v +='<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled" disabled title='+"<@spring.message 'action.disable'/>"+' ><i class="layui-icon layui-icon-more"></i></button>';
+		}else if(row.state == 1){//用户权限可以移除
+			v +='<button class="layui-btn layui-btn-normal layui-btn-sm "  title='+"<@spring.message 'action.remove'/>"+' onclick="javascript:deleteDataPermission(\''+row.dpId+'\',\''+row.userId+'\')"><i class="layui-icon">&#xe640;</i></button>';
+		}
+		v += '</div>';
+        return v;
+	}
+	
+	function isOrgDataPermission(value,row,index){
+		if(value == 0){
+			return '<@spring.message "tips.yes"/>';
+		}
+		return '<@spring.message "tips.no"/>';
+	}
+	
+	function deleteDataPermission(dpId,userId){
+		parent.layer.confirm("<@spring.message 'action.delete'/>？", {title:'<@spring.message "action.info"/>',
+            btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			yes: function(index, layero){
+		  		$.post('${basePath}/dataPermission/deleteByUser',{dpId:dpId,userId:userId},function(result){
+		    		layer.close(index);
+		    		if(result.code==0){
+                        parent.layer.msg("<@spring.message 'result.success'/>");
+					}else {
+                        parent.layer.msg("<@spring.message 'result.fail'/>");
+					}
+		    		$('#table').bootstrapTable('refresh', null);
+			    });
+			}
+     	});
+	}
+</script>

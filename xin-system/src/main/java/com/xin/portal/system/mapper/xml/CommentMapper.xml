@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.CommentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.Comment">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="resource_id" property="resourceId" />
+        <result column="content" property="content" />
+        <result column="create_time" property="createTime" />
+        <result column="tenant_id" property="tenantId" />
+        <result column="reply_userid" property="replyId" />
+        <result column="reply_time" property="replyTime" />
+        <result column="reply_content" property="replyContent" />
+        <result column="roof" property="roof" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id, content, create_time
+    </sql>
+	<select id="selectByResourceId" resultMap="BaseResultMap" parameterType="java.lang.String">
+	SELECT A.* ,
+	B.realname as userName,
+	B.avatar ,
+	C.realname as replyName
+	FROM T_COMMENT A 
+	LEFT JOIN T_USER_INFO B 
+	ON A.user_id=B.ID
+	LEFT JOIN T_USER_INFO C 
+	ON A.reply_userid=C.ID
+	<where>
+		<if test="resourceId!=null and resourceId!=''">
+			A.resource_id=#{resourceId}
+		</if>
+	</where>
+	ORDER BY roof desc,create_time DESC
+	</select>
+	
+	<select id="selectCommentMore" resultType="com.xin.portal.system.model.Comment">
+	SELECT
+    c.id,
+	c.content,
+	c.roof,
+    c.resource_id AS resourceId,
+	c.reply_content As replyContent,
+	r.name As resourceName,
+	f.realname AS commentName,
+	i.realname AS replyName,
+	c.create_time As createTime,
+	c.reply_time As replyTime
+	FROM t_comment c
+	LEFT
+	JOIN t_resource r
+	ON r.id = c.resource_id
+	LEFT JOIN t_user_info f
+	ON f.id=
+	c.user_id
+	LEFT JOIN t_user_info i
+	ON i.id = c.reply_userid
+	<where>
+		<if test="resourceId!=null and resourceId!=''">
+			and c.resource_id = #{resourceId}
+		</if>
+		<if test="commentName!=null and commentName!=''">
+			<bind name="pattern1" value="'%'+commentName+'%'"/>
+			and f.realname like #{pattern1}
+		</if>
+		<if test="resourceName!=null and resourceName!=''">
+			<bind name="pattern2" value="'%'+resourceName+'%'"/>
+			and r.name like #{pattern2}
+		</if>
+		<if test="resourceId!=null and resourceId!=''">
+			and c.resource_id = #{resourceId}
+		</if>
+		<if test="createTimeStart!=null">
+  		  	<![CDATA[ and c.create_time >= #{createTimeStart}]]>
+    	</if>
+    	<if test="createTimeEnd!=null">
+    		<![CDATA[ and c.create_time <= #{createTimeEnd}]]>
+    	</if>
+	</where>
+			ORDER BY c.create_time DESC
+	</select>
+
+	<select id="adminUser" parameterType="java.lang.String" resultType="com.xin.portal.system.model.AtUser">
+		select a.user_id as id,b.realname as name,a.role_id as groupId from t_role_user a LEFT JOIN  t_user_info  b on a.user_id = b.id
+		LEFT JOIN  t_user c  on   b.id = c.id
+		where a.role_id in
+		(select  role_id  from  t_role_permission
+		where
+		permission_id in (select  id  from   t_permission where (code = "view" or  code = "comment") and tenant_id = #{tenantId})
+		and  resource_id=#{resourceId})
+		<if test="roleIds!=null and roleIds.size>0">
+			and a.role_id in
+			<foreach collection="roleIds" index="index" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		and c.is_delete=0
+	</select>
+
+	<select id="otherUser"  resultType="com.xin.portal.system.model.AtUser">
+		select a.user_id as id,b.realname as name,a.role_id as groupId from t_role_user a LEFT JOIN  t_user_info  b on a.user_id = b.id
+		LEFT JOIN  t_user c  on   b.id = c.id
+		where a.role_id in
+		(select  role_id  from  t_role_permission
+		where
+		permission_id in (select  id  from   t_permission where (code = "view" or  code = "comment") and tenant_id = #{tenantId})
+		and  resource_id=#{resourceId})
+		<if test="roleIds!=null and roleIds.size>0">
+			and a.role_id not in
+			<foreach collection="roleIds" index="index" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="adminIds!=null and adminIds.size>0">
+			and a.user_id not in
+			<foreach collection="adminIds" index="index" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		and c.is_delete=0
+	</select>
+
+</mapper>

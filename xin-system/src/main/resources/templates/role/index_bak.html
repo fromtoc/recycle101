@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<#include "common/common_ztree.html" />
+<script type="text/javascript">
+	layui.use([ 'form','element'],function() {
+		var form = layui.form, 
+			layer = layui.layer;
+			element = layui.element;
+	})
+	
+ 	var zTree,resourceTree,orgTree;
+    var roleTreeSetting = {
+        check: {
+            enable: false
+        },
+        view: {
+        	addHoverDom:addHoverDom,
+        	removeHoverDom:removeHoverDom,
+            dblClickExpand: false,
+            showLine: true,
+            selectedMulti: false
+        },
+        data: {
+            simpleData: {
+                enable:true,
+                idKey: "id",
+                pIdKey: "parentId",
+                rootPId: "0"
+            }
+        },
+        async: {
+			enable: true,
+			contentType: "application/json",
+			url: "${basePath}/role/list",
+		},
+        callback: {
+            onClick: zTreeOnClick,
+            onAsyncSuccess: onRoleTreeAsyncSuccess
+        }
+    };
+    
+    var resourceTreeSetting = {
+        check: {
+            enable: true,
+            chkStyle: "checkbox",
+            chkboxType: { "Y": "ps", "N": "ps" }
+        },
+        view: {
+            dblClickExpand: false,
+            showLine: true,
+            selectedMulti: false
+        },
+        data: {
+            simpleData: {
+                enable:true,
+                idKey: "id",
+                pIdKey: "parentId",
+                rootPId: "0"
+            }
+        },
+        async: {
+			enable: true,
+			contentType: "application/json",
+			url: "${basePath}/resource/list",
+		},
+		callback: {
+			onAsyncSuccess: onAsyncSuccess,
+			onCheck:onResourceCheck
+		}
+    };
+    
+    var orgTreeSetting = {
+            check: {
+                enable: true,
+                chkStyle: "checkbox",
+                chkboxType: { "Y": "s", "N": "ps" }
+            },
+            view: {
+                dblClickExpand: false,
+                showLine: true,
+                selectedMulti: false
+            },
+            data: {
+                simpleData: {
+                    enable:true,
+                    idKey: "id",
+                    pIdKey: "parentId",
+                    rootPId: "0"
+                }
+            },
+            async: {
+    			enable: true,
+    			contentType: "application/json",
+    			url: "${basePath}/organization/listAll",
+    		},
+    		callback: {
+    			onAsyncSuccess: onAsyncSuccessOrg,
+    			onCheck:onCheckOrg
+    		}
+        };
+    
+    function onRoleTreeAsyncSuccess(){
+    	var node = zTree.getNodeByParam('id', 1,null);//获取id为1的点
+    	zTree.expandNode(node, true, false);//指定选中ID节点展开
+    }
+    
+    function onAsyncSuccess(){
+    	$.fn.zTree.getZTreeObj("resourceTree").expandAll(true);
+    }
+    
+    function onResourceCheck(event,treeId,treeNode){
+    	var roleNode = zTree.getSelectedNodes();
+    	if (roleNode.length>0 && roleNode[0].state==0 && treeNode.state==0) {
+    		layer.msg('默认权限无法修改!');
+    		return ;
+    	}
+    	var nodes = resourceTree.getCheckedNodes(true);
+    	var checkRoleId = $('#checkedId').val();
+    	if (checkRoleId==null || checkRoleId=='') {
+    		return;
+    	}
+		var ids = '';
+		if (nodes!=null && nodes!=undefined) {
+			for(var i=0;i<nodes.length;i++) {
+				if (i==0) {
+					ids = nodes[i].id ;
+				}else {
+					ids += ',' + nodes[i].id ;
+				}
+			}
+		}
+		
+		var node = treeNode.getParentNode();
+		var allNode = '';//获取当前选中节点
+		getParentNodes(node,allNode);
+		var param = {
+			roleId:$('#checkedId').val(),
+			ids:ids
+		};
+		$.post('${basePath}/roleResource/saveByRoleId',param,function(result){
+			if (result.code==0) {
+				layer.msg('保存成功!');
+			}else {
+				layer.msg('保存失败!');
+			}
+		},'json');
+    }
+    
+    function onAsyncSuccessOrg(){
+    	$.fn.zTree.getZTreeObj("orgTree").expandAll(true);
+    }
+    
+    function onCheckOrg(event,treeId,treeNode){
+    	var nodes = orgTree.getCheckedNodes(true);
+    	var checkRoleId = $('#checkedId').val();
+    	if (checkRoleId==null || checkRoleId=='') {
+    		return;
+    	}
+		var ids = '';
+		if (nodes!=null && nodes!=undefined) {
+			for(var i=0;i<nodes.length;i++) {
+				if (i==0) {
+					ids = nodes[i].id ;
+				}else {
+					ids += ',' + nodes[i].id ;
+				}
+			}
+		}
+		
+		var node = treeNode.getParentNode();
+		var allNode = '';//获取当前选中节点
+		getParentNodes(node,allNode);
+		var param = {
+			roleId:$('#checkedId').val(),
+			ids:ids
+		};
+		$.post('${basePath}/roleOrganization/saveByRoleId',param,function(result){
+			if (result.code==0) {
+				layer.msg('保存成功!');
+			}else {
+				layer.msg('保存失败!');
+			}
+		},'json');
+    }
+    
+    var parentResIds='';
+	function getParentNodes(node,allNode){
+		if(node!=null){
+			if (allNode=='') {
+				allNode = node['id'];
+			}else {
+				allNode += ","+node['id'];
+			}
+			curNode = node.getParentNode();
+			getParentNodes(curNode,allNode);
+		}else{
+			//根节点
+			parentResIds = allNode;
+		}
+	}
+    
+    
+    $(function(){
+        $.fn.zTree.init($("#tree"), roleTreeSetting);
+        zTree = $.fn.zTree.getZTreeObj("tree");
+        $('#add_user').on('click',function(){
+        	addUser();
+        });
+        
+        $.fn.zTree.init($("#resourceTree"), resourceTreeSetting);
+        resourceTree = $.fn.zTree.getZTreeObj("resourceTree");
+        
+        $.fn.zTree.init($("#orgTree"), orgTreeSetting);
+        orgTree = $.fn.zTree.getZTreeObj("orgTree");
+    });
+    
+    function addHoverDom(treeId, treeNode) {
+    	//不可编辑
+    	if (treeNode.state==0) {
+    		return false;
+    	}
+        var sObj = $("#" + treeNode.tId + "_span");
+        if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0 || $("#editBtn_"+treeNode.tId).length>0) return;
+        
+        var addStr = "";
+        if (treeNode.parentId==0){
+        	addStr = "<span class='button add' id='addBtn_" + treeNode.tId
+            + "' title='添加' onfocus='this.blur();'></span>";
+        }
+
+        addStr += "<span class='button edit' id='editBtn_" + treeNode.tId + "' title='修改' onfocus='this.blur();'></span>";
+        if (!treeNode.isParent) {
+	        addStr += "<span class='button remove' id='removeBtn_" + treeNode.tId + "'  title='删除' onfocus='this.blur();'></span>";
+        }
+        sObj.after(addStr);
+        var btn = $("#addBtn_"+treeNode.tId);
+        if (btn) btn.bind("click", function(){
+        	add(treeNode);
+            return false;
+        });
+        
+        var btn = $("#editBtn_"+treeNode.tId);
+        if (btn) btn.bind("click", function(){
+        	edit(treeNode);
+            return false;
+        });
+        
+        
+        
+        var btnDel = $("#removeBtn_"+treeNode.tId);
+        if (btnDel) btnDel.bind("click", function(){
+            del(treeNode);
+            return false;
+        });
+        
+    };
+    
+    function add(treeNode) {
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: '添加角色',
+			type:2,
+			content:'${basePath}/role/add',
+			area: ['600px', '500px'],
+			btn:['确定','取消'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				iframeWin.init(treeNode);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if(data!=null){
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath}/role/save',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('添加失败！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									layer.msg('添加成功！');
+									zTree.addNodes(treeNode, result.data);
+			                		
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+					}else{
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+    
+    function del(treeNode) {
+    	var zTree = $.fn.zTree.getZTreeObj("tree");
+        if (treeNode.isParent) {
+         	l.alert('该功能包含下级节点,不能删除!');
+         	return;
+        } else {
+         	layer.confirm('删除角色【'+treeNode.name+'】？', {
+				btn:['确定','取消'],
+				yes: function(index, layero){
+			  		$.post('${basePath}/role/delete',{id:treeNode.id},function(result){
+			    		if (result.code==0) {
+			    			zTree.removeNode(treeNode);
+			    		} 
+			    		layer.close(index);
+			    		parent.layer.msg(result.msg);
+			    		
+				    });
+		                
+				}
+         	});
+        }
+    }
+    
+    function edit(treeNode) {
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: '编辑角色',
+			type:2,
+			content:'${basePath}/role/edit?id='+treeNode.id,
+			area: ['600px', '500px'],
+			btn:['确定','取消'],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				var parentNodes = zTree.getNodesByParam("id", treeNode.parentId, null);
+				iframeWin.init(parentNodes[0]);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if(data!=null){
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath}/role/update',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('编辑失败！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									layer.msg('编辑成功！');
+									treeNode.name = result.data.name;
+									treeNode.title = result.data.name;
+									treeNode.type = result.data.type;
+									treeNode.sort = result.data.sort;
+									zTree.updateNode(treeNode);
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+					}else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+
+    function removeHoverDom(treeId, treeNode) {
+        $("#addBtn_"+treeNode.tId).unbind().remove();
+        $("#removeBtn_"+treeNode.tId).unbind().remove();
+        $("#editBtn_"+treeNode.tId).unbind().remove();
+    };
+    
+    var checkedResourceIds = '';
+    function zTreeOnClick(event, treeId, treeNode) {
+    	$('#table').bootstrapTable('refresh', null);
+    	$('#checkedId').val(treeNode.id),
+    	$.post('${basePath}/roleResource/findIds',{roleId:treeNode.id},function(ids){
+        	checkedResourceIds = ids;
+        	var resourceTree = $.fn.zTree.getZTreeObj("resourceTree");
+        	resourceTree.checkAllNodes(false);
+        	if (ids!=null && ids.length>0) {
+        		if (ids.length > 0) {
+        			for (var i=0;i<ids.length;i++ ) {
+        				var node = resourceTree.getNodeByParam("id", ids[i]);
+        				resourceTree.checkNode(node, true, true);
+        			}
+        		}
+        	}
+        },'json');
+    	$.post('${basePath}/roleOrganization/findIds',{roleId:treeNode.id},function(ids){
+        	checkedOrgIds = ids;
+        	orgTree.checkAllNodes(false);
+        	if (ids!=null && ids.length>0) {
+        		if (ids.length > 0) {
+        			for (var i=0;i<ids.length;i++ ) {
+        				var node = orgTree.getNodeByParam("id", ids[i]);
+        				orgTree.checkNode(node, true, true);
+        			}
+        		}
+        	}
+        },'json');
+    	
+    }
+    
+    function queryParams(params) {
+    	params.roleId = -1;
+    	if (zTree!=null) {
+    		var nodes = zTree.getSelectedNodes();
+	    	if (nodes!=null && nodes.length!=0 && nodes[0].id!=1) {
+				params.roleId = nodes[0].id;
+	    	}
+    	}
+		return params;
+	}
+	
+	
+	function opeFormatter(value,row,index){
+		var v = '<div class="layui-btn-group layui-btn-group-xs">'
+								+'<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="javascript:remove(\'%\',\'#\')"><i class="icon-info-sign"></i> 移除</button>'
+                        		+'</div>'; 
+        return v.replace(new RegExp(/(%)/g),row.id).replace(new RegExp(/(#)/g),row.username);
+	}
+	
+	
+	function addUser(){
+		var nodes = zTree.getSelectedNodes();
+		if (nodes==null || nodes.length==0) {
+			layer.msg('请选择角色！');
+			return;
+		}
+		var isSubmit = false;
+		parent.layer.open({
+			title: '添加用户',
+			type:2,
+			content:'${basePath}/userInfo/select/role?id='+nodes[0].id,
+			//area: ['800px', '700px'],
+			area: ['60%', '75%'],
+            maxmin: true,
+			btn:['确定','取消'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				iframeWin.init(nodes[0]);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data==null) {
+						parent.layer.msg("请选择用户！");
+						isSubmit = false;
+						return;
+					}
+	   		    	$.ajax({
+		                type: "POST",
+		                url:'${basePath}/roleUser/saveRoleUsersByRoleId',
+		                data:data,
+		                async: false,
+		                error: function(request) {
+		                    parent.layer.msg('添加失败！');
+		                    isSubmit = false;
+		                },
+		                success: function(result) {
+		                	if(result.code==0){
+		                		parent.layer.close(index);
+								layer.msg('添加成功！');
+								$('#table').bootstrapTable('refresh', null);
+		                	}else{
+		                		parent.layer.msg(result.msg);
+		                		isSubmit = false;
+		                	}
+		                }
+		            });
+				}
+    		}
+		});
+	}
+	
+	function remove(id,username) {
+		var nodes = zTree.getSelectedNodes();
+		var name = '';
+    	if (nodes!=null && nodes.length!=0 && nodes[0].id!=1) {
+			name = nodes[0].name;
+    	} else {
+    		layer.msg('用户角色信息丢失！');
+    		return;
+    	}
+		layer.confirm('从【'+name+'】角色中移除用户【'+username+'】？', {
+			btn:['确定','取消'],
+			yes: function(index, layero){
+		  		$.post('${basePath}/roleUser/delete',{userId:id,roleId:nodes[0].id},function(result){
+		  			$('#table').bootstrapTable('refresh', null);
+		    		layer.close(index);
+		    		parent.layer.msg(result.msg);
+			    });
+			}
+       	});
+	}
+    
+</script>
+
+</head>
+
+<body>
+	<div class="layui-container">
+		<div class="layui-row">
+		    <div class="layui-col-md2">
+		    	<ul id="tree" class="ztree" style="overflow:auto;"></ul>
+			</div>
+		    <div class="layui-col-md10">
+		    	<div class="layui-tab" style="-webkit-box-sizing: initial;">
+					  <ul class="layui-tab-title layui-tab-brief">
+					    <li class="layui-this" style="-webkit-box-sizing: initial;">人员维护</li>
+					    <li style="-webkit-box-sizing: initial;">菜单权限</li>
+					    <li class="" style="-webkit-box-sizing: initial;">组织权限</li>
+					  </ul>
+					  <input type="hidden" id="checkedId" />
+					  <div id="toolbar">
+			            <div class="layui-inline">
+					        <button type="button" id="add_user" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon">&#xe654;</i> 添加</button>
+					    </div>
+			          </div>
+					  <div class="layui-tab-content">
+					    <div class="layui-tab-item layui-show">
+					    	<table id="table"
+					    		   data-toolbar="#toolbar"
+					               data-toggle="table"
+					               data-search="false"
+					               data-side-pagination="server"
+					               data-pagination="true"
+					               data-query-params-type=""
+					               data-url="${basePath}/userInfo/page"
+					               data-query-params="queryParams">
+					            <thead>
+					            <tr>
+					                <th data-align="center"
+					                	data-halign="center"
+               							data-valign="middle"
+					                	data-formatter="indexFormatter"
+					                	data-width="1%">序号</th>
+					                <th data-align="center" 
+					                	data-halign="center"
+               							data-valign="middle"
+					                	data-field="username">账号</th>
+					                <th data-align="center" 
+					                	data-halign="center"
+               							data-valign="middle"
+					                	data-field="realname" >真实姓名</th>
+					                <th data-align="center"
+					                	data-halign="center"
+               							data-valign="middle"
+					                	data-field="orgName">组织机构</th>
+					                <th data-align="center"
+               							data-valign="middle"
+					                	data-halign="center"
+					                	data-formatter="opeFormatter" >操作</th>
+					            </tr>
+					            </thead>
+					        </table>
+					    </div>
+					    <div class="layui-tab-item">
+					    	<ul id="resourceTree" class="ztree" style="overflow:auto;"></ul>
+					    </div>
+					    <div class="layui-tab-item">
+					    	<ul id="orgTree" class="ztree" style="overflow:auto;"></ul>
+					    </div>
+					  </div>
+					</div>
+			</div>
+		</div>
+	</div>
+	<!-- <div class="layui-layout layui-layout-admin bg-white">
+		<div class="layui-side layui-bg-black bg-white " style="width:250px;top:20px !important">
+			<div class="layui-side-scroll">
+				<ul id="tree" class="ztree" style="overflow:auto;"></ul>
+			</div>
+		</div>
+		<div id="body" class="layui-body" style="margin-left:250px;top:0px !important">
+			
+		</div>
+	</div> -->
+</body>
+
+</html>

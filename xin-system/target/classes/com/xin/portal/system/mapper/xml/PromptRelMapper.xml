@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.PromptRelMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.PromptRel">
+        <id column="id" property="id" />
+        <result column="resource_id" property="resourceId" />
+        <result column="prompt_id" property="promptId" />
+        <result column="default_value1" property="defaultValue1" />
+        <result column="default_value2" property="defaultValue2" />
+        <result column="default_value3" property="defaultValue3" />
+        <result column="default_value4" property="defaultValue4" />
+        <result column="date_format" property="dateFormat" />
+        <result column="sort" property="sort" />
+        <result column="hidden" property="hidden" />
+        <result column="name" property="name" />
+        <result column="code" property="code" />
+        <result column="dictCode" property="dictCode" />
+        <result column="special" property="special" />
+        <result column="cascade_code" property="cascadeCode" />
+        <result column="update_time" property="updateTime" />
+        <result column="required" property="required" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, resource_id AS resourceId, prompt_id AS promptId, default_value1 AS defaultValue1, default_value2 AS defaultValue2, 
+        default_value3 AS defaultValue3, default_value4 AS defaultValue4, date_format AS dateFormat, sort, hidden
+    </sql>
+    
+    <select id="findList" resultType="com.xin.portal.system.model.PromptRel" parameterType="com.xin.portal.system.model.PromptRel" >
+    	select rp.id, rp.resource_id AS resourceId, rp.prompt_id AS promptId, rp.default_value1 AS defaultValue1, rp.default_value2 AS defaultValue2, 
+    	rp.default_value3 AS defaultValue3, rp.default_value4 AS defaultValue4, rp.date_format AS dateFormat, rp.sort,rp.hidden,
+    	rp.required,p.name,p.code,p.type,p.prompt_type as promptType, p.object_type as objectType, p.dict_code as dictCode, p.special,p.cascade_code,p.cascade_code
+    	from t_prompt_rel rp 
+    	left join t_prompt p on rp.prompt_id = p.id
+    	where resource_id = #{resourceId,jdbcType=VARCHAR}
+    	order by rp.sort asc
+    </select>
+    
+    <select id="find" resultType="com.xin.portal.system.model.PromptRel" parameterType="com.xin.portal.system.model.PromptRel" >
+    	select rp.id, rp.resource_id AS resourceId, rp.prompt_id AS promptId, rp.default_value1 AS defaultValue1, rp.default_value2 AS defaultValue2,
+    	rp.default_value3 AS defaultValue3, rp.default_value4 AS defaultValue4, rp.date_format AS dateFormat, rp.sort,rp.hidden,
+    	rp.required,p.name,p.code,p.type,p.prompt_type as promptType, p.object_type as objectType, p.dict_code as dictCode,p.special,p.cascade_code,p.cascade_code
+    	from t_prompt_rel rp 
+    	left join t_prompt p on rp.prompt_id = p.id
+    	<where>
+    		<if test="resourceId!=null and resourceId!=''">
+    			and  resource_id = #{resourceId}
+    		</if>
+    		<if test="id!=null and id!=''">
+    			and  rp.id = #{id}
+    		</if>
+    	</where>
+    </select>
+    
+    <select id="check" resultType="com.xin.portal.system.model.PromptRel" parameterType="com.xin.portal.system.model.PromptRel" >
+    	select pr.id,r.name from t_prompt_rel pr left join t_resource r on pr.resource_id = r.id
+    	<where>
+    		<if test="resourceId!=null and resourceId!=''">
+    			and  resource_id = #{resourceId}
+    		</if>
+    		<if test="promptId!=null and promptId!=''">
+    			and  pr.prompt_id = #{promptId}
+    		</if>
+    	</where>
+    	
+    </select>
+    
+    <select id="findResourceList" resultType="com.xin.portal.system.model.Resource" parameterType="com.xin.portal.system.model.PromptRel" >
+    	SELECT r.id as id,r.name as name,rt.name as type FROM t_prompt_rel pr
+		LEFT JOIN t_resource r ON r.id = pr.resource_id
+		LEFT JOIN t_resource_type rt ON rt.id = r.resource_type1
+		WHERE pr.prompt_id = #{promptId}
+    </select>
+    
+    <insert id="saveBatch" databaseId="mysql" >
+    insert into t_prompt_rel (resource_id, prompt_id, sort)
+    values 
+    <foreach collection="list" item="item" index="index" separator="," > 
+		(#{item.resourceId,jdbcType=VARCHAR},#{item.promptId,jdbcType=VARCHAR},#{item.sort,jdbcType=INTEGER})
+	</foreach> 
+  </insert>
+  
+  <insert id="saveBatch" >
+    insert into t_prompt_rel (resource_id, prompt_id, sort)
+    values 
+    <foreach collection="list" item="item" index="index" separator="," > 
+		(#{item.resourceId,jdbcType=VARCHAR},#{item.promptId,jdbcType=VARCHAR},#{item.sort,jdbcType=INTEGER})
+	</foreach> 
+  </insert>
+  
+  <insert id="saveBatch" databaseId="oracle" >
+    insert into t_prompt_rel (id,resource_id, prompt_id, sort,hidden)
+      select 
+		SEQ_T_PROMPT_REL_ID.nextval,resource_id,prompt_id,sort,0 from
+    <foreach close=")" collection="list" item="item" index="index" open="(" separator="union" >   
+		select 
+		#{item.resourceId,jdbcType=VARCHAR} as resource_id,
+		#{item.promptId,jdbcType=VARCHAR} as prompt_id,
+		#{item.sort,jdbcType=INTEGER} as sort
+		from dual
+	</foreach> 
+  </insert>
+    
+    
+    <select id="findListWithTenantId" resultType="com.xin.portal.system.model.PromptRel" parameterType="com.xin.portal.system.model.PromptRel" >
+    	select rp.id, rp.resource_id AS resourceId, rp.prompt_id AS promptId, rp.default_value1 AS defaultValue1, rp.default_value2 AS defaultValue2, 
+    	rp.default_value3 AS defaultValue3, rp.default_value4 AS defaultValue4, rp.date_format AS dateFormat, rp.sort,rp.hidden,
+    	rp.required,p.name,p.code,p.type,p.prompt_type as promptType, p.object_type as objectType, p.dict_code as dictCode, p.special,p.cascade_code,p.cascade_code
+    	from t_prompt_rel rp 
+    	left join t_prompt p on rp.prompt_id = p.id
+    	where rp.resource_id = #{resourceId,jdbcType=VARCHAR}
+    	and rp.tenant_id = #{tenantId,jdbcType=VARCHAR}
+    	order by rp.sort asc
+    </select>
+
+</mapper>

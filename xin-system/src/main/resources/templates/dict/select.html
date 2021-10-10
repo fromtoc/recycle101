@@ -1,0 +1,128 @@
+<div class="admin-content-body" style="margin-right: 20px;margin-top:20px">
+	<div style="width: 100%;
+float: left;">
+		<form action="javascript:query();"  id="query_form" class="layui-form">
+        	<div class="layui-form-item">
+			    <div class="layui-inline">
+			      <label class="layui-form-label"><@spring.message 'list.name'/></label>
+			      <div class="layui-input-inline">
+			        <input name="dict_name" id="query_name" class="layui-input" type="text" autocomplete="off">
+			      </div>
+			    </div>
+			    <div class="layui-inline">
+			      <label class="layui-form-label"><@spring.message 'dict.code'/></label>
+			      <div class="layui-input-inline">
+			        <input name="dict_code" id="query_code" class="layui-input" type="text" autocomplete="off">
+			      </div>
+			    </div>
+			    
+			    <div class="layui-inline">
+			    	<button class="layui-btn layui-btn-sm layui-btn-normal">
+					  <i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/>
+					</button>
+			        <button type="button" class="reset layui-btn layui-btn-sm layui-btn-normal"><i class="glyphicon glyphicon-refresh"></i> <@spring.message 'action.reset'/></button>
+			    </div>
+			    
+			</div>
+
+        </form>
+
+         
+        <table id="sel_dict"
+               data-toggle="table"
+               data-search="false"
+               data-pag="10"
+               data-side-pagination="server"
+               data-pagination="true"
+               data-query-params-type=""
+               data-url="${basePath}/dict/page"
+               data-query-params="queryParams"
+               data-detail-view="false"
+               data-click-to-select="true"
+               data-single-select="true"
+               data-height="450px"
+        >
+            <thead>
+            <tr>
+            	<th data-align="center" 
+                	data-width="1%"
+                	data-halign="center"
+                	data-checkbox="true"
+                	></th>
+                <th data-align="center" 
+                	data-width="10%"
+                	data-halign="center"
+                	data-field="dictName"><@spring.message 'list.name'/></th>
+                <th data-align="center" 
+                	data-width="10%"
+                	data-halign="center"
+                	data-field="dictCode"><@spring.message 'dict.code'/></th>
+               <th data-align="center" 
+                	data-width="55%"
+                	data-halign="center"
+                	data-field="items"><@spring.message 'dict.dictItem'/></th>
+                <th data-align="center"
+                	data-width="10%" 
+                	data-halign="center" 
+                	data-field="remark"><@spring.message 'list.remark'/></th>
+            </tr>
+            </thead>
+        </table>
+        
+	</div>
+	
+    
+        
+</div>
+
+<#include "common/common.html"/>
+<#include "common/common_table.html"/>
+<script>
+	var table = $('#sel_dict');
+	var laytpl;
+    $(function(){
+    	laytpl = layui.laytpl;
+		$(window).on('resize', function() {
+			var $content = $('.admin-content-body');
+			//$content.height($(this).height()-400);
+		}).resize();
+		
+		$('.reset').on('click',function(){
+			$('#query_form')[0].reset();
+		});
+		
+		
+	});
+	
+	function selDict(){
+  		return $('#sel_dict').bootstrapTable('getSelections');
+  	}
+	
+	
+	function queryParams(params) {
+		var dict_name = $('#query_name').val();
+		var dict_code = $('#query_code').val();
+		params.dictName = dict_name;
+		params.dictCode = dict_code;
+		return params;
+	}
+	
+	function query() {
+		table.bootstrapTable('refresh');
+	}
+	
+	function indexFormatter(value,row,index){
+        return index+1;
+	}
+	
+	
+	function itemFormatter(value,row,index){
+		var v = '<div class="layui-btn-group layui-btn-group-xs">'
+                        		+'<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="javascript:userInfo(\'%\')"><i class="icon-info-sign"></i> <@spring.message "dict.addDictItem"/></button>'
+                        		+'<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="javascript:userRole(\'%\')"><i class="icon-group"></i> <@spring.message "action.delete"/></button>'
+                        		+'</div>'; 
+        return v.replace(new RegExp(/(%)/g),row.id);
+	}
+	
+</script>
+

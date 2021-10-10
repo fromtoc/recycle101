@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.ModuleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.Module">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="state" property="state" />
+        <result column="creater" property="creater" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="is_delete" property="isDelete" />
+        <result column="is_edit" property="isEdit" />
+        <result column="organization_id" property="organizationId" />
+        <result column="tenant_id" property="tenantId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, state, creater, create_time, is_delete, is_edit, tenant_id
+    </sql>
+	<select id="selectPage" resultMap="BaseResultMap">
+		SELECT t.id,t.name,t.state,t.create_time,t.update_time ,t.is_delete ,t.is_edit,t.comments,t1.realname AS creater FROM t_module t LEFT JOIN t_user_info t1 ON t.creater=t1.id
+		WHERE t.id IN(SELECT module_id FROM t_organization_module  
+		<where>
+			<if test="organizationId!=null and organizationId!=''">
+				and organization_id= #{organizationId,jdbcType=VARCHAR} 
+			</if>
+		</where>
+		)
+	</select>
+</mapper>

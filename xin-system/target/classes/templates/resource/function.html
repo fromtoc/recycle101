@@ -1,0 +1,269 @@
+ <#include "common/common.html" />
+ <style>
+ 	#thumbnail_img{
+		width:200px;
+	}
+ 	.btn-blockquote{
+		display: inline-block;
+	    border-left: 5px solid #539fff;
+	    line-height: 0px;
+	    font-size: 10pt;
+	}
+ </style>
+ 
+<form id="form_add" class="layui-form" action=""
+	style="padding-top:10px;">
+	<div style="margin-left:100px;">
+		
+		<input type="hidden" name="id" id="id" value="${(record.id)!}">
+		<input type="hidden" name="resourceType1" id="resourceType1" value="${(record.resourceType1)!}">
+		<!-- <input type="hidden" name="resourceType2" id="resourceType2" value="${(record.resourceType2)!}"> -->
+		<input type="hidden" name="parentId" id="parentId">
+		<input type="hidden" name="path" id="path" value="${(record.path)!}">
+		<input type="hidden" name="serverId" id="serverId" value="${(record.serverId)!}">
+		<input type="hidden" name="projectId" id="projectId" value="${(record.projectId)!}">
+		<input type="hidden" name="reportId" id="reportId" value="${(record.reportId)!}">
+		<input type="hidden" name="typeName" id="typeName" value="${(record.typeName)!}">
+		<input type="hidden" name="typeValue" id="typeValue" value="${(record.typeValue)!}">
+		<input type="hidden" name="type" id="type" value="${(record.type)!}">
+		<input type="hidden" name="isMobile" value="0" />
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label label-required-diy"><@spring.message 'resource.Resource_type'/></label>
+			<div class="layui-input-block">
+				<span  id="resourceType1Name" class="form-info">
+				</span>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label"><@spring.message 'resource.Resource_classification'/></label>
+			<div class="layui-input-block">
+				<select id="resourceType2" name="resourceType2" value="${(record.resourceType2)!}">
+			        <option value=""></option>
+			        <#if resourceType2List??>
+			        <#list resourceType2List as rec>
+			        <option value="${rec.id}" ${(record.resourceType2==rec.id)?string('selected','')}>${rec.name}</option>
+			        </#list>
+			        </#if>
+			      </select>
+			</div>
+		</div>
+		<div class="layui-form-item" id="name_div">
+			<label class="layui-form-label label-required-diy"><@spring.message 'comment.Resource_name'/></label>
+			<div class="layui-input-inline" style="width:40%!important">
+				<input type="text" name="name" id="name" value="${(record.name)!}"  lay-verify="required|length" lay-verType="tips" placeholder="<@spring.message 'userInfo.Please_enter_a_name'/>"
+					autocomplete="off" class="layui-input">
+			</div>
+			<label class="layui-form-label"><@spring.message 'resource.Everyone_can_see_it'/></label>
+			<div class="layui-input-inline" style="width:30%;">
+				<input type="checkbox" name="everyone" lay-skin="switch" lay-text="YES|NO" <#if record.everyone=='on'>checked</#if>>
+			</div>
+		</div>
+		<div class="layui-form-item" id="code_div">
+			<label class="layui-form-label"><@spring.message 'resource.Shortcut_code'/></label>
+			<div class="layui-input-block" >
+				<input type="text" name="code" id="code" value="${(record.code)!}"  placeholder="<@spring.message 'tips.inputSome'/>"
+					autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item layui-hide" id="reports_div">
+			<label class="layui-form-label"><@spring.message 'BI.report'/></label>
+			<div class="layui-input-block" style="width:60%;">
+				<textarea  placeholder="<@spring.message 'tips.inputSome'/>" class="layui-textarea" readonly id= "reports_name" >
+				</textarea>
+			</div>
+		</div>
+		<div class="layui-form-item" >
+			<label class="layui-form-label label-required-diy"><@spring.message 'versionNotice.linkaddress'/></label>
+			<div class="layui-input-block" >
+				<textarea placeholder="<@spring.message 'tips.inputSome'/>" class="layui-textarea" name="linkUrl" id= "linkUrl" lay-verify="required" lay-verType="tips">${(record.linkUrl)!}</textarea>
+			</div>
+		</div>
+		<div class="layui-form-item" >
+			<label class="layui-form-label"><@spring.message 'resource.Explain'/></label>
+			<div class="layui-input-block" >
+				<textarea placeholder="<@spring.message 'tips.inputSome'/>" class="layui-textarea" name="introduce" id= "introduce" >${(record.introduce)!}</textarea>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label"><@spring.message 'list.order'/></label>
+			<div class="layui-input-block">
+				<input type="number" name="sort"  min="1" max="100" value="${(record.sort)!1}"
+					placeholder="<@spring.message 'resource.please_enter_value'/>" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label label-required-diy"><@spring.message 'resource.Open_with'/></label>
+			<div class="layui-input-block">
+				<input type="radio" name="linkType" value="1" title="<@spring.message 'resource.Current_page'/>" ${(record.linkType!=2)?string("checked","")} />
+				<input type="radio" name="linkType" value="2" title="<@spring.message 'resource.New_tab_page'/>" ${(record.linkType==2)?string('checked','')} />
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label"><@spring.message 'resource.Icon'/></label>
+			<div class="layui-input-block">
+				<input type="hidden" name="iconName" id="iconName" value="${(record.iconName)!}"
+					placeholder="<@spring.message 'resource.please_enter_value'/>" autocomplete="off" class="layui-input">
+				<button type="button" class="layui-btn layui-btn-sm layui-btn-normal "  id="icon_sel" ><@spring.message 'resource.Choose'/></button>
+				<i class="fa fa-2x ${(record.iconName)!}" id="icon_img"></i>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label"><@spring.message 'resource.thumbnail'/></label>
+			<div class="layui-input-block">
+				<input type="hidden" name="thumbnailId" id="thumbnailId" value="${(record.thumbnailId)!}">
+				<input type="hidden" name="thumbnail" id="thumbnail"  value="${(record.thumbnail)!'/images/thumbnail.png'}"
+					placeholder="<@spring.message 'resource.please_enter_value'/>" autocomplete="off" class="layui-input">
+				<#if record.thumbnail?default("")?trim?length gt 1>
+					<img src="${basePath}${record.thumbnail}" id="thumbnail_img" />
+				
+				<#else>
+					<img src="${basePath}/images/thumbnail.png" id="thumbnail_img" />
+				</#if>
+				<button type="button" class="layui-btn layui-btn-sm layui-btn-normal "  id="thumbnail_sel" ><@spring.message 'action.upload'/></button>
+				<button id="select_pic" type="button" class="layui-btn layui-btn-sm layui-btn-normal" ><@spring.message 'wechat.Select_pictures'/></button>
+				<blockquote class="layui-elem-quote btn-blockquote"><@spring.message 'resource.Please_upload_more_than_400*200_pictures'/></blockquote>
+				<button type="button" class="layui-hide"  id="resource_img_upload" ><@spring.message 'action.upload'/>Action</button>
+				
+			</div>
+		</div>
+		<div class="layui-form-item layui-hide" id="hiddenSecDiv">
+		    <label class="layui-form-label"><@spring.message 'resource.Report_Hidden_Area'/></label>
+		    <div class="layui-input-block" lay-filter="hiddenSections">
+		      <input type="checkbox"  name="hiddenSections" value="header" title="header" checked>
+		      <input type="checkbox"  name="hiddenSections" value="footer" title="footer" checked>
+		      <input type="checkbox"  name="hiddenSections" value="path" title="path" checked>
+		      <input type="checkbox"  name="hiddenSections" value="dockTop" title="dockTop" checked>
+		      <input type="checkbox"  name="hiddenSections" value="dockLeft" title="dockLeft" checked>
+		    </div>
+		</div>
+	</div>
+	<button class="layui-hide" lay-submit  id="btn_submit" lay-filter="btn_submit"><@spring.message 'action.save'/></button>
+</form>
+<!-- 弹窗 -->
+	<div id="iconSelDialog" style="display:none">
+		<#include "resource/icon_select.html" />
+	</div>
+<script type="text/javascript">
+	var is_verify = false;
+	function init (type1Node,type2Node) {
+		var resourceTypeName = type1Node.name;
+		$('#resourceType1').val(type1Node.id);
+		if (type2Node!=null) {
+			$('#resourceType2').val(type2Node.id);
+		}
+		$('#resourceType1Name').html(type1Node.name);
+		layui.form.render();
+	}
+	
+	
+	function getData(){
+		$('#btn_submit').click();
+		if (is_verify) {
+			//return $('#form_add').serialize();
+			var form = $('#form_add')[0];
+	        var data = new FormData(form);
+	        return data;
+		} else {
+			return null;
+		}
+
+  	}
+	
+	layui.use([ 'form','layer','layedit','upload'],function() {
+		var form = layui.form, 
+			layer = layui.layer, 
+			layedit = layui.layedit,
+			upload = layui.upload;
+		
+		
+		var iconSelContent = $('#iconSelDialog').html();
+		$('#icon_sel').on('click',function(){
+			 var indexSel = layer.open({
+				title: '<@spring.message "resource.Select_Icon"/>',
+				type:1,
+			    content: iconSelContent,
+			    area: ['70%', '80%'],
+			    success: function(layero){
+					$('.site-doc-icon li').on('click',function(e){
+						$('#icon').val($(this).find('.doc-icon-code').text());
+						//$('#icon_img').text($(this).find('.doc-icon-code').text());
+						$('#icon_img').removeClass().addClass('fa fa-2x ').addClass($(this).find('.doc-icon-code').text());
+						$('#iconName').val($(this).find('.doc-icon-code').text());
+						layer.close(indexSel);
+					    
+					})
+				}
+			}); 
+		});
+		
+		//普通图片上传
+		upload.render({
+		  elem: '#thumbnail_sel'
+		  ,accept:'images'
+		  ,acceptMime:'image/jpg, image/png, image/gif'
+		  ,auto: false //选择文件后不自动上传
+		  ,bindAction: '#resource_img_upload' //指向一个按钮触发上传
+		  ,field:'thumbFile'  //后端接收字段
+		  ,choose: function(obj){
+		    //将每次选择的文件追加到文件队列
+		    files = obj.pushFile();
+		    //预读本地文件，如果是多文件，则会遍历。(不支持ie8/9)
+		    obj.preview(function(index, file, result){
+		    	$('#thumbnail_img').attr('src', result); //图片链接（base64）
+		    });
+		  },
+		  before: function(obj){
+		      this.data = {businessId:$('#id').val()};
+		  },
+		  done: function(res, index, upload){ //上传后的回调
+			  $('#thumbnailId').val(res.data.id);
+			  $('#thumbnail').val(res.data.filePathView);
+		  }
+		});
+		
+		form.on('submit(btn_submit)', function(data){
+			is_verify = true;
+			return false;
+		});
+		
+		form.verify({
+			length: function(value,item){
+				if(value.length < 2 || value.length > 30){
+					return '<@spring.message"biMapping.please_enter_2_to_30_characters"/>';
+				}
+			},
+		});
+		
+		$('#select_pic').on('click',function () {
+			parent.layer.open({
+				title: '<@spring.message "wechat.Image_selection"/>',
+				type:2,
+				content:'${basePath!}/scheduleTask/select/img',
+				btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+				area: ['60%', '70%'],
+				success: function(layero){
+					var iframeWin = top.window[layero.find('iframe')[0]['name']];
+					iframeWin.init();
+				},
+				yes:function(index,layero){
+					var iframeWin = top.window[layero.find('iframe')[0]['name']];
+					var data = iframeWin.getData();
+					if (data!=null) {
+						var imgSrc = data[0].querySelector('img').getAttribute('src');
+						var fileId = data[0].querySelector('img').getAttribute('id')
+						var src = imgSrc.substring('${basePath!}'.length,imgSrc.length);
+						$('#thumbnailId').val(fileId);
+						$('#thumbnail').val(src);
+						$('#thumbnail_img').attr('src', imgSrc);
+						parent.layer.close(index);
+					}
+				}
+			});
+		});
+	})
+	
+	
+
+</script>

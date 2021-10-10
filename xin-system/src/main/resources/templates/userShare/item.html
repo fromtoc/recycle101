@@ -1,0 +1,175 @@
+	  <div  id="content_${typeId}" isAuto="false">
+	      
+	  </div>
+  <script id="itemContent_${typeId}" type="text/html">
+  {{#  layui.each(d.rows, function(index, item){ }}
+  {{#  if(index%2==0){ }}
+	  <div class="layui-row">
+  {{#  } }} 
+			    <div class="layui-col-md6 md" >
+			    	<div class="item" >
+					  <div class="item-link" onclick="javascript:showCourse({{item.id}},'{{=item.fileId}}')">
+			      	  	<div class="item-left">
+                          <img src="${basePath}/{{item.imgUrl||'images/course.jpg'}}" alt="{{item.name||''}}" />
+                      	</div>
+                      	<div class="item-right">
+                          <div class="item-right-title">
+                              <span>{{item.name||''}}</span>
+                          </div>
+                          <div class="item-right-desc">
+								简介：{{formatDesc(item.description||'暂无')}}
+                          </div>
+                      	</div>
+					  </div>
+                      <div class="clear"></div>
+                      <div class="item-footer">
+                          <span><i class="fa fa-clock-o"></i>&nbsp;&nbsp;{{utils.tmDate.getFormatDateByLong(item.createTime,'yyyy-MM-dd')}}</span>
+                          <span class="footer-author"><i class="fa fa-user"></i>&nbsp;&nbsp;{{item.createrName||''}}</span>
+						  <div class="footer-viewinfo" onclick="javascript:star({{item.id}},'add')">
+								{{#if (item.collect==null || item.collect==0){ }}
+									<i id="star_{{item.id}}" class="fa fa-star-o"></i>&nbsp;<span id="collect_{{=item.id}}">{{item.collectionNum||0}}</span>
+								{{# }else{ }}
+									<i id="star_{{item.id}}" class="fa fa-star"></i>&nbsp;<span id="collect_{{=item.id}}" >{{item.collectionNum||0}}</span>
+								{{# } }}
+						  </div>
+						  <span class="footer-viewinfo download" onclick="javascript:download({{item.fileId||0}},{{item.id||0}})"><i class="fa fa-download"></i>&nbsp;<span id="download_{{item.id}}">{{item.downloadNum||0}}</span></span>
+                          <span class="footer-viewinfo view" ><i class="fa fa-eye"></i>&nbsp;&nbsp;{{item.readNum||0}}</span>
+                      </div>
+                      </div>
+			    </div>
+	{{#  if(index%2==1){ }}
+	  </div>
+	  {{#  } }} 
+	{{#  }); }}
+
+  </script>
+  
+  <script>
+  /* <span><i class="fa fa-tag"></i>&nbsp;&nbsp;<a href="#">Web前端</a></span> */
+  	
+  	layui.use([ 'form','flow','laytpl','layer'],function() {
+		var form = layui.form,
+			$ = layui.jquery, //不用额外加载jQuery，flow模块本身是有依赖jQuery的，直接用即可。
+			flow = layui.flow,
+			layer = layui.layer,
+			laytpl = layui.laytpl;
+		
+		
+		flow.load({
+		    elem: '#content_${typeId!}', //指定列表容器
+		    isAuto:false,
+		    //scrollElem:'#',
+		    done: function(page, next){ //到达临界点（默认滚动触发），触发下一页
+		      var lis = [];
+		      //以jQuery的Ajax请求为例，请求下一页数据（注意：page是从2开始返回）
+		      var params = {
+		    		  pageNumber:page,
+		    		  pageSize:6,
+		    		  type:'${type!}',
+		    		  typeId:'${typeId!}'
+		      }
+		      $.post('${basePath}/course/show',params, function(res){
+		    	  console.log(res);
+		        //假设你的列表返回在data集合中
+		        var getTpl = itemContent_${typeId}.innerHTML;
+		        var tplHtml = laytpl(getTpl).render(res);
+		        //layui.each(res.rows, function(index, item){
+		        //  lis.push('<li>'+ item.desc +'</li>');
+		        //}); 
+		        //执行下一页渲染，第二参数为：满足“加载更多”的条件，即后面仍有分页
+		        //pages为Ajax返回的总页数，只有当前页小于总页数的情况下，才会继续出现加载更多
+		        //next(lis.join(''), page < res.total/res.pageSize);   
+		        next(tplHtml, page < res.total/res.pageSize); 
+		        $('.fa-star-o').off('mouseover').on('mouseover',function(){
+		        	layer.tips('收藏', this, {
+			        	  tips: [1, '#cecece'], //还可配置颜色
+			          	
+			        	});
+				});
+		        
+		        $('.fa-download').off('mouseover').on('mouseover',function(){
+		        	layer.tips('下载', this, {
+			        	  tips: [1, '#cecece'], //还可配置颜色
+			        	});
+				});
+		        
+		        
+		        /* $('.item').off('mouseover').on('mouseover',function(){
+		        	console.log(res);
+					console.log(this);
+					
+				}); */
+		      });
+		    }
+		  });
+		
+			
+  	});
+  	
+  	function queryParams (params) {
+  		var temp = {  //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+                //limit: params.limit,  //页面大小
+                //page: params.offset, //页码  
+
+                pageSize: params.pageSize,
+                pageNumber: params.pageNumber,
+            };
+  		return temp;
+  	}
+  	
+	function star(id,action){
+ 			var methodType = '+';
+ 			if ($('#star_'+id).hasClass('fa-star-o')){//未收藏变已收藏
+ 				$('#star_'+id).removeClass('fa-star-o');
+ 				$('#star_'+id).addClass('fa-star');
+ 				$('#collect_'+id).html(Number($('#collect_'+id).html())+1);
+ 			} else {
+ 				$('#star_'+id).removeClass('fa-star');
+ 				$('#star_'+id).addClass('fa-star-o');
+ 				$('#collect_'+id).html(Number($('#collect_'+id).html())-1);
+ 				methodType = '-';
+ 			};
+ 			
+ 			$.post('${basePath}/course/updateNum/collect',{id:id,methodType:methodType},function(result){
+ 				
+ 			});
+ 	}
+	
+  	function showCourse(id,fileId){
+  		$.post('${basePath}/course/updateNum/read',{id:id},function(){
+	  		//location.href='${basePath}/plugins/pdfjs/web/viewer.html?file=${basePath}'+fileUrl;
+  			location.href='${basePath}/file/view/'+fileId;	
+  		});
+  	}
+  	
+  	
+  	
+  	
+  	var isDownload = false;
+  	function download(fileId,id){
+  		if (!isDownload) {
+  			isDownload = true;
+  			$('#download_'+id).html(Number($('#download_'+id).html())+1);
+  			$.post('${basePath}/course/updateNum/download',{id:id},function(){
+  				isDownload=false;
+  			});
+	  		window.open('${basePath}/file/download/'+fileId);
+  		}
+  		
+  	}
+  	
+  	function formatDesc(description){
+  			if (description.length>80) {
+  				return description.substr(0,60) + '...';
+  			} else {
+  				return description;
+  			}
+  	}
+  	
+  
+	
+    
+  </script>
+  <style>
+  
+  </style>

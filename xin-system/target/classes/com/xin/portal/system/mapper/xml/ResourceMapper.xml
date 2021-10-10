@@ -1,0 +1,780 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xin.portal.system.mapper.ResourceMapper" >
+  <resultMap id="BaseResultMap" type="com.xin.portal.system.model.Resource" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="link_url" property="linkUrl" jdbcType="VARCHAR" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="state" property="state" jdbcType="INTEGER" />
+    <result column="parent_id" property="parentId" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="icon_name" property="iconName" jdbcType="VARCHAR" />
+    <result column="sort" property="sort" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="link_type" property="linkType" jdbcType="INTEGER" />
+    <result column="lv" property="lv" jdbcType="INTEGER" />
+    <result column="introduce" property="introduce" jdbcType="VARCHAR" />
+    <result column="creater" property="creater" jdbcType="VARCHAR" />
+    <result column="resource_type1" property="resourceType1" jdbcType="VARCHAR" />
+    <result column="resource_type2" property="resourceType2" jdbcType="VARCHAR" />
+    <result column="project_id" property="projectId" jdbcType="VARCHAR" />
+    <result column="report_id" property="reportId" jdbcType="VARCHAR" />
+    <result column="type_name" property="typeName" jdbcType="VARCHAR" />
+    <result column="type_value" property="typeValue" jdbcType="INTEGER" />
+    <result column="hidden_sections" property="hiddenSections" jdbcType="VARCHAR" />
+    <result column="collect_num" property="collectNum" jdbcType="VARCHAR" />
+    <result column="is_mobile" property="isMobile" jdbcType="INTEGER" />
+    
+  </resultMap>
+  
+  
+  <select id="findRoleResourceList" resultType="com.xin.portal.system.model.Resource" >
+    SELECT DISTINCT
+	r.id AS id,
+	r.name,
+	r.link_url AS linkUrl,
+	r.CODE,
+	r.state,
+	r.parent_id AS parentId,
+	r.create_time AS createTime,
+	r.update_time AS updateTime,
+	r.icon_name AS iconName,
+	r.sort,
+	r.type,
+	r.link_type AS linkType,
+	r.tenant_id AS tenantId,
+	r.introduce,
+	r.lv,
+	r.creater,
+	r.project_id AS projectId,
+	r.report_id AS reportId,
+	r.type_name AS typeName,
+	r.type_value AS typeValue,
+	r.hidden_sections AS hiddenSections,
+	r.thumbnail,
+	r.thumbnail_id AS thumbnailId,
+	r.view_num AS viewNum,
+	r.download_num AS downloadNum,
+	r.collect_num AS collectNum,
+	r.comment_num AS commentNum,
+	r.path,
+	r.resource_type1 AS resourceType1,
+	r.resource_type2 AS resourceType2,
+	r.is_mobile as isMobile,
+	rr.id as roleResourceId
+FROM
+	t_resource r
+	left join t_role_resource rr on r.id = rr.resource_id
+	<if test="roleId!=null and roleId!=''">
+			and rr.role_id = #{roleId}
+	</if>
+	<where>
+		
+		<if test="resourceType1!=null and resourceType1!=''">
+			and r.resource_type1 = #{resourceType1}
+		</if>
+		<if test="resourceType2!=null and resourceType2!=''">
+			and r.resource_type2 = #{resourceType2}
+		</if>
+		<if test="name!=null and name!=''">
+			<bind name="pattern1" value="'%'+name+'%'"/>
+			and r.name like #{pattern1}
+		</if>
+	</where>
+  </select>
+  
+  <insert id="saveBatch" parameterType="java.util.List" useGeneratedKeys="true"   keyProperty="id"   databaseId="oracle">
+    	<selectKey keyProperty="id" resultType="Long" order="BEFORE">  
+            select SEQ_T_RESOURCE_ID.nextval as id from dual  
+        </selectKey>  
+    insert into t_resource (id,name, state, parent_id, create_time,sort, type, link_type,lv)
+      select SEQ_T_RESOURCE_ID.nextval,temp.* from (
+      <foreach close=")" collection="list" item="item" index="index" open="(" separator="union all" >
+      	select 
+      	#{item.name,jdbcType=VARCHAR} as name,
+      	1 as state,
+      	#{item.parentId,jdbcType=VARCHAR} as parent_id,
+      	sysdate as create_time,
+      	#{item.sort,jdbcType=INTEGER} as sort,
+      	2 as type,
+      	#{item.linkType,jdbcType=INTEGER} as link_type,
+      	#{item.lv,jdbcType=INTEGER} as lv
+  	  	from dual
+  	  </foreach> 
+  	  ) temp
+  </insert>
+  
+  <insert id="saveBatch" useGeneratedKeys="true" keyProperty="id" databaseId="mysql"  >
+    insert into t_resource (name, state, parent_id, create_time,sort, type, link_type,lv)
+    values 
+    <foreach collection="list" item="item" index="index" separator="," > 
+		(#{item.name,jdbcType=VARCHAR},1,#{item.parentId,jdbcType=VARCHAR},now(),#{item.sort,jdbcType=INTEGER},2,#{item.linkType,jdbcType=INTEGER},#{item.lv,jdbcType=INTEGER})
+	</foreach> 
+  </insert>
+  
+   <insert id="saveBatch" useGeneratedKeys="true" keyProperty="id"  >
+    insert into t_resource (name, state, parent_id, create_time,sort, type, link_type,lv)
+    values 
+    <foreach collection="list" item="item" index="index" separator="," > 
+		(#{item.name,jdbcType=VARCHAR},1,#{item.parentId,jdbcType=VARCHAR},getdate(),#{item.sort,jdbcType=INTEGER},2,#{item.linkType,jdbcType=INTEGER},#{item.lv,jdbcType=INTEGER})
+	</foreach> 
+  </insert>
+  
+  
+  
+	<select id="findSharResource" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.Resource" >
+		SELECT  t.id, t.name, t.link_url, t.code, t.state, t.parent_id, t.create_time, t.update_time, t.icon_name, 
+			    t.sort, t.type, t.link_type,t.introduce,t.lv,t.creater
+		FROM (
+			SELECT  r.id, r.name, r.link_url, r.code, r.state, r.parent_id, r.create_time, r.update_time, r.icon_name, 
+					r.sort, r.type, r.link_type,r.introduce,r.lv,r.creater,us.resource_type,us.resource_id
+		    FROM t_user_share us
+		    LEFT JOIN t_resource r ON us.resource_id = r.id
+			WHERE 1=1 AND us.user_id IS NULL OR us.user_id = #{creater} OR r.creater = #{creater}
+			) t
+		WHERE t.resource_type=1 AND t.id= #{id,jdbcType=INTEGER}
+		ORDER BY t.create_time
+	</select>
+  
+  
+  <update id="updateIntroduce" parameterType="map">
+    update t_resource
+    <trim prefix="set" suffixOverrides=",">
+	  	<if test="introduce!=null">introduce = #{introduce},</if>
+	  	update_time = now()
+	</trim>
+    where id = #{resourceId,jdbcType=INTEGER}
+  </update>
+  
+  <update id="updateNum">
+		update t_resource set ${column} = ${column} ${methodType} 1 where id = #{id,jdbcType=VARCHAR}
+  </update>
+  
+  
+  
+  
+  <resultMap id="ResourcePerm" type="com.xin.portal.system.model.ResourcePerm" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="resource_type1" property="resourceType1" jdbcType="VARCHAR" />
+    <result column="resource_type2" property="resourceType2" jdbcType="VARCHAR" />
+	
+	  <collection property="permissions"  ofType="com.xin.portal.system.model.Permission">
+            <id property="id" column="perm_id"/>
+            <result property="name" column="perm_name"/>
+            <result property="code" column="code"/>
+            <result property="rolePermissionId" column="rolePermissionId"/>
+      </collection>
+    
+  </resultMap>
+  
+  <sql id="selectSql">
+  	select r.id,r.resource_type1, r.resource_type2,r.name,p.id as perm_id,p.name as perm_name,p.code,rp.id as rolePermissionId ,ro.name as roleName
+	from t_resource r 
+	  left join t_permission p on r.resource_type1 = p.resource_type_id and  p.tenant_id = #{query.tenantId}
+	left join t_role_permission rp on r.id = rp.resource_id and p.id = rp.permission_id
+  	<if test="query.roleId!=null and query.roleId!=''">
+  		and rp.role_id = #{query.roleId}
+  	</if>
+  	left join t_role ro on rp.role_id = ro.id
+  </sql>
+  
+  <select id="findResourcePermList" resultMap="ResourcePerm" parameterType="com.xin.portal.system.model.ResourcePerm" databaseId="mysql">
+  	<include refid="selectSql"/>
+	where r.id in (
+		select t.* from 
+			(select re.id from 
+			(SELECT * FROM t_resource 
+			<where>
+				tenant_id=#{query.tenantId}
+				<if test="query.resourceType1!=null and query.resourceType1!=''">
+		  			and resource_type1 = #{query.resourceType1}
+		  		</if>
+		  		<if test="query.permissionCode!=null and query.permissionCode!='' and query.permissionCode =='noview'">
+			  		AND id NOT IN 
+			  		(SELECT resource_id FROM t_role_permission WHERE CODE = 'view'
+			  		<if test="query.roleId!=null and query.roleId!=''">
+			  		 	AND role_id = #{query.roleId}
+		  			</if>
+		  			)
+		  		</if>
+		  		<if test="query.permissionCode!=null and query.permissionCode!='' and query.permissionCode =='view'">
+			  		AND id IN 
+			  		(SELECT resource_id FROM t_role_permission WHERE CODE = 'view'
+			  		<if test="query.roleId!=null and query.roleId!=''">
+			  		 	AND role_id = #{query.roleId}
+		  			</if>
+		  			)
+		  		</if>
+		  		<if test="query.resourceType2!=null and query.resourceType2!=''">
+			  		and resource_type2 = #{query.resourceType2}
+			  	</if>
+			  	<if test="query.name!=null and query.name!=''">
+				  	and name like concat('%',#{query.name},'%')
+			  	</if>
+			</where>
+			ORDER BY sort ASC LIMIT #{firstIndex},#{pageSize}
+			) re
+			LEFT JOIN t_role_permission rpr ON rpr.resource_id = re.id 
+			<if test="query.roleId!=null and query.roleId!=''">
+				and rpr.role_id = #{query.roleId}
+			</if>
+		  	<if test="query.permissionCode!=null and query.permissionCode!='' and query.permissionCode =='view'">
+		  		AND rpr.code IS NOT NULL AND rpr.code = 'view'
+		  	</if>
+			) as t ) 
+	order by p.sort asc,r.sort asc,perm_id asc
+  </select>
+	
+  <select id="findResourcePermListCount" resultType="java.lang.Integer" parameterType="com.xin.portal.system.model.ResourcePerm" databaseId="mysql">
+		SELECT COUNT(1) FROM t_resource WHERE id IN(
+			SELECT re.id FROM t_resource re
+			LEFT JOIN t_role_permission rp ON rp.resource_id = re.id
+			<if test="query.roleId!=null and query.roleId!=''">
+				 AND rp.role_id = #{query.roleId}
+			</if>
+			WHERE re.tenant_id = #{query.tenantId}
+			<if test="query.resourceType1!=null and query.resourceType1!=''">
+		  		and re.resource_type1 = #{query.resourceType1}
+		  	</if>
+		  	<if test="query.permissionCode!=null and query.permissionCode!='' and query.permissionCode =='noview'">
+		  		AND  re.id NOT IN 
+		  		(SELECT resource_id FROM t_role_permission WHERE CODE = 'view'
+		  		<if test="query.roleId!=null and query.roleId!=''">
+		  		 	AND role_id = #{query.roleId}
+		  		 </if>
+		  		 )
+		  	</if>
+		  	<if test="query.permissionCode!=null and query.permissionCode!='' and query.permissionCode =='view'">
+		  		AND rp.code IS NOT NULL AND rp.code = 'view'
+		  	</if>
+		  	<if test="query.resourceType2!=null and query.resourceType2!=''">
+		  		and re.resource_type2 = #{query.resourceType2}
+		  	</if>
+		  	<if test="query.name!=null and query.name!=''">
+			  	<bind name="pattern1" value="'%'+query.name+'%'"/>
+				and re.name like #{pattern1}
+		  	</if>
+		)
+  </select>
+  
+  <select id="findResourcePermListCount" resultType="java.lang.Integer" parameterType="com.xin.portal.system.model.ResourcePerm">
+		SELECT COUNT(1) FROM t_resource WHERE id IN(
+			SELECT re.id FROM t_resource re
+			LEFT JOIN t_role_permission rp ON rp.resource_id = re.id
+			<if test="query.roleId!=null and query.roleId!=''">
+				 AND rp.role_id = #{query.roleId}
+			</if>
+			WHERE re.tenant_id = #{query.tenantId}
+			<if test="query.resourceType1!=null and query.resourceType1!=''">
+		  		and re.resource_type1 = #{query.resourceType1}
+		  	</if>
+		  	<if test="query.permissionCode!=null and query.permissionCode!='' and query.permissionCode =='noview'">
+		  		AND  re.id NOT IN 
+		  		(SELECT resource_id FROM t_role_permission WHERE CODE = 'view'
+		  		<if test="query.roleId!=null and query.roleId!=''">
+		  		 	AND role_id = #{query.roleId}
+		  		 </if>
+		  		 )
+		  	</if>
+		  	<if test="query.permissionCode!=null and query.permissionCode!='' and query.permissionCode =='view'">
+		  		AND rp.code IS NOT NULL AND rp.code = 'view'
+		  	</if>
+		  	<if test="query.resourceType2!=null and query.resourceType2!=''">
+		  		and re.resource_type2 = #{query.resourceType2}
+		  	</if>
+		  	<if test="query.name!=null and query.name!=''">
+			  	<bind name="pattern1" value="'%'+query.name+'%'"/>
+				and re.name like #{pattern1}
+		  	</if>
+		)
+  </select>
+  
+  <select id="findResourcePermList" resultMap="ResourcePerm" parameterType="com.xin.portal.system.model.ResourcePerm" databaseId="sqlserver2005">
+  	<include refid="selectSql"/>
+	where r.id in (
+		SELECT TOP ${pageSize} id FROM (
+			select row_number()over(order by ID) as rn,* 
+			from t_resource 
+			where tenant_id=#{query.tenantId}
+				<if test="query.resourceType1!=null and query.resourceType1!=''">
+			  		and resource_type1 = #{query.resourceType1}
+			  	</if>
+			  	<if test="query.resourceType2!=null and query.resourceType2!=''">
+			  		and resource_type2 = #{query.resourceType2}
+			  	</if>
+			  	<if test="query.name!=null and query.name!=''">
+			  		<bind name="pattern1" value="'%'+query.name+'%'"/>
+				  	and name like #{pattern1} 
+			  	</if>
+			) temTable 
+			where rn &gt;= ${firstIndex} and rn &lt; (${firstIndex}+${pageSize})
+	)
+		
+	order by r.id asc,perm_id asc
+  </select>
+  
+  <select id="findResourcePermList" resultMap="ResourcePerm" parameterType="com.xin.portal.system.model.ResourcePerm" databaseId="sqlserver">
+  	<include refid="selectSql"/>
+	where r.id in (
+		select t.* from 
+			(select id from t_resource where tenant_id=#{query.tenantId}
+			<if test="query.resourceType1!=null and query.resourceType1!=''">
+		  		and resource_type1 = #{query.resourceType1}
+		  	</if>
+		  	<if test="query.name!=null and query.name!=''">
+			  	<bind name="pattern1" value="'%'+query.name+'%'"/>
+				and name like #{pattern1} 
+		  	</if>
+		  	order by id asc
+			OFFSET #{firstIndex} ROW FETCH NEXT #{pageSize} rows only
+			) as t ) 
+	order by r.id asc,perm_id asc
+  </select>
+  
+  <select id="findResourcePermList" resultMap="ResourcePerm" parameterType="com.xin.portal.system.model.ResourcePerm" databaseId="oracle">
+  	<include refid="selectSql"/>
+	where r.id in (
+		select t.* from 
+			(select re.id from 
+			(SELECT *
+  				FROM (SELECT ROWNUM AS rowno, t.*
+          				FROM t_resource t
+	          			<where>
+							tenant_id=#{query.tenantId}
+							<if test="query.resourceType1!=null and query.resourceType1!=''">
+					  			and resource_type1 = #{query.resourceType1}
+					  		</if>
+					  		<if test="query.permissionCode!=null and query.permissionCode!='' and query.permissionCode =='noview'">
+						  		AND id NOT IN 
+						  		(SELECT resource_id FROM t_role_permission WHERE CODE = 'view'
+						  		<if test="query.roleId!=null and query.roleId!=''">
+						  		 	AND role_id = #{query.roleId}
+					  			</if>
+					  			)
+					  		</if>
+					  		<if test="query.permissionCode!=null and query.permissionCode!='' and query.permissionCode =='view'">
+						  		AND id IN 
+						  		(SELECT resource_id FROM t_role_permission WHERE CODE = 'view'
+						  		<if test="query.roleId!=null and query.roleId!=''">
+						  		 	AND role_id = #{query.roleId}
+					  			</if>
+					  			)
+					  		</if>
+					  		<if test="query.resourceType2!=null and query.resourceType2!=''">
+						  		and resource_type2 = #{query.resourceType2}
+						  	</if>
+						  	<if test="query.name!=null and query.name!=''">
+						  		<bind name="pattern1" value="'%'+query.name+'%'"/>
+							  	and name like #{pattern1}
+						  	</if>
+						  	and ROWNUM <![CDATA[ <= ]]> (#{firstIndex}/#{pageSize}+1)*#{pageSize}
+						</where>
+         			  	ORDER BY sort ASC) tr
+ 				WHERE tr.rowno <![CDATA[ > ]]> #{firstIndex}
+			) re
+			LEFT JOIN t_role_permission rpr ON rpr.resource_id = re.id 
+			<if test="query.roleId!=null and query.roleId!=''">
+				and rpr.role_id = #{query.roleId}
+			</if>
+		  	<if test="query.permissionCode!=null and query.permissionCode!='' and query.permissionCode =='view'">
+		  		AND rpr.code IS NOT NULL AND rpr.code = 'view'
+		  	</if>
+			) t ) 
+	order by p.sort asc,r.sort asc,perm_id asc
+  </select>
+  
+  <select id="selectPageByListId" resultType="com.xin.portal.system.model.Resource" >
+	SELECT t1.name,t1.link_url,t1.thumbnail,t1.sort,t1.viewNum,t1.downloadNum,t1.collectNum,t1.commentNum,t1.introduce,t1.resourceType1,t2.name as typeName,t1.id,t1.list_id as listId FROM 
+			(
+			SELECT a.id,
+	    	a.name ,
+	    	a.link_url,
+	    	a.status,
+	    	a.parent_id,
+	    	a.thumbnail,
+	    	b.sort,
+	    	a.type,
+	    	a.link_type,
+			a.state,
+			a.introduce,
+			a.view_num AS viewNum,
+			a.download_num AS downloadNum, 
+			a.collect_num AS collectNum,
+			a.comment_num AS commentNum,
+			b.list_id,
+			c.name AS resourceType1
+	    	FROM t_resource a 
+	    	RIGHT JOIN t_list_manage_resource b ON a.id = b.resource_id  
+	    	LEFT JOIN t_resource_type c ON a.resource_type2=c.id 
+	    	<where>
+				<if test="listId!=null and listId!=''">
+					and b.list_id in(${listId}) 
+				</if>
+				<if test="name!=null and name!=''">
+					<bind name="pattern1" value="'%'+name+'%'"/>
+				  	and a.name like #{pattern1} 
+				</if>
+			</where>
+	    	)t1
+	    	LEFT JOIN t_list_manage t2 ON  t1.list_id=t2.id
+	    	ORDER BY sort ASC
+  </select>
+  <select id="selectListResource" resultMap="BaseResultMap">
+  SELECT t.*, c.id AS collect FROM (SELECT a.*,b.sort AS mysort
+  	FROM t_resource a 
+  	JOIN  t_list_manage_resource b ON a.id = b.resource_id
+  	AND b.list_id=#{relate}
+  	) t
+  	LEFT JOIN (SELECT *  FROM t_user_collect uc WHERE uc.user_id = #{userId}) c ON t.id=c.resource_id 
+  	ORDER BY t.mysort,t.create_time DESC
+  </select>
+  
+  <select id="selectResource" resultMap="BaseResultMap">
+  	select a.*,b.id as collect 
+  	from t_resource a 
+  	LEFT JOIN (SELECT *  FROM t_user_collect uc 
+  	WHERE uc.user_id = #{userId}) b
+  	ON a.id=b.resource_id 
+  	where  a.id=#{relate}  
+  </select>
+  
+  <select id="selectOperationLog" resultMap="BaseResultMap" parameterType="java.lang.Integer" databaseId="mysql">
+  	SELECT t.id,t.create_time,t.name,t.creater FROM 
+		(
+		SELECT c.id,c.create_time,CONCAT("访问了",d.name) AS name,e.realname as creater FROM t_resource_log c LEFT JOIN t_resource d ON c.resource_id=d.id LEFT JOIN t_user_info e ON c.creater=e.id
+		) t 
+		ORDER BY t.create_time DESC 
+		<if test="num!=null and num!=0">
+			  	LIMIT 0,#{num}
+		</if>
+  </select>
+  <select id="selectOperationLog" resultMap="BaseResultMap" parameterType="java.lang.Integer" databaseId="oracle">
+  	select * from (
+  		SELECT t.id,t.create_time,t.name,t.creater FROM 
+		(SELECT a.id,a.create_time,a.operation as name,b.realname as creater FROM t_sys_log a LEFT JOIN t_user_info b ON a.creater =b.id
+		UNION 
+		SELECT c.id,c.create_time,CONCAT("访问了",d.name) AS name,e.realname as creater FROM t_resource_log c LEFT JOIN t_resource d ON c.resource_id=d.id LEFT JOIN t_user_info e ON c.creater=e.id
+		) t 
+		ORDER BY t.create_time DESC 
+		)
+		<if test="num!=null and num!=0">
+			  	where rownum&gt;0 and rownum&lt;=#{num}
+		</if>
+  </select>
+	<select id="findReourceLog" resultMap="BaseResultMap" parameterType="java.lang.String" databaseId="oracle">
+	select * from (
+	SELECT d.id,c.create_time,d.name,e.realname AS creater,e.id AS user_id,d.link_type
+	FROM t_resource_log c LEFT JOIN t_resource d ON c.resource_id=d.id LEFT JOIN t_user_info e ON c.creater=e.id
+	WHERE e.id=#{userId}
+	ORDER BY c.create_time DESC
+	)m
+	where rownum&gt;0 and rownum&lt;=100
+	</select>
+
+	<select id="findReourceLog" resultMap="BaseResultMap" parameterType="java.lang.String" databaseId="mysql">
+		SELECT d.id,c.create_time,d.name,e.realname AS creater,e.id AS user_id,d.link_type
+		FROM t_resource_log c LEFT JOIN t_resource d ON c.resource_id=d.id LEFT JOIN t_user_info e ON c.creater=e.id
+		WHERE e.id=#{userId}
+		ORDER BY c.create_time DESC
+		LIMIT 0,100
+	</select>
+
+
+  
+  <select id="selectByListId" resultMap="BaseResultMap" >
+  SELECT b.*,c.id AS collect FROM t_list_manage_resource a
+	JOIN t_resource b 
+		ON a.resource_id=b.id
+	LEFT JOIN 
+	    (SELECT 
+	      * 
+	    FROM
+	      t_user_collect uc 
+	    WHERE uc.tenant_id = '1' 
+	      AND uc.user_id = ${userId}) c 
+	    ON b.id = c.resource_id 
+			<where>
+				<if test="id!=null and id!=''">
+					a.list_id in(${id}) 
+				</if>
+			</where>
+	ORDER BY a.sort ASC,b.update_time desc
+  </select>
+  
+  <select id="selecthistorylog" resultMap="BaseResultMap" databaseId="mysql">
+	SELECT 
+	l.resource_id AS id,
+	MAX(l.create_time) AS create_time,
+	r.name
+	FROM t_resource_log l
+	LEFT JOIN t_resource r
+	ON r.id = l.resource_id
+	<where>
+		<if test="id!=null and id!=''">
+			l.creater = #{id}
+		</if>
+	</where>
+	GROUP BY r.id
+	ORDER BY l.create_time DESC
+	    <if test="num!=null and num!=0">
+			  	LIMIT 0,#{num}
+		</if>
+  </select>
+  
+  <insert id="insertResourceAllColunmForNewTenant" parameterType="com.xin.portal.system.model.Resource"
+  useGeneratedKeys="true" keyProperty="id" >
+  	INSERT INTO t_resource 
+ 	( id,
+	NAME,
+	link_url,
+	CODE,
+	status,
+	parent_id,
+	create_time,
+	update_time,
+	icon_name,
+	thumbnail_id,
+	thumbnail,
+	sort,
+	TYPE,
+	link_type,
+	state,
+	lv,
+	introduce,
+	creater,
+	project_id,
+	report_id,
+	type_name,
+	type_value,
+	hidden_sections,
+	view_num,
+	download_num,
+	collect_num,
+	comment_num,
+	path,
+	resource_type1,
+	resource_type2,
+	file_id,
+	is_mobile,
+	tenant_id )  VALUES 
+ ( #{id,jdbcType=VARCHAR},
+	#{name,jdbcType=VARCHAR},
+	#{linkUrl,jdbcType=VARCHAR},
+	#{code,jdbcType=VARCHAR},
+	null,
+	#{parentId,jdbcType=VARCHAR},
+	#{createTime,jdbcType=TIMESTAMP},
+	#{updateTime,jdbcType=TIMESTAMP},
+	#{iconName,jdbcType=VARCHAR},
+	#{thumbnailId,jdbcType=VARCHAR},
+	#{thumbnail,jdbcType=VARCHAR},
+	#{sort,jdbcType=INTEGER},
+	#{type,jdbcType=VARCHAR},
+	#{linkType,jdbcType=INTEGER},
+	#{state,jdbcType=INTEGER},
+	#{lv,jdbcType=INTEGER},
+	#{introduce,jdbcType=VARCHAR},
+	#{creater,jdbcType=VARCHAR},
+	#{projectId,jdbcType=VARCHAR},
+	#{reportId,jdbcType=VARCHAR},
+	#{typeName,jdbcType=VARCHAR},
+	#{typeValue,jdbcType=VARCHAR},
+	#{hiddenSections,jdbcType=VARCHAR},
+	#{viewNum,jdbcType=INTEGER},
+	#{downloadNum,jdbcType=INTEGER},
+	#{collectNum,jdbcType=INTEGER},
+	#{commentNum,jdbcType=INTEGER},
+	#{path,jdbcType=VARCHAR},
+	#{resourceType1,jdbcType=VARCHAR},
+	#{resourceType2,jdbcType=VARCHAR},
+	#{fileId,jdbcType=VARCHAR},
+	#{isMobile,jdbcType=INTEGER},
+	#{tenantId,jdbcType=VARCHAR} )
+  </insert>
+	
+	<select id="resourceData" resultType="java.lang.Integer">
+		       SELECT COUNT(r.name) FROM t_resource r
+	</select>
+
+	<select id="resourceActive" resultType="java.lang.Integer">
+        SELECT COUNT(r.name) FROM (SELECT
+         r.name
+          FROM t_resource_log rl
+          LEFT JOIN t_resource r ON rl.resource_id=r.id
+           WHERE MONTH(rl.create_time)=MONTH(NOW())
+           GROUP BY r.name) r
+	</select>
+	
+	<select id="resourceActive" resultType="java.lang.Integer" databaseId="oracle">
+	SELECT COUNT(r.name) FROM (SELECT
+         r.name
+          FROM t_resource_log rl
+          LEFT JOIN t_resource r ON rl.resource_id=r.id
+           WHERE to_char(rl.create_time,'yyyy-mm') = to_char(sysdate ,'yyyy-mm')
+           GROUP BY r.name) r
+    </select>
+	
+	<select id="chart" resultType="com.xin.portal.system.model.Resource">
+                 SELECT rt.name AS username, COUNT(rl.resource_id) AS state
+		FROM t_resource_type rt
+		LEFT JOIN   t_resource r ON rt.id=r.resource_type1
+		LEFT JOIN t_resource_log rl ON rl.resource_id=r.id
+		WHERE rt.parent_id='0' AND MONTH(rl.create_time)=MONTH(NOW())
+		GROUP BY rt.name
+	</select>
+	
+	<select id="chart" resultType="com.xin.portal.system.model.Resource" databaseId="oracle">
+             SELECT rt.name AS username, COUNT(rl.resource_id) AS state
+		FROM t_resource_type rt
+		LEFT JOIN   t_resource r ON rt.id=r.resource_type1
+		LEFT JOIN t_resource_log rl ON rl.resource_id=r.id
+		WHERE rt.parent_id='0' AND to_char(rl.create_time,'yyyy-mm')=to_char(sysdate  ,'yyyy-mm')
+		GROUP BY rt.name
+	</select>
+	
+	<select id="selectMenuResourceByPermission" resultType="com.xin.portal.system.model.Resource" parameterType="java.lang.String">
+		SELECT 
+			r.id,
+			r.name,
+			r.link_url AS linkUrl,
+			r.CODE,
+			r.state,
+			r.parent_id AS parentId,
+			r.create_time AS createTime,
+			r.update_time AS updateTime,
+			r.icon_name AS iconName,
+			r.sort,
+			r.type,
+			r.link_type AS linkType,
+			r.tenant_id AS tenantId,
+			r.introduce,
+			r.lv,
+			r.creater,
+			r.project_id AS projectId,
+			r.report_id AS reportId,
+			r.type_name AS typeName,
+			r.type_value AS typeValue,
+			r.hidden_sections AS hiddenSections,
+			r.thumbnail,
+			r.thumbnail_id AS thumbnailId,
+			r.view_num AS viewNum,
+			r.download_num AS downloadNum,
+			r.collect_num AS collectNum,
+			r.comment_num AS commentNum,
+			r.path,
+			r.resource_type1 AS resourceType1,
+			r.resource_type2 AS resourceType2,
+			r.is_mobile as isMobile,
+			uc.id AS collect
+		FROM t_resource r
+		LEFT JOIN (SELECT * FROM t_user_collect WHERE user_id = #{userId} AND resource_id IS NOT NULL) uc ON uc.resource_id = r.id
+		WHERE r.id IN (
+			SELECT m.resource_id FROM t_menu m
+			LEFT JOIN t_role_permission rp ON rp.resource_id = m.resource_id
+			LEFT JOIN t_role_user ru ON rp.role_id = ru.role_id
+			WHERE rp.code = 'view' AND ru.user_id = #{userId} AND m.parent_id = #{menuParentId} 	
+		)
+	</select>
+
+	<update id="updateEveryoneById" parameterType="java.lang.String">
+		update t_resource set everyone = #{value} where id = #{resourceId}
+	</update>
+	
+	<select id="selectUserPermissionResource" resultType="com.xin.portal.system.model.Resource" parameterType="java.lang.String">
+		SELECT r.id,
+			r.name,
+			r.link_url AS linkUrl,
+			r.CODE,
+			r.state,
+			r.parent_id AS parentId,
+			r.create_time AS createTime,
+			r.update_time AS updateTime,
+			r.icon_name AS iconName,
+			r.sort,
+			r.type,
+			r.link_type AS linkType,
+			r.tenant_id AS tenantId,
+			r.introduce,
+			r.lv,
+			r.creater,
+			r.project_id AS projectId,
+			r.report_id AS reportId,
+			r.type_name AS typeName,
+			r.type_value AS typeValue,
+			r.hidden_sections AS hiddenSections,
+			r.thumbnail,
+			r.thumbnail_id AS thumbnailId,
+			r.view_num AS viewNum,
+			r.download_num AS downloadNum,
+			r.collect_num AS collectNum,
+			r.comment_num AS commentNum,
+			r.path,
+			r.resource_type1 AS resourceType1,
+			r.resource_type2 AS resourceType2,
+			r.is_mobile as isMobile
+		FROM t_resource r
+		LEFT JOIN t_role_permission rp ON rp.resource_id = r.id
+		LEFT JOIN t_role_user ru ON rp.role_id = ru.role_id
+		<where>
+			rp.code = 'view'
+			and r.tenant_id = #{tenantId}
+			<if test="userId!=null and userId!=''">
+				and ru.user_id = #{userId}
+			</if>
+			<if test="resourceId!=null and resourceId!=''">
+				and r.id = #{resourceId}
+			</if>
+			<if test="roleId!=null and roleId!=''">
+				and rp.role_id = #{roleId}
+			</if>
+			<if test="isMobile!=null">
+				and r.is_mobile = #{isMobile}
+			</if>
+		</where>
+		ORDER BY r.create_time DESC
+	</select>
+
+	<select id="selectByIdWithTenantId" resultType="com.xin.portal.system.model.Resource">
+	SELECT 
+			r.id,
+			r.name,
+			r.link_url AS linkUrl,
+			r.CODE,
+			r.state,
+			r.parent_id AS parentId,
+			r.create_time AS createTime,
+			r.update_time AS updateTime,
+			r.icon_name AS iconName,
+			r.sort,
+			r.type,
+			r.link_type AS linkType,
+			r.tenant_id AS tenantId,
+			r.introduce,
+			r.lv,
+			r.creater,
+			r.project_id AS projectId,
+			r.report_id AS reportId,
+			r.type_name AS typeName,
+			r.type_value AS typeValue,
+			r.hidden_sections AS hiddenSections,
+			r.thumbnail,
+			r.thumbnail_id AS thumbnailId,
+			r.view_num AS viewNum,
+			r.download_num AS downloadNum,
+			r.collect_num AS collectNum,
+			r.comment_num AS commentNum,
+			r.path,
+			r.resource_type1 AS resourceType1,
+			r.resource_type2 AS resourceType2,
+			r.file_id AS fileId,
+			r.everyone,
+			r.is_mobile AS isMobile,
+			r.show_tools AS showTools,
+			r.auto_refreshtime AS autoRefreshtime
+		FROM t_resource r where r.id=#{resourceId} and r.tenant_id=#{tenantId}
+	</select>
+
+</mapper>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="keywords" content="">
+    <meta http-equiv="description" content="">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+     <#include "common/common.html" />
+     <#include "common/common_table.html" />
+  </head>
+  <body style="padding:10px;">
+  <div class="layui-container">
+		<div class="layui-row" >
+			<div class="layui-col-md12">
+			  	<div  id="query_div" id="toolbar" class="layui-form layui-form-pane" >
+			  	<button type="button" id="collectAdd" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon">&#xe615;</i> <@spring.message "action.collect"/></button>
+			  	</div>
+    		</div>
+	    </div>
+    </div>
+  </body>
+  <script>
+  	layui.use([ 'form','layer','upload'],function() {
+		var form = layui.form, 
+			layer = layui.layer;
+		
+		$('#collectAdd').on('click',function(data){
+			addCollect();
+		});
+  	
+	var resourceId='56';
+	var collectName = 'ooooo';
+	var collectType = 'report';
+		
+  	function addCollect() {
+  		var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message "addRole"/><@spring.message "action.collect"/>',
+			type:2,
+			content:'${basePath}/collect/addCollect',
+			area: ['80%', '600px'],
+            btn:['<@spring.message"action.ok"/>','<@spring.message"action.cancel"/>'],
+            success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+			},
+			yes:function(index,layero){
+				isSubmit = saveCollect(index,layero,isSubmit);
+    		},
+    		btn3: function(index, layero){
+    		    //return false 开启该代码可禁止点击该按钮关闭
+    		}
+		});
+    }
+  	
+  	function saveCollect(index,layero,isSubmit) {
+  		if(!isSubmit){
+  			isSubmit = true;
+	  		var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+			var data = iframeWin.getData();
+			if (data!=null) {
+		  		$.ajax({
+		            type: "POST",
+		            url:'${basePath}/collect/save',
+		            data:{id:data,resourceId:resourceId,collectName:collectName,collectType:collectType},//参数 parentId  collectName  resourceId collectType
+		            async: false,
+		            error: function(request) {
+		                parent.layer.msg('<@spring.message "result.addFail"/>！');
+		                isSubmit = false;
+		            },
+		            success: function(result) {
+		            	if(result.code==0){
+		            		parent.layer.close(index);
+							parent.layer.msg('<@spring.message "result.addSuccess"/>！');
+							reloadTable();
+		            	}else{
+		            		parent.layer.msg('<@spring.message "model.file_already_exists"/>！');
+		            		isSubmit = false;
+		            	}
+		            }
+		        });
+			}else{
+				isSubmit = false;
+			}
+  		}
+  		return isSubmit;
+  	}
+  	});
+  </script>
+</html>

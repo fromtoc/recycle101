@@ -1,0 +1,143 @@
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<style>
+	.fixed-table-body {
+    	height: auto;
+    }
+</style>
+<div id="body" class="layui-body" style="">
+	<div class="layui-tab" style="-webkit-box-sizing: initial;">
+	  <div id="toolbar" class="layui-form layui-form-pane" action="">
+	  	<label class="layui-form-label"><@spring.message 'list.name'/></label>
+	  	<div class="layui-inline">
+	  		<input type="hidden" id="resourceType1" name="resourceType1" value="${(query.resourceType1)!}">
+	  		<input type="hidden" id="resourceType2" name="resourceType2" value="${(query.resourceType2)!}">
+	        <input type="hidden" id="isMobile" name="isMobile" value="${(query.isMobile)!}">
+	        <input type="text" id="name" name="name" placeholder="<@spring.message 'tips.input'/>"
+			autocomplete="off" class="layui-input">
+		</div>
+           <div class="layui-inline">
+           	<button type="button" id="query" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/></button>
+	    </div>
+         </div>
+	  <div class="layui-tab-content">
+	    <div class="layui-tab-item layui-show">
+	    	<table id="table"
+	    		   data-toolbar="#toolbar"
+	    		   data-click-to-select="true"
+	    		   data-single-select="true"
+	               data-toggle="table"
+	               data-search="false"
+	               data-side-pagination="server"
+	               data-pagination="true"
+	               data-query-params-type=""
+	               data-url="${basePath}/resource/page"
+	               data-query-params="queryParams">
+	            <thead>
+	            <tr>
+	            	<th data-align="center"
+	                	data-halign="center"
+	                	data-checkbox="true"
+	                	data-width="1%"></th>
+	                <th data-align="center"
+	                	data-halign="center"
+	                	data-formatter="indexFormatter"
+	                	data-width="1%"><@spring.message 'list.serialNum'/></th>
+	                <th data-align="center" 
+	                	data-halign="center"
+	                	data-field="resourceType1"
+	                	data-formatter="typeFormatter"
+	                	><@spring.message 'resource.Resource_type'/></th>
+	                <th data-align="center" 
+	                	data-halign="center"
+	                	data-field="resourceType2"
+	                	data-formatter="typeFormatter"><@spring.message 'resource.Resource_classification'/></th>
+	                <th data-align="left" 
+	                	data-halign="center"
+	                	data-field="name" ><@spring.message 'list.name'/></th>
+	                <th data-align="left" 
+	                	data-halign="center"
+	                	data-field="isMobile"
+	                	data-formatter="isMobileFormatter">移动端资源</th>
+	                <th data-align="left" 
+	                	data-halign="center"
+	                	data-field="path" ><@spring.message 'resource.original_path'/></th>
+	                <th data-align="left" 
+	                	data-halign="center"
+	                	data-field="introduce" ><@spring.message 'resource.Detailed_description'/></th>
+	            
+	            </tr>
+	            </thead>
+	        </table>
+	    </div>
+	  </div>
+	</div>
+</div>
+<script>
+	var resourceTypes = '${resourceTypes!}';
+	var resourceTypeArr = [];
+	if (resourceTypes.length>0) {
+		var resourceTypeData = JSON.parse(resourceTypes);
+		$.each(resourceTypeData,function(i,rec){
+			resourceTypeArr[rec.id]=rec.name;
+		});
+	}
+	
+	function typeFormatter(value,row,index){
+		if (resourceTypeArr.length>0) {
+			return resourceTypeArr[value];
+		} else {
+			return value;
+		}
+	}
+	
+	function isMobileFormatter(value,row,index){
+		if (value == '1'){
+			return "是"
+		}else {
+			return "否"
+		}
+	}
+	
+	$('#query').on('click',function(){
+        	$('#table').bootstrapTable('refresh');
+    });
+    
+    
+	function init(parentNode,node) {
+		
+	}
+
+	function queryParams(params) {
+		var name = $('#name').val();
+		var resourceType2 = $('#resourceType2').val();
+		var resourceType1 = $('#resourceType1').val();
+		var isMobile = $('#isMobile').val();
+    	if (name!='') {
+			params.name = name;
+    	}
+		if (resourceType1!='') {
+			params.resourceType1 = resourceType1;
+
+		}
+    	if (resourceType2!='') {
+	    	params.resourceType2 = resourceType2;
+    	}
+    	if(isMobile != ''){
+    		params.isMobile = isMobile;
+    	}
+		return params;
+	}
+	
+	function getData() {
+		var records = $('#table').bootstrapTable('getSelections');
+		if (records!=null && records.length>0) {
+			return records;
+		
+		} else {
+			return null;
+		}
+	}
+	
+	
+</script>

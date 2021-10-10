@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+	<title>Picture Management</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
+	<#include "common/common.html" />
+	<script src="${basePath}/plugins/zui/zui.min.js"></script>
+	<script src="${basePath}/plugins/zui/zui.tabs.js"></script>
+	<link rel="stylesheet" href="${basePath}/css/module.css"> 
+	<link rel="stylesheet" href="${basePath}/plugins/zui/zui.min.css">
+	<style>      
+	.card:hover img {  
+	    transform: scale(1.8);
+	    transition: all 1s ease 0s;
+	}
+	.card a img{
+		height:150px;
+	}
+	.cards{
+		margin-top:20px
+	}
+	</style>
+</head>
+<body>
+    <div id="content" class="container-fluid">	
+		  <div class="layui-form-item">
+		    <div class="layui-inline">
+		      <input id="title" type="text" name="title" required  lay-verify="required" placeholder="<@spring.message 'banner.Please_enter_titile'/>" autocomplete="off" class="layui-input" style="width:400px;margin-top:10px">
+		    </div>
+		    <div class="layui-inline" style="margin-top:10px">
+		    	<button type="button" onclick="queryFile()" class="layui-btn layui-btn-sm ">
+				 	<@spring.message 'action.query'/>
+				</button>
+	     		<button type="button" id="btn_add_picture" class="layui-btn layui-btn-sm layui-btn-normal " onclick="btn_add_picture()">
+	     		  <i class="layui-icon ">&#xe67c;</i> <@spring.message 'banner.upload_pictures'/>
+				</button>
+				<button type="button" id="btn_deleteAll_picture" onclick="deletePicAll()" class="layui-btn layui-btn-sm layui-btn-danger ">
+				  <i class="layui-icon ">&#x1006;</i>  <@spring.message 'picture.delete_all'/>
+				</button>
+	    	</div>
+		  </div>
+    
+    	
+    
+    	        
+		<div class="cards">
+		<div class="item">
+		<#if (fileModel?? && fileModel?size>0)>
+		<#list fileModel as rec>
+		  <div id="${rec.id}" class="col-md-2 col-sm-3 col-lg-2 cardDiv">
+		  	  <div class="card">
+		   	  <a class="" href="javascript:;">
+		      	<#if (rec.filePathView)??>
+					<img src="${basePath}${rec.filePathView}"  alt="" ">
+				<#else>
+					<img src="${basePath}/images/chartBg.jpg"  alt="" onclick="cardListClick('${rec.id}','${rec.name}','${rec.linkType}')">
+				</#if>
+		      </a>
+		      <div class="caption"><@spring.message 'list.createTime'/>${(rec.createTime?string("yyyy-MM-dd HH:mm:ss"))!''}</div>
+		      <div class="card-heading"><strong>${rec.nameBefore}</strong></div>
+		      <div class="card-content text-muted">${rec.filePathView}</div>
+			  <div class="card-actions">
+			  	<button type="button" class="btn btn-danger" onclick="deleteFileById('${rec.id}')">
+			  		<i class="icon-trash"></i> 
+			  	</button>
+			  	<div class="pull-right text-danger">
+			  		<#if rec.businessType??&&rec.businessType=='banner'>
+			  			<span class="layui-badge layui-bg-orange"> <@spring.message 'picture.banner_type_upload'/></span>
+			  		<#elseif rec.businessType??&&rec.businessType=='thumbnail'>
+			  			<span class="layui-badge layui-bg-cyan"> <@spring.message 'picture.thumbnail_type_upload'/></span>
+			  		<#else>
+			  			<span class="layui-badge layui-bg-gray"> <@spring.message 'picture.common_type_upload'/></span>
+			  		</#if>
+			  	</div>
+			  </div>
+		   	</div>
+		  </div>
+		  </#list>
+		</#if>
+		</div>
+		</div>
+    </div>
+	<script>
+	layui.use([ 'form','layer'],function() {
+		var form = layui.form, 
+			layer = layui.layer;
+  	});
+	function queryFile(){
+		 var query=$("#title").val();
+			$.post('${basePath}/file/searchByName',{nameBefore:query},function(result){
+				$(".cardDiv").remove();
+				var html="";
+				for(var i=0;i<result.length;i++){
+					var businessType;
+					if(result[i].businessType=="banner"){
+						businessType="<span class='layui-badge layui-bg-orange'> <@spring.message 'picture.banner_type_upload'/></span>";
+					}else if(result[i].businessType=="thumbnail"){
+						businessType="<span class='layui-badge layui-bg-cyan'> <@spring.message 'picture.thumbnail_type_upload'/></span>";
+					}else{
+						businessType="<span class='layui-badge layui-bg-gray'> <@spring.message 'picture.common_type_upload'/></span>";
+					}
+					var mycard="<div id='"+result[i].createTime+"' class='col-md-2 col-sm-3 col-lg-2 cardDiv'><div class='card'> <a class='' href='javascript:;'>" +
+								"<img src='${basePath}"+result[i].filePathView+"' alt=''>" +
+								"</a><div class='caption'><@spring.message 'list.createTime'/>"+formatDate(result[i].createTime)+"</div>" +
+								"<div class='card-heading'><strong>"+result[i].nameBefore+"</strong></div>" +
+								"<div class='card-content text-muted'>"+result[i].filePathView+"</div><div class='card-actions'>" +
+								"<button type='button' class='btn btn-danger' onclick='deleteFileById(\""+result[i].id+"\")'><i class='icon-trash'></i>" +
+								"</button><div class='pull-right text-danger'>"+
+								businessType +
+								"</div></div></div></div>";
+					html+=mycard;
+					
+				}
+				$(".item").append(html);
+		    }); 
+	}
+	function deleteFileById(id){
+		layer.confirm('<@spring.message "comment.Confirm_delete"/>？',{title:'<@spring.message "action.info"/>',
+			btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+			yes: function(index, layero){
+		  		$.post('${basePath}/file/deleteFileById',{id:id},function(result){
+		    		if (result.code==0) {
+		    			layer.close(index);
+			    		parent.layer.msg("<@spring.message 'result.deleteSuccess'/>");
+			    		document.location.reload();
+		    		} else{
+		    			layer.close(index);
+			    		parent.layer.msg(result.msg+"<@spring.message 'result.inUse'/>");
+		    		}
+			    });
+			}
+	 	});
+	}
+	function deletePicAll(){
+		layer.confirm('<@spring.message 'picture.delete_all'/>？',{icon:5,title:'<@spring.message "action.info"/>',
+			btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+			yes: function(index, layero){
+		  		$.post('${basePath}/file/deletePicAll',function(result){
+		    		if (result.code==0) {
+		    			layer.close(index);
+			    		parent.layer.msg("<@spring.message 'result.deleteSuccess'/>");
+			    		document.location.reload();
+		    		} else{
+		    			layer.close(index);
+			    		parent.layer.msg(result.msg+"<@spring.message 'result.inUse'/>");
+		    		}
+			    });
+			}
+	 	});
+	}
+	function btn_add_picture(){
+		parent.layer.open({
+			title: "<@spring.message 'action.add'/>",
+			type:2,
+			content:'${basePath}/file/add',
+			area: ['70%', '80%'],
+			/* btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'], */
+			success: function(layero){
+			},
+			yes:function(index,layero){
+				document.location.reload();
+    		},
+    		end:function() {
+    	        location.reload();
+    	    }
+		});
+	}
+	//时间戳转换方法    date:时间戳数字
+	function formatDate(date) {
+	  var date = new Date(date);
+	  var YY = date.getFullYear() + '-';
+	  var MM = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+	  var DD = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate());
+	  var hh = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
+	  var mm = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
+	  var ss = (date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds());
+	  return YY + MM + DD +" "+hh + mm + ss;
+	}
+	
+	</script>  
+	
+</body>
+</html>

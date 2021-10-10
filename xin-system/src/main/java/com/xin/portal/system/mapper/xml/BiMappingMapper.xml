@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.BiMappingMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.BiMapping">
+        <id column="id" property="id" />
+        <result column="bi_user_id" property="biUserId" />
+        <result column="user_id" property="userId" />
+        <result column="type" property="type" />
+        <result column="tenant_id" property="tenantId" />
+        <result column="username" property="username" />
+        <result column="realname" property="realname" />
+        <result column="orgName" property="orgName" />
+        <result column="biUserName" property="biUserName" />
+        <result column="biServerName" property="biServerName" />
+        
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, bi_user_id, user_id, type, tenant_id
+    </sql>
+    
+    <select id="findList" parameterType="com.xin.portal.system.model.BiMapping" resultMap="BaseResultMap">
+    	select bm.id,
+			bm.user_id,
+			bm.bi_user_id,
+			u.username,
+			ui.realname,
+			o.name as orgName,
+			bu.username as biUserName,
+			bs.name as biServerName 
+			from t_bi_mapping bm 
+			left join t_user u on bm.user_id = u.id
+			left join t_user_info ui on u.id = ui.id
+			left join t_organization o on ui.org_id = o.id
+			left join t_bi_user bu on bm.bi_user_id = bu.id
+			left join t_bi_server bs on bu.bi_server_id = bs.id
+    	<where>
+    		<if test="biUserId!=null and biUserId!=''">
+    			and bm.bi_user_id = #{biUserId}
+    		</if>
+    		<if test="biServerId!=null and biServerId!=''">
+    			and bu.bi_server_id = #{biServerId}
+    		</if>
+    		<if test="username!=null and username!=''">
+    			and u.username like '%${username}%'
+    		</if>
+    		<if test="realname!=null and realname!=''">
+    			and ui.realname like '%${realname}%'
+    		</if>
+    	</where>
+    </select>
+    
+    <select id="selectBiUserBySysUserAndServerId" parameterType="com.xin.portal.system.model.BiMapping" resultType="com.xin.portal.system.model.BiMapping">
+    	SELECT
+    		m.id, 
+    		m.user_id,
+    		m.bi_user_id as biUserId,
+    		m.type,
+    		u.username as biUserName,
+    		u.password as biPassword
+    	FROM t_bi_mapping m 
+    	LEFT JOIN t_bi_user u ON u.id=m.bi_user_id
+		LEFT JOIN t_bi_server s ON s.id=u.bi_server_id
+		<where>
+			<if test="userId!=null and userId!=''">
+				AND m.user_id=#{userId}
+			</if>
+			<if test="biServerId!=null and biServerId!=''">
+				AND s.id = #{biServerId}
+			</if>
+		</where>
+    </select>
+    
+    <select id="selectBiUserBySysUserAndServerIdWithTenantId" parameterType="com.xin.portal.system.model.BiMapping" resultType="com.xin.portal.system.model.BiMapping">
+    	SELECT
+    		m.id, 
+    		m.user_id,
+    		m.bi_user_id as biUserId,
+    		m.type,
+    		u.username as biUserName,
+    		u.password as biPassword
+    	FROM t_bi_mapping m 
+    	LEFT JOIN t_bi_user u ON u.id=m.bi_user_id
+		LEFT JOIN t_bi_server s ON s.id=u.bi_server_id
+		<where>
+			m.tenant_id = #{tenantId}
+			<if test="userId!=null and userId!=''">
+				AND m.user_id=#{userId}
+			</if>
+			<if test="biServerId!=null and biServerId!=''">
+				AND s.id = #{biServerId}
+			</if>
+		</where>
+    </select>
+    
+    <select id="selectUserMappingCountByType" resultType="java.lang.Integer">
+    select count(*) from t_bi_mapping where type= #{type}
+    </select>
+
+</mapper>

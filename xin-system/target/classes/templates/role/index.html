@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<#include "common/common_ztree.html" />
+<script type="text/javascript">
+	var resourceTypeList = [];
+	layui.use([ 'form','element','treeSelect'],function() {
+		var form = layui.form, 
+			element = layui.element,
+			treeSelect = layui.treeSelect;;
+			$.ajax({
+				type:'GET',
+				url:'${basePath}/resourceType/list',
+				success:function(result){
+					var treeData = utils.toTreeData(result.list);
+					treeSelect.render({
+			            // 选择器
+			            elem: '#type',
+			            // 数据
+			            data: treeData[0].children,
+			            // 异步加载方式：get/post，默认get
+			            type: 'get',
+			            // 占位符
+			            placeholder: '<@spring.message "banner.Selection_of_resource_types"/>',
+			            // 是否开启搜索功能：true/false，默认false
+			            search: true,
+			            view:{
+			            	showIcon:false,
+			            },
+			            // 点击回调
+			            click: function(d){
+			                var parentNode = treeSelect.zTree('type').getNodeByParam('id',d.current.parentId);
+			                if (parentNode!=null) {
+			                	$('#resourceType1').val(parentNode.id);
+			                	$('#resourceType2').val(d.current.id);
+			                } else {
+			                	$('#resourceType1').val(d.current.id);
+			                	$('#resourceType2').val('');
+			                }
+			                $('#type').val(d.current.id);
+			            },
+			        });
+					
+				}
+			});
+			
+			function formatResourceType(value,row,index) {
+				if (value!=null && value!=''){
+					var node = treeSelect.zTree('type').getNodeByParam('id',value);
+	         		return node==null?value:node.name;
+					
+				}
+	            	//return zTree.getNodesByParam("id", value, null)[0].name;
+            }
+			
+			$('#query_resource').on('click',function(){
+				$('#table_resource').bootstrapTable('refresh', {url: '${basePath!}/resource/pageRoleResource'});
+			})
+			
+			$('.reset').on('click',function(){
+				$('#query_form')[0].reset();
+				$("input[type='hidden']").val("");
+			});
+			
+	})
+	
+	
+	function onCheck(row){
+		var roleNode = zTree.getSelectedNodes();
+    	if (roleNode.length>0 && roleNode[0].state==0 && treeNode.state==0) {
+    		parent.layer.msg('<@spring.message "tips.defaultNoChange"/>!');
+    		return ;
+    	}
+    	
+    	var checkRoleId = $('#checkedId').val();
+    	if (checkRoleId==null || checkRoleId=='') {
+    		return;
+    	}
+		
+		$.post('${basePath}/roleResource/save',{roleId:$('#checkedId').val(),resourceId:row.id},function(result){
+			if (result.code==0) {
+				parent.layer.msg('<@spring.message "result.saveSuccess"/>!');
+			}else {
+				parent.layer.msg('<@spring.message "result.saveFail"/>!');
+			}
+		});
+	}
+	
+	function onUncheck(row){
+		var checkRoleId = $('#checkedId').val();
+    	if (checkRoleId==null || checkRoleId=='') {
+    		return;
+    	}
+		$.post('${basePath}/roleResource/delete',{roleId:$('#checkedId').val(),resourceId:row.id},function(result){
+			if (result.code==0) {
+				parent.layer.msg('<@spring.message "result.saveSuccess"/>!');
+			}else {
+				parent.layer.msg('<@spring.message "result.saveFail"/>!');
+			}
+		});
+	}
+	
+	function onCheckAll(rows){
+		var roleNode = zTree.getSelectedNodes();
+    	if (roleNode.length>0 && roleNode[0].state==0 && treeNode.state==0) {
+    		layer.msg('<@spring.message "tips.defaultNoChange"/>!');
+    		return ;
+    	}
+    	
+    	var checkRoleId = $('#checkedId').val();
+    	if (checkRoleId==null || checkRoleId=='') {
+    		return;
+    	}
+    	var rows = $('#table_resource').bootstrapTable('getSelections');
+		var ids = '';
+		if (rows!=null && rows!=undefined) {
+			for(var i=0;i<rows.length;i++) {
+				if (i==0) {
+					ids = rows[i].id ;
+				}else {
+					ids += ',' + rows[i].id ;
+				}
+			}
+		}		
+
+		var param = {
+			roleId:checkRoleId,
+			ids:ids
+		};
+		$.post('${basePath}/roleResource/saveByRoleId',param,function(result){
+			if (result.code==0) {
+				layer.msg('<@spring.message "result.saveSuccess"/>!');
+			}else {
+				layer.msg('<@spring.message "result.saveFail"/>!');
+			}
+		},'json');
+	}
+	
+	function onUncheckAll(rows){
+		var roleNode = zTree.getSelectedNodes();
+    	if (roleNode.length>0 && roleNode[0].state==0 && treeNode.state==0) {
+    		layer.msg('<@spring.message "tips.defaultNoChange"/>!');
+    		return ;
+    	}
+    	var checkRoleId = $('#checkedId').val();
+    	if (checkRoleId==null || checkRoleId=='') {
+    		return;
+    	}
+    	var rows = $('#table_resource').bootstrapTable('getSelections');
+		var ids = '';
+		if (rows!=null && rows!=undefined) {
+			for(var i=0;i<rows.length;i++) {
+				if (i==0) {
+					ids = rows[i].id ;
+				}else {
+					ids += ',' + rows[i].id ;
+				}
+			}
+		}		
+
+		var param = {
+			roleId:checkRoleId,
+			ids:ids
+		};
+		$.post('${basePath}/roleResource/deleteBatch',param,function(result){
+			if (result.code==0) {
+				layer.msg('<@spring.message "result.saveSuccess"/>!');
+			}else {
+				layer.msg('<@spring.message "result.saveFail"/>!');
+			}
+		},'json');
+	}
+
+	//是否是测试用户
+	var isTestRole = "<@shiro.hasRole name='role_test' >true</@shiro.hasRole>" ? true : false;
+
+ 	var zTree,resourceTree,orgTree;
+    var roleTreeSetting = {
+        check: {
+            enable: false
+        },
+        view: {
+        	<@shiro.lacksRole name='role_test' >
+        	addHoverDom:addHoverDom,
+        	removeHoverDom:removeHoverDom,
+			</@shiro.lacksRole>
+            dblClickExpand: false,
+            showLine: true,
+            selectedMulti: false
+        },
+        data: {
+            simpleData: {
+                enable:true,
+                idKey: "id",
+                pIdKey: "parentId",
+                rootPId: "0"
+            }
+        },
+        async: {
+			enable: true,
+			contentType: "application/json",
+			url: "${basePath}/role/list",
+		},
+        callback: {
+            onClick: zTreeOnClick,
+            onAsyncSuccess: onRoleTreeAsyncSuccess
+        }
+    };
+    
+    
+    function onRoleTreeAsyncSuccess(){
+    	zTree.expandAll(true);
+    }
+    
+    
+    function onResourceCheck(event,treeId,treeNode){
+    	var roleNode = zTree.getSelectedNodes();
+    	if (roleNode.length>0 && roleNode[0].state==0 && treeNode.state==0) {
+    		layer.msg('<@spring.message "tips.defaultNoChange"/>!');
+    		return ;
+    	}
+    	var nodes = resourceTree.getCheckedNodes(true);
+    	var checkRoleId = $('#checkedId').val();
+    	if (checkRoleId==null || checkRoleId=='') {
+    		return;
+    	}
+		var ids = '';
+		if (nodes!=null && nodes!=undefined) {
+			for(var i=0;i<nodes.length;i++) {
+				if (i==0) {
+					ids = nodes[i].id ;
+				}else {
+					ids += ',' + nodes[i].id ;
+				}
+			}
+		}
+		
+		var node = treeNode.getParentNode();
+		var allNode = '';//获取当前选中节点
+		getParentNodes(node,allNode);
+		var param = {
+			roleId:$('#checkedId').val(),
+			ids:ids
+		};
+		$.post('${basePath}/roleResource/saveByRoleId',param,function(result){
+			if (result.code==0) {
+				layer.msg('<@spring.message "result.saveSuccess"/>!');
+			}else {
+				layer.msg('<@spring.message "result.saveFail"/>!');
+			}
+		},'json');
+    }
+    
+    function onAsyncSuccessOrg(){
+    	$.fn.zTree.getZTreeObj("orgTree").expandAll(true);
+    }
+    
+    function onCheckOrg(event,treeId,treeNode){
+    	var nodes = orgTree.getCheckedNodes(true);
+    	var checkRoleId = $('#checkedId').val();
+    	if (checkRoleId==null || checkRoleId=='') {
+    		return;
+    	}
+		var ids = '';
+		if (nodes!=null && nodes!=undefined) {
+			for(var i=0;i<nodes.length;i++) {
+				if (i==0) {
+					ids = nodes[i].id ;
+				}else {
+					ids += ',' + nodes[i].id ;
+				}
+			}
+		}
+		
+		var node = treeNode.getParentNode();
+		var allNode = '';//获取当前选中节点
+		getParentNodes(node,allNode);
+		var param = {
+			roleId:$('#checkedId').val(),
+			ids:ids
+		};
+		$.post('${basePath}/roleOrganization/saveByRoleId',param,function(result){
+			if (result.code==0) {
+				layer.msg('<@spring.message "result.saveSuccess"/>!');
+			}else {
+				layer.msg('<@spring.message "result.saveFail"/>!');
+			}
+		},'json');
+    }
+    
+    var parentResIds='';
+	function getParentNodes(node,allNode){
+		if(node!=null){
+			if (allNode=='') {
+				allNode = node['id'];
+			}else {
+				allNode += ","+node['id'];
+			}
+			curNode = node.getParentNode();
+			getParentNodes(curNode,allNode);
+		}else{
+			//根节点
+			parentResIds = allNode;
+		}
+	}
+	
+	
+    
+    
+    $(function(){
+        $.fn.zTree.init($("#tree"), roleTreeSetting);
+        zTree = $.fn.zTree.getZTreeObj("tree");
+        $('#add_user').on('click',function(e){
+        	addUser();
+		});
+        
+        
+        /* 
+        $.fn.zTree.init($("#resourceTree"), resourceTreeSetting);
+        resourceTree = $.fn.zTree.getZTreeObj("resourceTree");
+        
+        $.fn.zTree.init($("#orgTree"), orgTreeSetting);
+        orgTree = $.fn.zTree.getZTreeObj("orgTree"); */
+    });
+    
+    function addHoverDom(treeId, treeNode) {
+    	//不可编辑
+    	if (treeNode.state==0 && treeNode.parentId!=0) {
+    		return false;
+    	}
+        var sObj = $("#" + treeNode.tId + "_span");
+        if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0 || $("#editBtn_"+treeNode.tId).length>0) return;
+        
+        var addStr = "";
+        /*if (treeNode.parentId==0){*/
+        	addStr = "<span class='button add' id='addBtn_" + treeNode.tId
+            + "' title="+"<@spring.message 'action.add'/>"+" onfocus='this.blur();'></span>";
+       /* }*/
+		if (treeNode.parentId!=0){
+        	addStr += "<span class='button edit' id='editBtn_" + treeNode.tId + "' title="+"<@spring.message 'action.edit'/>"+"  onfocus='this.blur();'></span>";
+        }
+        if (!treeNode.isParent && treeNode.parentId!=0) {
+	        addStr += "<span class='button remove' id='removeBtn_" + treeNode.tId + "' title="+"<@spring.message 'action.delete'/>"+" onfocus='this.blur();'></span>";
+        }
+        sObj.after(addStr);
+        var btn = $("#addBtn_"+treeNode.tId);
+        if (btn) btn.bind("click", function(){
+        	add(treeNode);
+            return false;
+        });
+        
+        var btn = $("#editBtn_"+treeNode.tId);
+        if (btn) btn.bind("click", function(){
+        	edit(treeNode);
+            return false;
+        });
+        
+        
+        
+        var btnDel = $("#removeBtn_"+treeNode.tId);
+        if (btnDel) btnDel.bind("click", function(){
+            del(treeNode);
+            return false;
+        });
+        
+    };
+    
+    function add(treeNode) {
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message "role.Add_roles"/>',
+			type:2,
+			content:'${basePath}/role/add',
+			area: ['600px', '500px'],
+			btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				iframeWin.init(treeNode);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if(data!=null){
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath}/role/save',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message "result.addFail"/>！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									layer.msg('<@spring.message "result.addSuccess"/>！');
+									zTree.addNodes(treeNode, result.data);
+			                	}else if(result.code==-2){
+			                		parent.layer.msg('<@spring.message "role.haveRoleCode"/>');
+			                		isSubmit = false;
+			                	}else {
+			                		parent.layer.msg('<@spring.message "result.addFail"/>!');
+			        				isSubmit = false;
+			        			}
+			                }
+			            });
+					}else{
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+    
+    function del(treeNode) {
+    	//var zTree = $.fn.zTree.getZTreeObj("tree");
+        if (treeNode.isParent) {
+         	l.alert('<@spring.message"tips.treeDelete"/>!');
+         	return;
+        } else {
+         	layer.confirm('<@spring.message"role.Delete_roles"/>【'+treeNode.name+'】？', {title:'<@spring.message "action.info"/>',
+                btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+				yes: function(index, layero){
+			  		$.post('${basePath}/role/delete',{id:treeNode.id},function(result){
+			    		if (result.code==0) {
+			    			zTree.removeNode(treeNode);
+			    		}
+			    		layer.close(index);
+			    		if(result.code==0){
+			    			parent.layer.msg('<@spring.message "result.deleteSuccess"/>！');
+	                	}else {
+	                		parent.layer.msg('<@spring.message "result.deleteFail"/>！');
+	        			}
+				    });
+				}
+         	});
+        }
+    }
+    
+    function edit(treeNode) {
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message"role.Edit_role"/>',
+			type:2,
+			content:'${basePath}/role/edit?id='+treeNode.id,
+			area: ['600px', '500px'],
+            btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				var parentNodes = zTree.getNodesByParam("id", treeNode.parentId, null);
+				iframeWin.init(parentNodes[0]);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if(data!=null){
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath}/role/update',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message"result.updateFail"/>！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									layer.msg('<@spring.message"result.updateSuccess"/>！');
+									treeNode.name = result.data.name;
+									treeNode.title = result.data.name;
+									treeNode.type = result.data.type;
+									treeNode.sort = result.data.sort;
+									zTree.updateNode(treeNode);
+			                	} else if(result.code==-2){
+			                		parent.layer.msg('<@spring.message "role.haveRoleCode"/>');
+			                		isSubmit = false;
+			                	} else {
+			                		parent.layer.msg('<@spring.message"result.updateFail"/>！');
+			        				isSubmit = false;
+			        			}
+			                }
+			            });
+					}else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+
+    function removeHoverDom(treeId, treeNode) {
+        $("#addBtn_"+treeNode.tId).unbind().remove();
+        $("#removeBtn_"+treeNode.tId).unbind().remove();
+        $("#editBtn_"+treeNode.tId).unbind().remove();
+    };
+    
+    var checkedResourceIds = '';
+    function zTreeOnClick(event, treeId, treeNode) {
+    	$('#checkedId').val(treeNode.id);
+    	$('#table').bootstrapTable('refresh');
+    	$('#table_resource').bootstrapTable('refresh', {url: '${basePath!}/resource/pageRoleResource'});
+    	/* $.post('${basePath}/roleResource/findIds',{roleId:treeNode.id},function(ids){
+        	checkedResourceIds = ids;
+        	var resourceTree = $.fn.zTree.getZTreeObj("resourceTree");
+        	resourceTree.checkAllNodes(false);
+        	if (ids!=null && ids.length>0) {
+        		if (ids.length > 0) {
+        			for (var i=0;i<ids.length;i++ ) {
+        				var node = resourceTree.getNodeByParam("id", ids[i]);
+        				resourceTree.checkNode(node, true, true);
+        			}
+        		}
+        	}
+        },'json');
+    	$.post('${basePath}/roleOrganization/findIds',{roleId:treeNode.id},function(ids){
+        	checkedOrgIds = ids;
+        	orgTree.checkAllNodes(false);
+        	if (ids!=null && ids.length>0) {
+        		if (ids.length > 0) {
+        			for (var i=0;i<ids.length;i++ ) {
+        				var node = orgTree.getNodeByParam("id", ids[i]);
+        				orgTree.checkNode(node, true, true);
+        			}
+        		}
+        	}
+        },'json'); */
+    	
+    }
+    
+    function queryParams(params) {
+    	//params.roleId = -1;
+    	if (zTree!=null) {
+    		var nodes = zTree.getSelectedNodes();
+	    	if (nodes!=null && nodes.length!=0 && nodes[0].id!=1) {
+				//params.roleId = nodes[0].id;
+				var roleIdIn = new Array();
+				if (nodes[0].children!=null&&nodes[0].children.length>0) {
+					roleIdIn.push("'"+nodes[0].id+"'");
+					for (var i=0;i<nodes[0].children.length;i++) {
+						roleIdIn.push("'"+nodes[0].children[i].id+"'");
+					}
+					params.roleIdIn = roleIdIn.join(',');
+				}else {
+					params.roleId = nodes[0].id;
+				}
+	    	}
+    	}
+		return params;
+	}
+    
+    function queryResourceParams(params) {
+    	params.roleId = -1;
+    	if (zTree!=null) {
+    		var nodes = zTree.getSelectedNodes();
+	    	if (nodes!=null && nodes.length!=0 && nodes[0].id!=1) {
+				params.roleId = nodes[0].id;
+	    	}
+    	}
+    	var resourceType1 = $('#resourceType1').val();
+    	if (resourceType1!=null && resourceType1!='') {
+    		params.resourceType1=resourceType1;
+    	}
+    	var resourceType2 = $('#resourceType2').val();
+    	if (resourceType2!=null && resourceType2!='') {
+    		params.resourceType2=resourceType2;
+    	}
+    	var name = $('#name').val();
+    	if (name!=null && name!='') {
+    		params.name=name;
+    	}
+		return params;
+	}
+    
+    
+	
+	
+	function opeFormatter(value,row,index){
+    	if (isTestRole) {
+    		return '<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled " disabledtitle='+'<@spring.message "action.disable"/>'+'><i class="layui-icon layui-icon-more"></i> </button>'
+					;
+		}
+		var v = '<div class="layui-btn-group layui-btn-group-xs">'
+								+'<button class="layui-btn layui-btn-normal layui-btn-sm "  title='+'<@spring.message "action.remove"/>'+' onclick="javascript:remove(\'%\',\''+row.username+'\')"><i class="layui-icon">&#xe640;</i> </button>'
+                        		+'</div>'; 
+        return v.replace(new RegExp(/(%)/g),row.id);
+	}
+	
+	
+	function addUser(){
+		var nodes = zTree.getSelectedNodes();
+		if (nodes==null || nodes.length==0 || nodes[0].id==1) {
+			layer.msg('<@spring.message"role.Please_select_the_specific_role_to_operate_again"/>！');
+			return;
+		}
+		var isSubmit = false;
+		parent.layer.open({
+			title: '<@spring.message "role.Add_user"/>',
+			type:2,
+			content:'${basePath}/userInfo/select/role?id='+nodes[0].id,
+			//area: ['800px', '700px'],
+			area: ['60%', '75%'],
+            maxmin: true,
+            btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				iframeWin.init(nodes[0]);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data==null) {
+						parent.layer.msg("<@spring.message'tips.choosUser'/>！");
+						isSubmit = false;
+						return;
+					}
+	   		    	$.ajax({
+		                type: "POST",
+		                url:'${basePath}/roleUser/saveRoleUsersByRoleId',
+		                data:data,
+		                async: false,
+		                error: function(request) {
+		                    parent.layer.msg('<@spring.message "result.addFail"/>！');
+		                    isSubmit = false;
+		                },
+		                success: function(result) {
+		                	if(result.code==0){
+		                		parent.layer.close(index);
+								layer.msg('<@spring.message "result.addSuccess"/>！');
+								$('#table').bootstrapTable('refresh', null);
+		                	}else{
+		                		parent.layer.msg('<@spring.message "result.addFail"/>！');
+			                    isSubmit = false;
+		                	}
+		                }
+		            });
+				}
+    		}
+		});
+	}
+	
+	function remove(id,username) {
+		var nodes = zTree.getSelectedNodes();
+		var name = '';
+    	if (nodes!=null && nodes.length!=0 && nodes[0].id!=1) { 
+			name = nodes[0].name;
+    	} else {
+    		layer.msg('<@spring.message"role.Please_select_the_specific_role_to_operate_again"/>！');
+    		return;
+    	}
+		layer.confirm('<@spring.message"role.from"/>【'+name+'】<@spring.message"role.Remove_users_from_roles"/>【'+username+'】？',  {title:'<@spring.message "action.info"/>',
+            btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+			yes: function(index, layero){
+		  		$.post('${basePath}/roleUser/delete',{userId:id,roleId:nodes[0].id},function(result){
+		  			$('#table').bootstrapTable('refresh', null);
+		    		layer.close(index);
+		    		if(result.code==0){
+		    			parent.layer.msg('<@spring.message "result.deleteSuccess"/>！');
+                	}else{
+                		parent.layer.msg('<@spring.message "result.deleteFail"/>！');
+                	}
+			    });
+			}
+       	});
+	}
+	function initTree(){
+		//var treeHeight = $('body').height()-$('.mycontent').offset().top;
+		var treeHeight = document.documentElement.clientHeight-$('.ztree').offset().top-10;
+		$('#tree').height(treeHeight);
+	}
+</script>
+
+</head>
+
+<body onload="initTree()">
+	<div class="layui-fluid">
+		<@system.path id="${menuId!}"></@system.path>
+		<div class="layui-row">
+		    <div class="layui-col-md2">
+		    	<ul id="tree" class="ztree" style="overflow:auto;"></ul>
+			</div>
+		    <div class="layui-col-md10">
+		    	<div class="layui-tab" style="-webkit-box-sizing: initial;">
+					  <ul class="layui-tab-title layui-tab-brief">
+					    <li class="layui-this" style="-webkit-box-sizing: initial;"><@spring.message 'role.personMaint'/></li>
+					    <li style="-webkit-box-sizing: initial;" class="layui-hide"><@spring.message 'role.Resource_permissions'/></li>
+					  </ul>
+					  <input type="hidden" id="checkedId" />
+					  <div id="toolbar">
+			            <div class="layui-inline">
+					        <button type="button" id="add_user" class="layui-btn layui-btn-sm layui-btn-normal  <@shiro.hasRole name='role_test' >layui-btn-disabled</@shiro.hasRole>" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole>><i class="layui-icon">&#xe654;</i> <@spring.message 'addRole'/></button>
+					    </div>
+			          </div>
+					  <div class="layui-tab-content">
+					    <div class="layui-tab-item layui-show">
+					    	<table id="table"
+					    		   data-toolbar="#toolbar"
+					               data-toggle="table"
+					               data-search="false"
+					               data-side-pagination="server"
+					               data-pagination="true"
+					               data-query-params-type=""
+					               data-url="${basePath}/userInfo/pageRoleUser"
+					               data-query-params="queryParams" class="table-condensed">
+					            <thead>
+					            <tr>
+					            	<th data-align="center"
+               							data-valign="middle"
+					                	data-halign="center"
+					                	data-formatter="opeFormatter" ><@spring.message 'action.action'/></th>
+					                <th data-align="center"
+					                	data-halign="center"
+               							data-valign="middle"
+					                	data-formatter="indexFormatter"
+					                	data-width="1%"><@spring.message 'list.serialNum'/></th>
+					                <th data-align="left" 
+					                	data-halign="center"
+               							data-valign="middle"
+					                	data-field="username"><@spring.message 'BIUser.account'/></th>
+					                <th data-align="left" 
+					                	data-halign="center"
+               							data-valign="middle"
+					                	data-field="roleName" ><@spring.message 'role.role'/></th>
+					                <th data-align="left" 
+					                	data-halign="center"
+               							data-valign="middle"
+					                	data-field="realname" ><@spring.message 'role.Real_name'/></th>
+					                <th data-align="left"
+					                	data-halign="center"
+               							data-valign="middle"
+					                	data-field="orgName"><@spring.message 'role.Organization'/></th>
+					            </tr>
+					            </thead>
+					        </table>
+					    </div>
+					  </div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- <div class="layui-layout layui-layout-admin bg-white">
+		<div class="layui-side layui-bg-black bg-white " style="width:250px;top:20px !important">
+			<div class="layui-side-scroll">
+				<ul id="tree" class="ztree" style="overflow:auto;"></ul>
+			</div>
+		</div>
+		<div id="body" class="layui-body" style="margin-left:250px;top:0px !important">
+			
+		</div>
+	</div> -->
+</body>
+
+</html>

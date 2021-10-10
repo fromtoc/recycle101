@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<meta http-equiv="keywords" content="">
+<meta http-equiv="description" content="">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="${basePath!}/plugins/layui-2.4.3/css/layui.css">
+<link rel="stylesheet" href="${basePath!}/css/system_layui.css">
+
+</head>
+<body>
+  	<div id="tools_roleModule">
+  		<button type="button" id="btn_add_roleModule" title="add"
+			  class="layui-btn layui-btn-sm">
+			<i class="layui-icon layui-icon-add-1"></i>
+		</button>
+	</div>
+	<div id="query_form">
+	</div>
+	<table id="table" lay-filter="table">
+
+	</table>
+</body>
+<script type="text/javascript" src="${basePath!}/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="${basePath!}/plugins/layui-2.4.3/layui.js"></script>
+<script type="text/html" id="operateBar">
+	<div class="layui-btn-group" >
+		<button type="button" class="layui-btn layui-btn-sm " title="edit" lay-event="edit"><i class="layui-icon layui-icon-edit"></i></button>
+		<button type="button" class="layui-btn layui-btn-sm " title="delete" lay-event="delete" ><i class="layui-icon layui-icon-delete"></i></button>
+	</div>
+</script>
+<script>
+  	var tableRoleModule;
+  	layui.use(['form', 'layer', 'table'],function() {
+		var form = layui.form, 
+			layer = layui.layer,
+			table = layui.table;
+		
+		$('#btn_add_roleModule').on('click',function(data){
+			addRoleModule();
+		});
+		
+		tableRoleModule = table.render({
+			elem : '#table',
+			url : '${basePath!}/roleModule/page',
+			page : true,
+			request : {
+				pageName : 'pageNumber', //页码的参数名称，默认：page
+				limitName : 'pageSize' //每页数据量的参数名，默认：limit
+			},
+			parseData : function(res) { //res 即为原始返回的数据
+				return {
+					"code" : res.code, //解析接口状态
+					"msg" : res.msg, //解析提示文本
+					"count" : res.total, //解析数据长度
+					"data" : res.rows //解析数据列表
+				};
+			},
+			cols : [[ {
+				type : 'numbers',
+				title : '<@spring.message "list.serialNum"/>'
+			}, 
+            {
+            	field: 'roleId',
+                title: 'roleId',
+                align : 'center',
+				style : 'text-align:center',
+				sort : true
+            },
+            {
+            	field: 'moduleId',
+                title: 'moduleId',
+                align : 'center',
+				style : 'text-align:center',
+				sort : true
+            },
+			{
+				fixed : 'right',
+				title : '<@spring.message "action.action"/>',
+				align : 'center',
+				toolbar : '#operateBar'
+			} 
+			] ],
+		});
+
+		//监听工具条
+		table.on('tool(table)',function(obj) {
+			var data = obj.data;
+			if (obj.event === 'delete') {
+				deleteRoleModule(data);
+			} else if (obj.event === 'edit') {
+				editRoleModule(data)
+			}
+		});
+	  	
+  	});
+  	
+  	function addRoleModule() {
+  		var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message "resource.new-build"/>',
+			type:2,
+			content:'${basePath!}/roleModule/add',
+			area: ['60%', '70%'],
+            btn : ['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>' ],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init();
+			},
+			yes:function(index,layero){
+				if (!isSubmit) {
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+						$.ajax({
+			                type: "POST",
+			                url: '${basePath!}/roleModule/save',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message "result.addFail"/>！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('<@spring.message "result.addSuccess"/>！');
+									reloadTable();
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+					} else {
+						isSubmit = false;
+					}
+				}
+   		    	
+    		}
+		});
+    }
+    
+    
+    function editRoleModule(record) {
+    	parent.layer.open({
+			title: '<@spring.message "action.edit"/>',
+			type:2,
+			content:'${basePath!}/roleModule/edit',
+			area: ['60%', '70%'],
+            btn : ['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>' ],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init(record);
+			},
+			yes:function(index,layero){
+    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				var data = iframeWin.getData();
+				if (data!=null) {
+	   		    	$.ajax({
+		                type: "POST",
+		                url:'${basePath!}/roleModule/update',
+		                data:data,
+		                error: function(request) {
+		                    parent.layer.msg('<@spring.message "result.updateFail">！');
+		                },
+		                success: function(result) {
+		                	if(result.code==0){
+		                		parent.layer.close(index);
+								parent.layer.msg('<@spring.message "result.updateSuccess"/>！');
+								reloadTable();
+		                	}else{
+		                		parent.layer.msg(result.msg);
+		                	}
+		                	
+		                }
+		            });
+	            }
+    		}
+		});
+    }
+    
+    function deleteRoleModule(record) {
+    	parent.layer.confirm('<@spring.message "comment.Confirm_delete"/>？',{
+            btn : ['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>' ],
+            yes : function(index,layero) {
+				$.ajax({
+						url : '${basePath!}/roleModule/delete/'+ record.id,
+						type : 'DELETE',
+						success : function(result) {
+							if (result.code == 0) {
+								parent.layer.msg('<@spring.message "result.deleteSuccess"/>');
+								reloadTable();
+							} else {
+								parent.layer.msg('<@spring.message "result.deleteFail"/>');
+							}
+							layer.close(index);
+						}
+				});
+			}
+		});
+    }
+    
+    function reloadTable() {
+    	tableRoleModule.reload({page : {curr : 1}});
+    }
+</script>
+</html>

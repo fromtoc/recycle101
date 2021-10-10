@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.UserWxWorkMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.UserWxWork">
+        <id column="id" property="id" />
+        <result column="open_id" property="openId" />
+        <result column="user_id" property="userId" />
+        <result column="app_id" property="appId" />
+        <result column="agent_id" property="agentId" />
+        <result column="wx_userid" property="wxUserid" />
+        <result column="name" property="name" />
+        <result column="mobile" property="mobile" />
+        <result column="department" property="department" />
+        <result column="sort" property="sort" />
+        <result column="position" property="position" />
+        <result column="gender" property="gender" />
+        <result column="email" property="email" />
+        <result column="is_leader_in_dept" property="isLeaderInDept" />
+        <result column="avatar" property="avatar" />
+        <result column="telephone" property="telephone" />
+        <result column="is_enable" property="isEnable" />
+        <result column="alias" property="alias" />
+        <result column="extattr" property="extattr" />
+        <result column="status" property="status" />
+        <result column="qr_code" property="qrCode" />
+        <result column="external_profile" property="externalProfile" />
+        <result column="external_position" property="externalPosition" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, app_id, open_id, user_id, app_id, agent_id, wx_userid, name, mobile, department, sort, position, gender, email, is_leader_in_dept, avatar, telephone, t.is_enable, alias, extattr, t.status, qr_code, external_profile, external_position, create_time
+    </sql>
+
+    <select id="findListForPush" resultMap="BaseResultMap" parameterType="java.lang.String">
+      select id, open_id, user_id, app_id, agent_id, wx_userid, name, mobile, department, sort, t.position, gender, email, is_leader_in_dept, avatar, telephone, t.is_enable, alias, extattr, t.status, qr_code, external_profile, external_position, create_time
+        from t_user_wx_work t
+      <where>
+          <if test="ids!=null and ids!=''">
+            and t.user_id in 
+            <foreach item="id" collection='ids.split("\\|")' open="(" separator="," close=")">
+				#{id}
+			</foreach>
+          </if>
+          <if test="roleIds!=null and roleIds!=''">
+              and t.user_id in (select user_id from t_role_user where role_id in 
+			<foreach item="roleId" collection='roleIds.split("\\|")' open="(" separator="," close=")">
+				#{roleId}
+			</foreach>
+			  )
+          </if>
+          <if test="orgIds!=null and orgIds!=''">
+	          and t.user_id in (select user_id from t_user_organization where org_id in
+			<foreach item="orgId" collection='orgIds.split("\\|")' open="(" separator="," close=")">
+				#{orgId}
+			</foreach>
+              )
+          </if>
+		  <if test="appId!=null and appId!=''">
+		  	  and t.app_id = #{appId} 
+		  </if>
+		  <if test="agentId!=null and agentId!=''">
+		  	  and t.agent_id = #{agentId} 
+		  </if>
+      </where>
+    </select>
+    
+    <select id="findUserRelationApp" resultType="com.xin.portal.system.model.UserWxWork" parameterType="com.xin.portal.system.model.UserWxWork">
+        SELECT 
+		  uww.id as id,
+		  uww.user_id as userId,
+		  uww.app_id as appId,
+		  uww.agent_id as agentId,
+		  uww.wx_userid as wxUserid,
+		  uww.mobile as mobile,
+		  tap.app_type as appType,
+		  tap.app_name as appName,
+		  tap.logo_url as logoUrl
+		FROM
+		  t_user_wx_work uww 
+		  LEFT JOIN t_third_app_param tap 
+		    ON tap.id = uww.app_id 
+		<where>
+			<if test="userId!=null and userId!=''">
+				AND uww.user_id = #{userId}
+			</if>
+			<if test="tenantId!=null and tenantId!=''">
+			 	AND uww.tenant_id = #{tenantId}
+			</if>
+		</where>
+		GROUP BY uww.user_id, tap.app_type 
+    </select>
+    
+    <select id="findUserRelationApp" resultType="com.xin.portal.system.model.UserWxWork" parameterType="com.xin.portal.system.model.UserWxWork" databaseId="oracle">
+       select 
+	       max(uww.id)        as id,
+	       uww.user_id   as userid,
+	       max(uww.app_id)    as appid,
+	       max(uww.agent_id)  as agentid,
+	       max(uww.wx_userid) as wxuserid,
+	       max(uww.mobile)    as mobile,
+	       tap.app_type  as apptype,
+	       max(tap.app_name)  as appname,
+	       max(tap.logo_url)  as logourl
+		FROM
+		  t_user_wx_work uww 
+		  LEFT JOIN t_third_app_param tap 
+		    ON tap.id = uww.app_id 
+		<where>
+			<if test="userId!=null and userId!=''">
+				AND uww.user_id = #{userId}
+			</if>
+			<if test="tenantId!=null and tenantId!=''">
+			 	AND uww.tenant_id = #{tenantId}
+			</if>
+		</where>
+		GROUP BY uww.user_id, tap.app_type 
+    </select>
+    
+    <select id="selectPageByParam" resultType="com.xin.portal.system.model.UserWxWork" parameterType="com.xin.portal.system.model.UserWxWork">
+        SELECT uww.id,
+			uww.user_id AS userId, 
+			uww.app_id AS appId, 
+			uww.agent_id AS agentId, 
+			uww.wx_userid AS wxUserid, 
+			uww.name, 
+			uww.mobile, 
+			uww.department, 
+			uww.position, 
+			uww.gender, 
+			uww.email,
+			uww.is_leader_in_dept AS isLeaderInDept,
+			uww.avatar,
+			uww.telephone,
+			uww.is_enable AS isEnable,
+			uww.status,
+			uww.qr_code AS qrCode,
+			uww.create_time AS createTime,
+			u.username,
+			ui.realname
+		FROM t_user_wx_work uww
+		LEFT JOIN t_user u ON u.id = uww.user_id
+		LEFT JOIN t_user_info ui ON ui.id = uww.user_id
+		<where>
+			uww.app_id = #{appId} and uww.tenant_id = #{tenantId}
+			<if test="username!=null and username!=''">
+				<bind name="pattern1" value="'%'+username+'%'"/>
+				and u.username like #{pattern1}
+			</if>
+			<if test="realname!=null and realname!=''">
+				<bind name="pattern2" value="'%'+realname+'%'"/>
+				and ui.realname like #{pattern2}
+			</if>
+		</where>
+    </select>
+
+</mapper>

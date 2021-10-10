@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>个人主页</title>
+    <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+    <meta http-equiv="description" content="this is my page">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<#include "common/common.html" />
+	<#include "common/common_table.html" />
+	<style>
+		body{
+			background-image: linear-gradient(to right, #F0FAFE,#E0EAF7);
+		}
+		.container-fluid{
+			padding-left: 0px;
+		}
+		.content{
+			/*border: 2px solid #ddd;*/
+			min-height:300px;
+			border-radius:6px;
+			margin: 0 0 0 30px;
+		}
+		.hot{
+			background: url(${basePath}/images/hotDiv.jpg) ;
+			background-size: 91% 100%;
+			box-shadow: 
+			0px 3px 0px 0px #D4DDE4,   /*上边阴影  红色*/
+               -4px 0px 0px 0px red,   /*左边阴影  绿色*/
+               5px 0px 0px 0px #D4DDE4,    /*右边阴影  蓝色*/
+               0px 5px 0px 0px #D4DDE4;    /*下边阴影  黄色*/
+		}
+		.history{
+			background: url(${basePath}/images/historyDiv.jpg) ;
+			background-size: 91% 100%;
+			box-shadow: 
+			0px 3px 0px 0px #D4DDE4,   /*上边阴影  红色*/
+               -4px 0px 0px 0px #FDB221,   /*左边阴影  绿色*/
+               5px 0px 0px 0px #D4DDE4,    /*右边阴影  蓝色*/
+               0px 5px 0px 0px #D4DDE4;    /*下边阴影  黄色*/
+               margin-left: 30px;
+		}
+		.collect{
+			background: url(${basePath}/images/collectDiv.jpg) ;
+			background-size: 91% 100%;
+			box-shadow: 
+			0px 3px 0px 0px #D4DDE4,   /*上边阴影  红色*/
+               -4px 0px 0px 0px #1296DB,   /*左边阴影  绿色*/
+               5px 0px 0px 0px #D4DDE4,    /*右边阴影  蓝色*/
+               0px 5px 0px 0px #D4DDE4;    /*下边阴影  黄色*/
+		}
+		.notice{
+			background: url(${basePath}/images/noticeDiv.jpg) ;
+			background-size: 91% 100%;
+			box-shadow: 
+			0px 3px 0px 0px #D4DDE4,   /*上边阴影  红色*/
+               -4px 0px 0px 0px #2B7B48,   /*左边阴影  绿色*/
+               5px 0px 0px 0px #D4DDE4,    /*右边阴影  蓝色*/
+               0px 5px 0px 0px #D4DDE4;    /*下边阴影  黄色*/
+               margin-left: 30px;
+		}
+		.row{
+			margin-top: 25px;
+			width: 100%;
+			margin-right: 0px !important;
+    		margin-left: 0px !important;
+		}
+		tr>td{
+			padding: 2px;
+			margin-top: 5px;
+			cursor: pointer;
+		}
+		tr > td:first-child {
+			width: 70%;
+		    white-space: nowrap;
+		    overflow: hidden;
+		    word-break: keep-all;
+		    text-overflow: ellipsis;
+		}
+		tr > td:nth-child(2){
+			width: 30%;
+		}
+		.table-hover>tbody>tr:hover>td{
+			background-color:#E3F0F9;	
+		}
+	</style>
+	</head>
+	<body>
+		<div class="container-fluid">
+		  <div class="row">
+			  <div class="col-md-5 content hot" >
+			  	<div style="height: 50px;width: 100%;border-bottom: 2px solid #EAF4FA;line-height: 50px;">
+			  		<img src="${basePath}/images/hotTitle.png" style="width:40px;height: 40px;"/>
+			  		<label style="font-weight: bold;margin-left: 10px;">最热资源（Top 10）</label>
+			  	</div>
+			  	<table id="perHot" class="_table table-hover" style="margin-top: 5px;;width:100%;table-layout: fixed;word-break:break-all;word-wrap: break-word;">
+					<tbody>
+						<#if (personHotResource?? && personHotResource?size>0)>
+						<#list personHotResource as perHot>
+							<tr onclick="perHotFun('${perHot.resourceId}','${perHot.resourName}')">
+								<td>
+									${perHot.resourName}
+								</td>
+								<td align="right" >
+									<font size="2" color="#C2C2C2">${perHot.num}</font>
+								</td>
+							</tr>
+						</#list>
+						</#if>
+					</tbody>
+				</table>
+			  </div>
+	  		  <div class="col-md-5 content history">
+	  		  	<div style="height: 50px;width: 100%;border-bottom: 2px solid #EAF4FA;line-height: 50px;">
+			  		<img src="${basePath}/images/historyTitle.png" style="width:40px;height: 40px;"/>
+			  		<label style="font-weight: bold;margin-left: 10px;">最近访问</label>
+			  	</div>
+			  	<table id="perHistory" class="_table table-hover" style="margin-top: 5px;width:100%;table-layout: fixed;word-break:break-all;word-wrap: break-word;">
+					<tbody>
+						<#if (personHistory?? && personHistory?size>0)>
+						<#list personHistory as perHistory>
+							<tr onclick="perHistoryFun('${perHistory.resourceId}','${perHistory.resourName}')">
+								<td>
+									${perHistory.resourName}
+								</td>
+								<td align="right" >
+									<font size="2" color="#C2C2C2">${perHistory.createTime?string("yyyy-MM-dd HH:mm:ss")}</font>
+								</td>
+							</tr>
+						</#list>
+						</#if>
+					</tbody>
+				</table>
+	  		  </div>
+  		  </div>
+  		  <div class="row" >
+			  <div class="col-md-5 content collect">
+			  	<div style="height: 50px;width: 100%;border-bottom: 2px solid #EAF4FA;line-height: 50px;">
+			  		<img src="${basePath}/images/collectTitle.png" style="width:40px;height: 40px;"/>
+			  		<label style="font-weight: bold;margin-left: 10px;">我的收藏</label>
+			  		<a href="javascript:perMoreCollect();"  style="float: right;margin-right: 5px;font-size: 16px;cursor: pointer;" >more</a>
+			  	</div>
+			  	<table id="perCollect" class="_table table-hover" style="margin-top: 5px;width:100%;table-layout: fixed;word-break:break-all;word-wrap: break-word;">
+					<tbody>
+						<#if (personCollect?? && personCollect?size>0)>
+						<#list personCollect as perCollect>
+							<tr onclick="perCollectFun('${perCollect.resourceId}','${perCollect.name}')">
+								<td>
+									${perCollect.name}
+								</td>
+								<td align="right" >
+									<font size="2" color="#C2C2C2">${perCollect.colCreateTime?string("yyyy-MM-dd HH:mm:ss")}</font>
+								</td>
+							</tr>
+						</#list>
+						</#if>
+					</tbody>
+				</table>
+			  </div>
+	  		  <div class="col-md-5 content notice">
+	  		  	<div style="height: 50px;width: 100%;border-bottom: 2px solid #EAF4FA;line-height: 50px;">
+			  		<img src="${basePath}/images/noticeTitle.png" style="width:40px;height: 40px;"/>
+			  		<label style="font-weight: bold;margin-left: 10px;">系统公告</label>
+			  		<a href="javascript:perMoreNotice();" style="float: right;margin-right: 5px;font-size: 16px;cursor: pointer;" >more</a>
+			  	</div>
+			  	<table id="perUnread" class="_table table-hover" style="margin-top: 5px;width:100%;table-layout: fixed;word-break:break-all;word-wrap: break-word;">
+					<tbody>
+						<#if (personUnreadNotice?? && personUnreadNotice?size>0)>
+						<#list personUnreadNotice as perUnread>
+							<tr onclick="perUnreadNoticeFun('${perUnread.id}','${perUnread.type}')">
+								<td>
+									${perUnread.title}
+								</td>
+								<td align="right" >
+									<font size="2" color="#C2C2C2">${perUnread.publishTime?string("yyyy-MM-dd HH:mm:ss")}</font>
+								</td>
+							</tr>
+						</#list>
+						</#if>
+						<#if (personReadNotice?? && personReadNotice?size>0)>
+						<#list personReadNotice as perRead>
+							<tr onclick="perUnreadNoticeFun('${perRead.id}','${perRead.type}')">
+								<td>
+									${perRead.title}
+								</td>
+								<td align="right" >
+									<font size="2" color="#C2C2C2">${perRead.publishTime?string("yyyy-MM-dd HH:mm:ss")}</font>
+								</td>
+							</tr>
+						</#list>
+						</#if>
+					</tbody>
+				</table>
+	  		  </div>
+  		  </div>
+		</div>
+	<script>
+	var sysTheme = '${sysTheme!}';
+	$(window).on('resize', function() {
+		 var $content = $('.content');
+		 var $container = $('.container-fluid');
+		 var $tr = $('._table tr>td');
+		 var tableHeight = ($(this).height()-75)/2-66
+		 $container.height(($(this).height()));
+		 $content.height(($(this).height()-75)/2);
+		 $tr.height(tableHeight/12);
+	}).resize();
+	
+	function perMoreCollect(){
+		if(parent.openTabUrl){
+			parent.openTabUrl("${basePath!}/collect/index");
+		}else{
+			window.open("${basePath!}/collect/index");
+		}
+	}
+	
+	function perMoreNotice(){
+		parent.moreNotice();
+	}
+	
+	function perHotFun(resourceId,resourceName){
+		openResource(resourceId,resourceName);
+	}
+	
+	function perHistoryFun(resourceId,resourceName){
+		openResource(resourceId,resourceName);
+	}
+	
+	function perCollectFun(resourceId,resourceName){
+		openResource(resourceId,resourceName);
+	}
+	
+	function perUnreadNoticeFun(id,type){
+		parent.noticeInfo(id,type);
+	}
+	
+	function perreadNoticeFun(id,type){
+		parent.noticeInfo(id,type);
+	}
+	
+	function openResource(resourceId,resourceName){
+		if(sysTheme=="theme_left_shen"){
+			if(parent.openTab){
+				parent.openTab(resourceId,resourceName,"${basePath!}/resource/view/"+resourceId,"iframe")
+			}else{
+				window.open("${basePath!}/resource/view/"+resourceId);
+			}
+		}else if(sysTheme=="theme_left_black"){
+			if(parent.openTab){
+				parent.openTab(resourceId,resourceName,"${basePath!}/resource/view/"+resourceId,"iframe")
+			}else{
+				window.open("${basePath!}/resource/view/"+resourceId);
+			}
+		}else if(sysTheme=="theme_left_admin"){
+			if(parent.openTab){
+				parent.openTab(resourceId,resourceName,"${basePath!}/resource/view/"+resourceId,"iframe");
+			}else{
+				window.open("${basePath!}/resource/view/"+resourceId);
+			}
+		}else{
+			 if(parent.refreshIframe){
+				parent.refreshIframe("${basePath!}/resource/view/"+resourceId);
+			}else{
+				window.open("${basePath!}/resource/view/"+resourceId);	
+			}
+		}
+	}
+	</script>
+	</body>
+</html>

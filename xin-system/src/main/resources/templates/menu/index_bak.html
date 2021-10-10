@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<#include "common/common_ztree.html" />
+<link rel="stylesheet" href="${basePath}/plugins/font-awesome-4.7.0/css/font-awesome.css" media="all">
+<style>
+	.layui-treeSelect .ztree li span.button.ico_open{display:none;}.layui-treeSelect .ztree li span.button.ico_close{display:none;}.layui-treeSelect .ztree li span.button.ico_docu:before{content:"\e621";}.layui-treeSelect .ztree li span.button.bottom_close:before,.layui-treeSelect .ztree li span.button.center_close:before,.layui-treeSelect .ztree li span.button.roots_close:before,.layui-treeSelect .ztree li span.button.root_close:before{content:"\e623";}.layui-treeSelect .ztree li span.button.bottom_open:before,.layui-treeSelect .ztree li span.button.roots_open:before,.layui-treeSelect .ztree li span.button.center_open:before,.layui-treeSelect .ztree li span.button.root_open:before{content:"\e625";}
+</style>
+<script type="text/javascript">
+
+	/* var dictInputType = '${inputType!}';
+	var dictInputTypeArr = [];
+	var dictInputTypeData = JSON.parse(dictInputType);
+	$.each(dictInputTypeData,function(i,rec){
+		dictInputTypeArr[rec.itemValue]=rec.itemName;
+	}); */
+
+	layui.use([ 'form','element','treeSelect'],function() {
+		var form = layui.form, 
+			element = layui.element,
+			treeSelect = layui.treeSelect;
+		$.ajax({
+			type:'GET',
+			url:'${basePath}/resourceType/list',
+			success:function(result){
+				var treeData = utils.toTreeData(result.list);
+				treeSelect.render({
+		            // 选择器
+		            elem: '#type',
+		            // 数据
+		            data: treeData[0].children,
+		            // 异步加载方式：get/post，默认get
+		            type: 'get',
+		            // 占位符
+		            placeholder: '选择资源类型',
+		            // 是否开启搜索功能：true/false，默认false
+		            search: true,
+		            view:{
+		            	showIcon:false,
+		            },
+		            // 点击回调
+		            click: function(d){
+		                var parentNode = treeSelect.zTree('type').getNodeByParam('id',d.current.parentId);
+		                if (parentNode!=null) {
+		                	$('#resourceType1').val(parentNode.id);
+		                	$('#resourceType2').val(d.current.id);
+			                showSelResource(parentNode,d.current);
+		                } else {
+		                	$('#resourceType1').val(d.current.id);
+		                	showSelResource(d.current);
+		                }
+		                $('#type').val(d.current.id);
+		            },
+		            // 加载完成后的回调函数
+		            success: function (d) {
+		            }
+		        });
+				
+			}
+		});
+		
+		//$('#parentId').val(menuData[0].id);
+		var isSubmit = false;
+		form.on('submit(btn_submit)', function(data){
+		    if(!isSubmit){
+				isSubmit = true;
+				if (data!=null) {
+	   		    	$.ajax({
+		                type: "POST",
+		                url:'${basePath}/menu/saveOrUpdate',
+		                data:data.field,
+		                error: function(request) {
+		                    parent.layer.msg('添加失败！');
+		                    isSubmit = false;
+		                },
+		                success: function(result) {
+		                	if(result.code==0){
+								parent.layer.msg(result.msg);
+								/* var id = $('#id').val();
+								if (id==null||id=='') {
+									var nodes = zTree.getSelectedNodes();
+									if (nodes.length==0) {
+										zTree.addNodes(null, result.data);
+									} else {
+										zTree.addNodes(nodes[0], result.data);
+									}
+									zTree.reAsyncChildNodes(nodes[0], "refresh");
+								} else {
+									var node = zTree.getNodeByParam('id',id);
+									//zTree.reAsyncChildNodes(node, "refresh");
+									node.name=result.data.name;
+									node.parentId=result.data.parentId;
+									node.resourceType1=result.data.resourceType1;
+									node.resourceType2=result.data.resourceType2;
+									node.type=result.data.type;
+									zTree.updateNode(node);
+								}
+								initMenuSel(); */
+								zTree.reAsyncChildNodes(null, "refresh");
+		                	}else{
+		                		parent.layer.msg(result.msg);
+		                	}
+		                	isSubmit = false;
+		                }
+		            });
+				}else {
+					isSubmit = false;
+				}
+		    return false;
+		  }
+		    return false;
+		});
+		
+		
+		var iconSelContent = $('#iconSelDialog').html();
+		$('#icon_sel').on('click',function(){
+			 var indexSel = layer.open({
+				title: '选择图标',
+				type:1,
+			    content: iconSelContent,
+			    area: ['70%', '80%'],
+			    success: function(layero){
+					$('.site-doc-icon li').on('click',function(e){
+						$('#icon').val($(this).find('.doc-icon-code').text());
+						//$('#icon_img').text($(this).find('.doc-icon-code').text());
+						$('#icon_img').addClass($(this).find('.doc-icon-code').text());
+						$('#iconName').val($(this).find('.doc-icon-code').text());
+						layer.close(indexSel);
+					    
+					})
+				}
+			}); 
+		});
+		
+		
+		
+		
+		function showSelResource(pNode,node){
+			parent.layer.open({
+				title: '选择资源',
+				type:2,
+				content:'${basePath}/resource/select?resourceType1='+pNode.id+'&resourceType2='+(node==null?'':node.id),
+				area: ['70%', '80%'],
+				btn:['确定','取消'],
+				success: function(layero){
+					var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+					iframeWin.init(pNode,node);
+				},
+				yes:function(index,layero){
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null&&data.length>0) {
+		   		    	$('#resourceId').val(data[0].id);
+		   		    	$('#name').val(data[0].name);
+		   		    	$('#linkUrl').val(data[0].linkUrl);
+		   		    	$('#introduce').val(data[0].introduce);
+		   		    	parent.layer.close(index);
+					}
+	    		}
+			});
+		}
+		
+		
+	 	
+	    
+	    var roleTreeSetting = {
+	        check: {
+	            enable: true,
+	            chkStyle: "checkbox",
+	            chkboxType: { "Y": "ps", "N": "ps" }
+	        },
+	        view: {
+	            dblClickExpand: false,
+	            showLine: true,
+	            selectedMulti: false
+	        },
+	        data: {
+	            simpleData: {
+	                enable:true,
+	                idKey: "id",
+	                pIdKey: "parentId",
+	            }
+	        },
+	        async: {
+				enable: true,
+				contentType: "application/json",
+				url: "${basePath}/role/list",
+			},
+			callback: {
+				onAsyncSuccess: onAsyncSuccess,
+				onCheck:onRoleCheck
+			}
+	    };
+	    
+	   
+
+	    
+	    
+	    
+	    
+	    function queryParams(params) {
+	    	params.resourceId = 0;
+	    	if (zTree!=null) {
+	    	var nodes = zTree.getSelectedNodes();
+		    	if (nodes!=null) {
+					params.resourceId = nodes[0].id;
+		    	}
+	    	}
+			return params;
+		}
+	    
+	    function opeFormatter(value,row,index){
+			var v = '<div class="layui-btn-group layui-btn-group-xs">'
+	                        		+'<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="javascript:editPermission(\'%\')"><i class="icon-info-sign"></i> 编辑</button>'
+	                        		+'<button class="layui-btn layui-btn-normal layui-btn-sm" onclick="javascript:delPermission(\'%\')"><i class="icon-info-sign"></i> 删除</button>'
+	                        		+'</div>'; 
+	        return v.replace(new RegExp(/(%)/g),row.id);
+		}
+		
+	    	var menuData = zTree.getNodes();
+			treeSelect.render({
+	            // 选择器
+	            elem: '#parentId',
+	            // 数据
+	            data: menuData,
+	            //data: "${basePath}/menu/list",
+	            // 异步加载方式：get/post，默认get
+	            type: 'get',
+	            // 占位符
+	            placeholder: '选择上级菜单',
+	            // 是否开启搜索功能：true/false，默认false
+	            search: true,
+	            view:{
+	            	showIcon:false,
+	            },
+	            // 点击回调
+	            click: function(d){
+	            	$('#parentId').val(d.current.id);
+	            },
+	            // 加载完成后的回调函数
+	            success: function (d) {
+	                //treeSelect.checkNode('parentId', d.data[0].id);
+	            }
+	        });
+	    	
+		
+	})
+	
+	
+	var zTree;
+	 	var roleTree;
+	 	var treeSetting = {
+		        check: {
+		            enable: false
+		        },
+		        view: {
+		        	addHoverDom:addHoverDom,
+		        	removeHoverDom:removeHoverDom,
+		            dblClickExpand: false,
+		            showLine: true,
+		            selectedMulti: false,
+		        },
+		        data: {
+		            simpleData: {
+		                enable:true,
+		                idKey: "id",
+		                pIdKey: "parentId",
+		            }
+		        },
+		        async: {
+					enable: true,
+					url: "${basePath}/menu/list",
+					autoParam:["id"],
+					type:'get'
+				},
+		        callback: {
+		            onClick: zTreeOnClick,
+		            onAsyncSuccess: onResourceTreeAsyncSuccess
+		        }
+		    };
+ 	$(function(){
+ 		$.fn.zTree.init($("#tree"), treeSetting);
+        zTree = $.fn.zTree.getZTreeObj("tree");
+ 	});
+	    
+	
+	function addHoverDom(treeId, treeNode) {
+	    	if (treeNode.state==0 && treeNode.id!=1) {
+	    		return false;
+	    	}
+	        var sObj = $("#" + treeNode.tId + "_span");
+	        if (sObj[0].innerText.length>20) {
+	        	sObj.html(sObj[0].innerText.substring(0, 20) + "...");
+	        }
+	        
+	        if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+	        var addStr = "<span class='button add' id='addBtn_" + treeNode.tId
+	                + "' title='添加' onfocus='this.blur();'></span>";
+
+	        addStr += "<span class='button edit' id='editBtn_" + treeNode.tId + "' title='修改' onfocus='this.blur();'></span>";
+	        if (!treeNode.isParent && treeNode.id!=1) {
+		        addStr += "<span class='button remove' id='removeBtn_" + treeNode.tId + "'  title='删除' onfocus='this.blur();'></span>";
+	        }
+	        sObj.after(addStr);
+	        var btn = $("#addBtn_"+treeNode.tId);
+	        if (btn) btn.bind("click", function(){
+	        	addMenu(treeNode);
+	        	/* $('#body').load('${basePath}/resource/add',function(){
+	        		$('#parentId').val(treeNode.id);
+	        		$('#parentName').val(treeNode.name);
+	        	}); */
+	            return false;
+	        });
+	        
+	        var btn = $("#editBtn_"+treeNode.tId);
+	        if (btn) btn.bind("click", function(){
+	        	editMenu(treeNode);
+	            return false;
+	        });
+	        
+	        
+	        
+	        var btnDel = $("#removeBtn_"+treeNode.tId);
+	        if (btnDel) btnDel.bind("click", function(){
+	            delResource(treeNode);
+	            return false;
+	        });
+	        
+	    };
+	    
+	    function removeHoverDom(treeId, treeNode) {
+	        $("#addBtn_"+treeNode.tId).unbind().remove();
+	        $("#removeBtn_"+treeNode.tId).unbind().remove();
+	        $("#editBtn_"+treeNode.tId).unbind().remove();
+	    };
+	    
+	    
+	    var checkedRoleIds = '';
+	    function zTreeOnClick(event, treeId, treeNode) {
+	    	$('#checkedId').val(treeNode.id);
+	    	//treeNode.parentName = parentNode==null ? '' : parentNode.name;
+	    	//treeNode.linkType=treeNode.linkType.toString();
+	    	//$('#form_menu').fillValue2Form(treeNode);
+	    	layui.form.val('form_menu',treeNode)
+	    	if (treeNode.parentId!=null&&treeNode.parentId!=''){
+	    		var parentNode = treeNode.getParentNode();
+	    		$('#parentId').val(parentNode.id);
+		    	layui.treeSelect.checkNode('parentId', parentNode.id);
+	    	}
+	    	layui.treeSelect.checkNode('type',treeNode.type);
+	    	/* $.post('${basePath}/roleResource/findIds',{resourceId:treeNode.id},function(ids){
+	        	checkedRoleIds = ids;
+	        	var roleTree = $.fn.zTree.getZTreeObj("roleTree");
+	        	roleTree.checkAllNodes(false);
+	        	if (ids!=null && ids.length>0) {
+	        		if (ids.length > 0) {
+	        			for (var i=0;i<ids.length;i++ ) {
+	        				var node = roleTree.getNodeByParam("id", ids[i]);
+	        				if (node!=null) 
+	        					roleTree.checkNode(node,true,false,false);
+	        			}
+	        		}
+	        	}
+	        },'json'); */
+	    	
+	    	//如果是MSTR报表，显示提示设置
+	    	/* if (treeNode.type==2) {
+	    		$('#tab_prompt').removeClass('layui-hide');
+	    		$('#tab_prompt_content').removeClass('layui-hide');
+	    		$('#table').bootstrapTable('refresh', null);
+	    		$('#table_prompt').bootstrapTable('refresh', {url: "${basePath}/promptRel/findList",query:{resourceId:treeNode.id}});
+	    	} else {
+	    		$('#tab_1').addClass('layui-this');
+	    		$('#tab_item_1').addClass('layui-show');
+	    		$('#tab_prompt').addClass('layui-hide');
+	    		$('#tab_prompt_content').addClass('layui-hide');
+	    	} */
+	    }
+	    
+	    function onResourceTreeAsyncSuccess(event, treeId, treeNode, msg){
+	    	//var node = zTree.getNodeByParam('id', 1,null);//获取id为1的点
+	    	//zTree.expandNode(node, true, false);//指定选中ID节点展开
+	    	zTree.expandAll(true);
+	    	var nodes = zTree.getNodes();
+	    	layui.treeSelect.zTree('parentId').loadData(nodes);
+	    	
+	    	
+	    }
+	    
+			
+	    function onAsyncSuccess(){
+	    	$.fn.zTree.getZTreeObj("roleTree").expandAll(true);
+	    }
+	    
+	    function onRoleCheck(event,treeId,treeNode){
+	    	var resourceNodes = zTree.getSelectedNodes();
+	    	if (resourceNodes.length>0 && resourceNodes[0].state==0 && treeNode.state==0) {
+	    		layer.msg('默认权限无法修改!');
+	    		return ;
+	    	}
+	    	
+	    	var nodes = roleTree.getCheckedNodes(true);
+	    	var checkResId = $('#checkedId').val();
+	    	if (checkResId==null || checkResId=='') {
+	    		return;
+	    	}
+			var ids = '';
+			var delRoleIds = '';
+			if (nodes!=null && nodes!=undefined) {
+				for(var i=0;i<nodes.length;i++) {
+					if (i==0) {
+						ids = nodes[i].id ;
+					}else {
+						ids += ',' + nodes[i].id ;
+					}
+				}
+			}
+			
+			$.each(checkedRoleIds,function(index,ele){
+				var del = true;
+				$.each(nodes,function(index2,n){
+					if (ele==n.id){
+						del = false;
+					}
+				});
+				if (del) {
+					if (delRoleIds==''){
+						delRoleIds = ele ;
+					}else {
+						delRoleIds += ',' + ele ;
+					}
+				} 
+			});
+			var node = treeNode.getParentNode();
+			var allNode = '';//获取当前选中节点
+			getParentNodes(node,allNode);
+			var param = {
+				resId:$('#checkedId').val(),
+				resIds:parentResIds,
+				delRoleIds:delRoleIds,
+				saveRoleIds:ids
+			};
+			$.post('${basePath}/roleResource/saveByResId',param,function(result){
+				if (result.code==0) {
+					layer.msg('保存成功!');
+				}else {
+					layer.msg('保存失败!');
+				}
+			},'json');
+	    }
+	    
+	    var parentResIds='';
+		function getParentNodes(node,allNode){
+			if(node!=null){
+				if (allNode=='') {
+					allNode = node['id'];
+				}else {
+					allNode += ","+node['id'];
+				}
+				curNode = node.getParentNode();
+				getParentNodes(curNode,allNode);
+			}else{
+				//根节点
+				parentResIds = allNode;
+			}
+		}
+	    
+	        
+	        
+	        //$.fn.zTree.init($("#roleTree"), roleTreeSetting);
+	        //roleTree = $.fn.zTree.getZTreeObj("roleTree");
+	    
+	    
+	    
+	    function addMenu(treeNode) {
+	    	$('#form_menu')[0].reset();
+	    	$("input[type='hidden']").val("");
+	    	$('#checkedId').val(treeNode.id);
+	   		$('#parentId').val(treeNode.id);
+	    	layui.treeSelect.checkNode('parentId', treeNode.id);
+	    	
+	    	
+	    	//layui.form.val('form_menu',treeNode);
+	    	
+	    	/* var isSubmit = false;
+	    	parent.layer.open({
+				title: '添加菜单',
+				type:2,
+				content:'${basePath}/resource/add',
+				area: ['70%', '80%'],
+				btn:['确定','取消'],
+				success: function(layero){
+					var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+					iframeWin.init(treeNode);
+				},
+				yes:function(index,layero){
+					if(!isSubmit){
+						isSubmit = true;
+		    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+						var data = iframeWin.getData();
+						if (data!=null) {
+			   		    	$.ajax({
+				                type: "POST",
+				                url:'${basePath}/resource/save',
+				                data:data,
+				                async: false,
+				                error: function(request) {
+				                    parent.layer.msg('添加失败！');
+				                    isSubmit = false;
+				                },
+				                success: function(result) {
+				                	if(result.code==0){
+				                		parent.layer.close(index);
+										layer.msg('添加成功！');
+										zTree.addNodes(treeNode, result.data);
+				                		
+				                	}else{
+				                		parent.layer.msg(result.msg);
+				                		isSubmit = false;
+				                	}
+				                }
+				            });
+						}else {
+							isSubmit = false;
+						}
+					}
+	    		}
+			}); */
+	    }
+	    
+	    function delResource(treeNode) {
+	        if (treeNode.isParent) {
+	        	parent.layer.alert('该功能包含下级节点,不能删除!');
+	         	return;
+	        } else {
+	        	parent.layer.confirm('删除菜单【'+treeNode.name+'】？', {title:'<@spring.message "action.info"/>',
+					btn:['确定','取消'],
+					yes: function(index, layero){
+				  		$.ajax({url:'${basePath}/menu/delete/'+treeNode.id,type:'delete',
+				  			success:function(result){
+					    		/* if (result.code==0) {
+					    			zTree.removeNode(treeNode);
+					    		} */
+					    		
+					    		zTree.reAsyncChildNodes(null, "refresh",function(){
+						    		var nodes = zTree.getNodes();
+							    	layui.treeSelect.zTree('parentId').loadData(nodes);
+								});
+					    		$('#form_menu')[0].reset();
+					    		$("input[type='hidden']").val("");
+					    		parent.layer.close(index);
+					    		parent.layer.msg(result.msg);
+					    		
+					    	}
+				  		});
+			                
+					}
+	         	});
+	        }
+	    }
+	    
+	    function editMenu(treeNode) {
+	    	$('#checkedId').val(treeNode.id);
+	    	if (treeNode.parentId!=null&&treeNode.parentId!=''){
+	    		var parentNode = treeNode.getParentNode();
+	    		$('#parentId').val(parentNode.id);
+		    	layui.treeSelect.checkNode('parentId', parentNode.id);
+	    	}
+	    	layui.treeSelect.checkNode('type',treeNode.type);
+	    	layui.form.val('form_menu',treeNode)
+	    }
+	
+    
+    
+</script>
+
+</head>
+<body>
+	<div class="layui-container">
+		<div class="layui-row">
+		    <div class="layui-col-md3">
+				<ul id="tree" class="ztree" style="overflow:auto;"></ul>
+		    </div>
+		    <div class="layui-col-md9">
+		    	<form id="form_menu" class="layui-form" action=""
+					style="padding-top:10px;" lay-filter="form_menu">
+					<div style="margin-left:100px;">
+						<input type="hidden" name="id" id="id">
+						<!-- MSTR报表属性 -->
+						<input type="hidden" name="projectId" id="projectId">
+						<input type="hidden" name="reportId" id="reportId">
+						<input type="hidden" name="typeName" id="typeName">
+						<input type="hidden" name="typeValue" id="typeValue">
+						<input type="hidden" name="lv" id="lv">
+						<input type="hidden" name="reports" id="reports">
+						<input type="hidden" name="resourceId" id="resourceId">
+						<input type="hidden" name="resourceType1" id="resourceType1">
+						<input type="hidden" name="resourceType2" id="resourceType2">
+						
+						
+						<div class="layui-form-item">
+							<label class="layui-form-label ">上级菜单</label>
+							<div class="layui-input-block">
+								<input type="text" id="parentId" name="parentId" lay-filter="parentId" autocomplete="off"
+									class="layui-input">
+							</div>
+						</div>
+						<div class="layui-form-item">
+							<label class="layui-form-label ">菜单类型</label>
+							<div class="layui-input-block">
+								<input type="text" id="type" name="type" lay-filter="type"  autocomplete="off" class="layui-input">
+							</div>
+						</div>
+						<div class="layui-form-item" id="name_div">
+							<label class="layui-form-label ">菜单名称</label>
+							<div class="layui-input-block" >
+								<input type="text" name="name" id="name"  lay-verify="required" placeholder="请输入名称"
+									autocomplete="off" class="layui-input">
+							</div>
+						</div>
+						<div class="layui-form-item layui-hide" id="reports_div">
+							<label class="layui-form-label ">报表</label>
+							<div class="layui-input-block" >
+								<textarea  placeholder="请输入内容" class="layui-textarea" readonly id= "reports_name" >
+								</textarea>
+							</div>
+						</div>
+						<div class="layui-form-item">
+							<label class="layui-form-label ">排序</label>
+							<div class="layui-input-block">
+								<input type="number" name="sort"  min="1" max="100" value="1"
+									placeholder="请输入值" autocomplete="off" class="layui-input">
+							</div>
+						</div>
+						<div class="layui-form-item" id="linkUrl_div">
+							<label class="layui-form-label ">链接地址</label>
+							<div class="layui-input-block" >
+								<textarea placeholder="请输入内容" readonly class="layui-textarea" name="linkUrl" id= "linkUrl" >${(record.linkUrl)!}</textarea>
+							</div>
+						</div>
+						
+						<div class="layui-form-item" id="linkUrl_div">
+							<label class="layui-form-label ">说明</label>
+							<div class="layui-input-block">
+								<textarea  class="layui-textarea" name="introduce" id= "introduce" ></textarea>
+							</div>
+						</div>
+						<div class="layui-form-item">
+						    <div class="layui-input-block">
+						      <button class="layui-btn layui-btn-sm layui-btn-normal" lay-submit lay-filter="btn_submit">立即提交</button>
+						      <button type="reset" class="layui-btn layui-btn-sm layui-btn-normal">重置</button>
+						    </div>
+						  </div>
+					</div>
+				</form>
+		    </div>
+	  </div>
+	</div>
+	<div id="iconSelDialog" style="display:none">
+		<#include "resource/icon_select.html" />
+	</div>
+	
+</body>
+</html>

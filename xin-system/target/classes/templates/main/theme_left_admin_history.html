@@ -1,0 +1,17 @@
+<ul class="sidebar-list">
+	<#if (log?? && log?size>0)>
+		<#list log as rec>
+			<li>
+				<div class="chat-detail m-left-sm">
+					<div class="chat-message" style="width:227px;">
+						<p style="margin:0;position: relative;left:-5px;">
+							<i class="fa fa-circle-o text-danger"></i>&nbsp;&nbsp;
+							${(rec.createTime?string("MM-dd   HH:mm"))!}，<@spring.message 'theme.You_visited'/>
+						</p>
+						<a href="javascript:openHistory('${rec.linkType}','${basePath!}/resource/view/${rec.id}')" style="margin-bottom:12px;width:227px;height:30px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap;">【${rec.name}】</a>
+					</div>
+				</div>
+			</li>
+		</#list>
+	</#if>
+</ul>

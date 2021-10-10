@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="keywords" content="">
+    <meta http-equiv="description" content="">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+     <#include "common/common.html" />
+     <#include "common/common_table.html" />
+  </head>
+  <body style="padding:10px;">
+  	 <div >
+     	<div class="layui-inline">
+     		<button id="btn_add_menu" class="layui-btn layui-btn-sm layui-btn-normal">
+			  <i class="layui-icon">&#xe654;</i> 新建
+			</button>
+	    </div>
+    </div>
+    <table id="table"></table>
+  </body>
+  <script>
+  	
+  	layui.use([ 'form','layer'],function() {
+		var form = layui.form, 
+			layer = layui.layer;
+		
+		$('#btn_add_menu').on('click',function(data){
+			addMenu();
+		});
+		
+		
+		
+	  	$('#table').bootstrapTable({
+            url: '${basePath!}/menu/page',         //请求后台的URL（*）
+            contentType : 'application/x-www-form-urlencoded',
+            method: 'get',                      //请求方式（*）
+            striped: false,                      //是否显示行间隔色
+            cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+            pagination: true,                   //是否显示分页（*）
+            sortable: true,                     //是否启用排序
+            sortOrder: "desc",                   //排序方式
+            queryParamsType:"",
+            queryParams: queryParams,//传递参数（*）
+            sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+            pageNumber: 1,                       //初始化加载第一页，默认第一页
+            pageSize: 10,                       //每页的记录行数（*）
+            uniqueId:'id',
+            columns: [{
+                field:'',
+                title:'序号',
+                width:'5px',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:indexFormatter
+            }, 
+            {
+                field: 'id',
+                title: '主键',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'name',
+                title: '模块名',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'linkUrl',
+                title: 'linkUrl',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'code',
+                title: '模块编号',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'status',
+                title: '0启用  1禁用',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'parentId',
+                title: '父级id',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'createTime',
+                title: '创建时间',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'updateTime',
+                title: '修改时间',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'iconName',
+                title: '图标名',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'sort',
+                title: '排序',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'type',
+                title: '1:菜单;2:报表',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'linkType',
+                title: '1:页面内跳转;2:系统内;3外部',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'state',
+                title: 'state',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'lv',
+                title: 'lv',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'introduce',
+                title: 'introduce',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'creater',
+                title: 'creater',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'projectId',
+                title: 'projectId',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'reportId',
+                title: 'reportId',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'typeName',
+                title: 'typeName',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'typeValue',
+                title: 'typeValue',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'hiddenSections',
+                title: 'hiddenSections',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'tenantId',
+                title: 'tenantId',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'opt',
+                title: '操作',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:opeFormatter
+            }
+            ],
+        });
+	  	
+  	});
+  	
+  	function queryParams (params) {
+  		return params;
+  	}
+  	
+  	function opeFormatter(value,row,index){
+  		var v = '<div class="layui-btn-group layui-btn-group-xs" >'
+  				+ '<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" title="编辑" onclick="javascript:editMenu(\'%\')"><i class="layui-icon layui-icon-edit"></i></button>'
+  				+ '<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" title="删除" onclick="javascript:deleteMenu(\'%\')" ><i class="layui-icon layui-icon-delete"></i></button>'
+  			  + '</div>';
+  		return v.replace(new RegExp(/(%)/g),row.id);
+		
+  	} 
+	
+  	function addMenu() {
+  		var isSubmit = false;
+    	parent.layer.open({
+			title: '新建',
+			type:2,
+			content:'${basePath!}/menu/add',
+			area: ['60%', '70%'],
+			btn:['确定','取消'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init();
+			},
+			yes:function(index,layero){
+				if (!isSubmit) {
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+						$.ajax({
+			                type: "POST",
+			                url:'${basePath!}/menu/save',
+			                data:data,
+			                error: function(request) {
+			                    parent.layer.msg('添加失败！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('添加成功！');
+									reloadTable();
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+					} else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+    
+    function editMenu(id) {
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: '编辑',
+			type:2,
+			content:'${basePath!}/menu/edit',
+			area: ['60%', '70%'],
+			btn:['确定','取消'],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init($('#table').bootstrapTable('getRowByUniqueId',id));
+			},
+			yes:function(index,layero){
+				if (!isSubmit) {
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath!}/menu/update',
+			                data:data,
+			                error: function(request) {
+			                    parent.layer.msg('编辑失败！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('编辑成功！');
+									reloadTable();
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                	
+			                }
+			            });
+		            } else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+    
+    function deleteMenu(id){
+		parent.layer.confirm('确定删除？',{title:'<@spring.message "action.info"/>',
+			btn : ['确定','取消' ],
+			yes : function(index,layero) {
+				$.ajax({
+						url : '${basePath!}/menu/delete/'+id,
+						type : 'DELETE',
+						success : function(result) {
+							if (result.code == 0) {
+								parent.layer.msg('删除成功');
+								reloadTable();
+							} else {
+								parent.layer.msg('删除失败');
+							}
+							layer.close(index);
+						}
+				});
+			}
+		});
+	}
+    
+    function reloadTable() {
+    	$('#table').bootstrapTable('refresh', {pageNumber:1});
+    }
+  </script>
+</html>

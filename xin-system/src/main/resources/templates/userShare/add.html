@@ -1,0 +1,133 @@
+ <#include "common/common.html" />
+ <style>
+ 	.my-label {
+ 		width:100px!important;
+ 	}
+ 	 	.wide-input {
+ 		width:85%;
+ 	}
+
+</style>
+<form id="form_add" class="layui-form" action=""
+	style="padding-top:10px;">
+	<div style="margin-left:100px;">
+		<input type="hidden" id="resourceId" name="resourceId" value="">
+		<input type="hidden" id="resourceType" name="resourceType" value=""/>
+		<input type="hidden" id="userIds" name="userIds" value="">
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label">分享给</label>
+			<div class="layui-input-block">
+				<input type="radio" name="shareType" lay-filter="shareType" value="1" title="所有人" checked> 
+				<input type="radio" name="shareType" lay-filter="shareType" value="2" title="指定人">
+			</div>
+		</div>
+		<div class="layui-form-item" id="userItem" style="display:none">
+			<label class="layui-form-label my-label"></label>
+			<div class="layui-input-block" id="userNames">
+				
+			</div>
+		</div>
+		
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label">描述</label>
+			<div class="layui-input-inline" style="width:50%">
+				<textarea placeholder="请输入内容" class="layui-textarea" name="remark" id= "remark" ></textarea>
+			</div>
+		</div>
+	</div>
+</form>
+
+<script type="text/javascript">
+	function init (id,resourceType) {
+		$('#resourceId').val(id);
+		$('#resourceType').val(resourceType)
+	}
+	
+	
+	function getData(){
+		
+		if (check()) {
+			return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+
+  	}
+  	
+	function check() {
+		var selectors = [];
+		var result = true;
+		$.each(selectors,function(index, rec){
+			if (!checkField(rec)) {
+				result = false;
+				return false;//调出循环
+			}
+			
+		});
+  		return result;
+  	}
+  	
+  	function checkField(selector){
+  		var value = $(selector).val();
+  		if (value==null || value == '') {
+  			$(selector).addClass("layui-form-danger");
+  			$(selector).focus();
+  			layer.tips('请输入内容', selector);
+  			return false;
+  		} else {
+  			return true;
+  		}
+  	}
+	
+	layui.use([ 'form' ],function() {
+		var form = layui.form;
+		form.on('radio(shareType)', function(data){
+			if (data.value==2) {
+				var isSubmit = false;
+				parent.layer.open({
+					title: '选择用户',
+					type:2,
+					content:'${basePath}/userInfo/select/user',
+					area: ['60%', '75%'],
+		            maxmin: true,
+					btn:['确定','取消'],
+					success: function(layero){
+						var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+						//iframeWin.init(nodes[0]);
+					},
+					yes:function(index,layero){
+						if(!isSubmit){
+							isSubmit = true;
+			    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+							var data = iframeWin.getData();
+							if (data==null) {
+								parent.layer.msg("请选择用户！");
+								isSubmit = false;
+								return;
+							}
+							var dataName = '';
+							var userIds = new Array();
+							for (var i=0;i<data.length;i++) {
+								dataName += '<span class="layui-badge-rim share-user">'+data[i].realname+'</span>';
+								userIds.push(data[i].id);
+							}
+							
+							$('#userNames').html(dataName);
+							$('#userIds').val(userIds.toString());
+							$('#userItem').css('display','block');
+							console.log(data);
+							parent.layer.close(index);
+						}
+		    		}
+				});
+			} else {
+				$('#userNames').html('');
+				$('#userIds').val('');
+				$('#userItem').css('display','none');
+			}
+			  
+		}); 
+		
+	})
+</script>

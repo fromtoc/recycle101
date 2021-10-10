@@ -1,0 +1,183 @@
+<ul class="nav-notification">
+	<li onmouseleave="showTypeFn1('0')" onmouseover="showTypeFn1('1')">
+		<a href="#" id="aaa" data-toggle="dropdown"  title='<@spring.message"theme.News"/>' style="width: 52px;height: 52px;margin-left:47px;"><i class="fa fa-bell fa-lg" ></i></a>
+		<#if (((unreadNotices && unreadNotices?size>0) || (messageList && messageList?size>0))&& (messageCount+noticeCount)!=0)>
+			<span class="badge badge-info bounceIn animation-delay6 active"  style="background-color: red;">${((messageCount+noticeCount)>99)?string('99+',(messageCount+noticeCount))}</span>
+		</#if>
+		<ul class="dropdown-menu notification dropdown-3 pull-right" id="ul1" style="right: -160px;">
+			<li>
+				<a href="#" id="liNotice1"style="width:50%;" class="liNotice bottom-style" onclick="showLis('liNotice1')"><@spring.message 'theme.Notice'/>(${(noticeCount>99)?string('99+',noticeCount)})</a>
+				<a href="#" id="liNotice2" class="liNotice"
+				   style="display:inline-block;position:absolute;left:207px;width:50%;top: 0px;" onclick="showLis('liNotice2')"><@spring.message"theme.News"/>(${(messageCount>99)?string('99+',messageCount)})</a>
+			</li>
+			<#if ((unreadNotices && unreadNotices?size>0) || (readNotices && readNotices?size>0))>
+				<#list unreadNotices as rec>
+					<li  class="noticeLis">
+						<a href="#" onclick="noticeInfo('${(rec.id)}','${(rec.type)}');" title="${(rec.title)!}">
+							<span class="notification-icon bg-warning">
+								<i class="layui-icon layui-icon-speaker" style="position: relative;font-weight:bold;" ></i>
+							</span >
+							<span class="m-left-xs"><p style="display:inline-block;width: 217px;height:17px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;margin-bottom: 0px;">${(rec.title)!}</p></span>
+							<div  style="position: relative;top:5px;float: right;" class="layui-badge-dot"></div>
+						</a>
+					</li>
+				</#list>
+				<#list readNotices as rec>
+					<li  class="noticeLis">
+						<a href="#" onclick="noticeInfo('${(rec.id)}','${(rec.type)}');" title="${(rec.title)!}">
+													<span class="notification-icon bg-warning">
+														<i class="layui-icon layui-icon-speaker" style="position: relative;font-weight:bold;" ></i>
+													</span>
+							<span class="m-left-xs"><p style="display:inline-block;width: 217px;height:17px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;margin-bottom: 0px;">${(rec.title)!}</p></span>
+						</a>
+					</li>
+				</#list>
+				<#else>
+					<li  class="noticeLis">
+						<a href="#" >
+								<span class="notification-icon bg-warning">
+									<i class="layui-icon layui-icon-speaker" style="position: relative;font-weight:bold;" ></i>
+								</span>
+							<span class="m-left-xs">
+									<p style="display:inline-block;width: 217px;height:17px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;margin-bottom: 0px;"><@spring.message "theme.No_notice_yet"/></p>
+								</span>
+						</a>
+					</li>
+			</#if>
+			<li class="noticeLis">
+				<a href="#" style="display:inline-block;width:50%;text-align: center;" onclick="setAllNoticeRead()"><@spring.message "theme.All_Read"/></a>
+				<a href="#" style="display:inline-block;position:absolute;width:50%;text-align: center;"  onclick="moreNotice()"><@spring.message "model.more"/></a>
+			</li>
+			<#if (messageList && messageList?size>0)>
+				<#list messageList as rec>
+					<li class="messageLis" style="display: none" >
+						<#if (rec.type=='1')>
+							<a href="#" onclick="MessageInfo('${(rec.id)}');" >
+									<span class="notification-icon bg-success" style="width:30px;height:30px;">
+										<i class="layui-icon layui-icon-dialogue" style="position: relative;font-weight:bold;font-size:18px;" ></i>
+									</span>
+								<span class="m-left-xs">
+										<p class="messageTitle">${(rec.title)!}</p><#if (rec.isRead==0) ><div style="position: relative;top:5px;float:right;" class="layui-badge-dot"></div></#if>
+									</span>
+								<p class="messageContent" style="text-indent:1em;">${(rec.content)!}</p>
+								<p style="text-align: right;margin: 0px;"class="messageContent" >${(rec.createTimeTran)!}</p>
+							</a>
+							<#elseif (rec.type=='2')>
+								<a href="#" onclick="showTab('${(rec.id)}','${(rec.resourceId)}','${(rec.resourceName)}','${(rec.linkType)}');" >
+									<#if rec.avatar?length gt 60>
+									<img src="${rec.avatar}" style="border-radius: 50%;box-shadow: 0px 0px 7px #7E7E7E;width: 30px;height: 30px;position: relative;top: -7px;">
+										<#else>
+											<img alt="#" src="${basePath}/${rec.avatar}" style="border-radius: 50%;box-shadow: 0px 0px 7px #7E7E7E;width: 30px;height: 30px;position: relative;top: -7px;">
+
+									</#if>
+									<span class="m-left-xs">
+										<p class="messageTitle">${(rec.title)!}<@spring.message "moContent.andClickYou"/></p><#if (rec.isRead==0) ><div style="position: relative;top:5px;float:right;" class="layui-badge-dot"></div></#if>
+									</span>
+									<span class="messageContent" >${(rec.content)!}</span>
+
+									<p style="text-align: right;margin: 0px;"class="messageContent" >${(rec.createTimeTran)!}<br></p>
+								</a>
+								<#elseif (rec.type=='4')>
+								<a href="#" onclick="showTab2('${(rec.id)}','${(rec.issueId)}','${(rec.title)}','${(rec.linkType)}');" >
+									<#if rec.avatar?length gt 60>
+									<img src="${rec.avatar}" style="border-radius: 50%;box-shadow: 0px 0px 7px #7E7E7E;width: 30px;height: 30px;position: relative;top: -7px;">
+										<#else>
+											<img alt="#" src="${basePath}/${rec.avatar}" style="border-radius: 50%;box-shadow: 0px 0px 7px #7E7E7E;width: 30px;height: 30px;position: relative;top: -7px;">
+
+									</#if>
+									<span class="m-left-xs">
+										<p class="messageTitle">${(rec.title)!}<@spring.message "moContent.andClickYou"/></p><#if (rec.isRead==0) ><div style="position: relative;top:5px;float:right;" class="layui-badge-dot"></div></#if>
+									</span>
+									<span class="messageContent" >${(rec.content)!}</span>
+
+									<p style="text-align: right;margin: 0px;"class="messageContent" >${(rec.createTimeTran)!}<br></p>
+								</a>
+								<#else>
+									<a href="#" onclick="MessageInfo('${(rec.id)}');" >
+										<span class="notification-icon bg-success" style="width:30px;height:30px;">
+											<i class="layui-icon layui-icon-dialogue" style="position: relative;font-weight:bold;font-size:18px;" ></i>
+										</span>
+										<span class="m-left-xs">
+											<p class="messageTitle">${(rec.title)!}</p><#if (rec.isRead==0) ><div style="position: relative;top:5px;float: right;" class="layui-badge-dot"></div></#if>
+										</span>
+										<p class="messageContent"style="text-indent:1em;" >${(rec.content)!}<br></p>
+										<p style="text-align: right;margin: 0px;" class="messageContent">${(rec.createTimeTran)!}<br></p>
+									</a>
+						</#if>
+					</li>
+				</#list>
+				<#else>
+					<li class="messageLis" style="display: none">
+						<a href="#" >
+								<span class="notification-icon bg-success" style="width:30px;height:30px;">
+									<i class="layui-icon layui-icon-dialogue" style="position: relative;font-weight:bold;font-size:18px;" ></i>
+								</span>
+							<span class="m-left-xs">
+									<p style="display:inline-block;width: 193px;height:17px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;margin-bottom: 0px;"><@spring.message 'theme.No_news_yet'/></p>
+								</span>
+						</a>
+					</li>
+			</#if>
+			<li class="messageLis" style="display: none">
+				<a href="#" style="display:inline-block;width:33%;text-align: center;" onclick="setAllMessageRead()"><@spring.message "theme.All_Read"/></a>
+				<a href="#" style="display:inline-block;width:33%;text-align: center;" onclick="clearAllMessage()"><@spring.message "theme.Clear"/></a>
+				<a href="#" style="display:inline-block;width:33%;position:absolute;text-align: center;"  onclick="moreMessage()"><@spring.message "model.more"/></a>
+			</li>
+		</ul>
+	</li>
+	<li class="chat-notification">
+		<a href="#" id="fa-history"  class="<!--sidebarRight-toggle-->"><i class="fa fa-history  fa-lg"></i></a>
+	</li>
+</ul>
+<div class="user-block hidden-xs"  onmouseover="showTypeFn2('1')"  onmouseleave="showTypeFn2('0')">
+	<a href="#" id="userToggle" data-toggle="dropdown">
+		<img id='headPic' src="images/profile/profile1.jpg" alt="" class="img-circle inline-block user-profile-pic">
+		<div class="user-detail inline-block">
+			${(user.realname)!}
+			<i class="fa fa-angle-down"></i>
+		</div>
+	</a>
+	<div class="panel border dropdown-menu user-panel" id="ul2">
+		<div class="panel-body paddingTB-sm">
+			<ul>
+				<li>
+					<a href="javascript:openPersonalRecord('<@spring.message "PersonalPortrait"/>','${basePath}/userInfo/personalRecord/${user.id}')">
+						<i class="fa fa-edit fa-lg"></i><span class="m-left-xs"><@spring.message "PersonalPortrait"/></span>
+					</a>
+				</li>
+				<li>
+					<a href="javascript:setPreference('${(user.id)!}')">
+						<i class="fa fa-inbox fa-lg"></i><span class="m-left-xs"><@spring.message 'setPreference'/></span>
+					</a>
+				</li>
+				<li>
+					<a  href="${basePath}/logout">
+						<i class="fa fa-power-off fa-lg"></i><span class="m-left-xs"><@spring.message 'logout'/></span>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+<script>
+
+    $('#fa-history').click(function(event)	{
+        event.stopPropagation();
+        $("#historyDiv").load("${basePath}/historyLog", null,function(){
+            if($("#sidebar-right").hasClass("active")){
+                $("#sidebar-right").removeClass("active")
+                $("#wrapper").removeClass("display-right")
+            }else{
+                $("#sidebar-right").addClass("active")
+                $("#wrapper").addClass("display-right")
+            }
+        })
+    });
+
+
+
+
+
+
+</script>

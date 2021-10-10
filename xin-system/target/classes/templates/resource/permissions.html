@@ -1,0 +1,226 @@
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+
+<div id="body" class="layui-body" style="">
+	<div class="layui-tab" style="-webkit-box-sizing: initial;">
+		<input type="hidden" id="id"/>
+	  <div id="toolbar" class="layui-form layui-form-pane" action="">
+         </div>
+	  <div class="layui-tab-content">
+	    <div class="layui-tab-item layui-show">
+	    	<table id="tablePermission" data-toolbar="#toolbar"></table>
+	    </div>
+	  </div>
+	</div>
+</div>
+<script>
+
+	layui.use([ 'form','element'],function() {
+		var form = layui.form;
+		
+		form.on('checkbox(all)', function(obj){
+		    var data={
+					resourceId:$(this).attr('data-resourceId'),
+					permissionId:$(this).attr('data-permissionId'),
+					code:$(this).attr('data-code'),
+					roleId:$(this).attr('data-roleId'),
+			  };
+		    if (!obj.elem.checked) {
+		    	delete data.permissionId;
+		    }
+		    var resourceType1 = $(this).attr('data-resourceType1');
+			  $.post('${basePath}/rolePermission/saveAll',data,function(result){
+                 location.reload();
+                 if(result.code=="0"){
+                     parent.layer.msg("<@spring.message 'result.success'/>");
+				 }else{
+                     parent.layer.msg("<@spring.message 'result.fail'/>");
+				 }
+
+			  });
+            layui.form.render('checkbox');
+		  });
+		  form.on('checkbox(perms)', function(obj){
+			  var data={
+					id:$(this).attr('data-id'),
+					resourceId:$(this).attr('data-resourceid'),
+					permissionId:$(this).attr('data-permissionid'),
+					code:$(this).attr('data-code'),
+					roleId:$(this).attr('data-roleid'),
+			  };
+
+			  var resourceType1 = $(this).attr('data-resourceType1');
+			  var showType = $('#showType').val();
+			  if (obj.elem.checked) {
+				  
+				  $.post('${basePath}/rolePermission/save',data,function(result){
+                      if(result.code=="0"){
+                          parent.layer.msg("<@spring.message 'result.success'/>");
+                          reloadTable();
+                      }else{
+                          parent.layer.msg("<@spring.message 'result.fail'/>");
+                      }
+
+				  });
+			  } else {
+				  $.ajax({
+					  url: '${basePath}/rolePermission/delete',
+					  data: {resourceId: data.resourceId, permissionId: data.permissionId, roleId: data.roleId},
+					  type: 'POST',
+					  // dataType:'json',
+					  success: function (result) {
+                          if(result.code=="0"){
+                              parent.layer.msg("<@spring.message 'result.success'/>");
+                              reloadTable();
+                          }else if(result.code=="-1"){
+                              parent.layer.msg("<@spring.message 'result.fail'/>");
+                          }
+                          else if(result.code=="-2"){
+                              parent.layer.msg("<@spring.message 'rolePermission.parameterError'/>");
+                          }
+					  }
+				  });
+			  }
+			  
+			  
+			  
+		  });
+	})
+
+	var table ;
+	function init(id) {
+		$('#id').val(id);
+		$.get({url:'${basePath}/resource/'+id+'/permissions'},function(result){
+			table = $('#tablePermission').bootstrapTable({
+	            striped: false,                      //是否显示行间隔色
+	            cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+	            pagination: false,                   //是否显示分页（*）
+	            sortable: true,                     //是否启用排序
+	            sortOrder: "desc",                   //排序方式
+	            queryParamsType:"",
+	            uniqueId:'id',
+	            undefinedText:'',
+	            fixedColumns:true,
+		        fixedNumber:1,
+		        data:result.list,
+	            columns: [
+					
+	                {
+   	                field: "roleName",
+   	                title: "<@spring.message 'role.role'/>",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+   	             	width:'240px',
+   	             	formatter: nameFormatter
+   	            },
+   	         	{
+   	            	field: "opt",
+   	                title: "<@spring.message 'permissions.permissions'/>",
+   	             	align: 'center',
+   	             	halign: 'center',
+   	             	valign: 'middle',
+	   	            formatter: permFormatter
+   	            }
+   	            ]
+			});
+			layui.form.render('checkbox');
+    	});
+	}
+	
+	function nameFormatter(value,row,index){
+		var permissionsArr = new Array();
+		var all = true;
+		if (row.permissions!=null && row.permissions.length>0) {
+			for (var i=0;i<row.permissions.length;i++) {
+				permissionsArr.push(row.permissions[i].id+'_'+row.permissions[i].code);
+				
+				if (row.permissions[i].rolePermissionId==null||row.permissions[i].rolePermissionId=='') {
+					all = (all && false);
+				}
+				
+			}
+		} else {
+			return value;
+		}
+		var checked = all?'checked':'';
+		var disabled = $('#checkedId').val()!=''?'':'disabled';
+		var permission = permissionsArr.join(',');
+		var attrStr = ' data-resourceid="'+$('#id').val()+'"'
+					+ ' data-permissionId="'+permission+'"'
+					+ ' data-resourceType1="'+row.resourceType1+'"'
+					+ ' data-roleid="'+row.roleId+'"';
+		var v = '<div class="layui-form resource-form"><span class="resouce-name" title="'+value+'">' +value + '</span>&nbsp;&nbsp;&nbsp;&nbsp;<input class="resouce-box" type="checkbox" name="" title="" lay-filter="all" lay-skin="primary" '+checked+' '+attrStr+' '+disabled+'>'
+				+'</div>'; 
+        return v;
+	}
+	
+	function permFormatter(value,row,index){
+		var v = '<div class="layui-form permission-form">';
+		if (row.permissions!=null && row.permissions.length>0) {
+			for (var i=0;i<row.permissions.length;i++) {
+				var checked = '';
+				if (row.permissions[i].rolePermissionId!=null&&row.permissions[i].rolePermissionId!='') {
+					checked = 'checked';
+				};
+				var attrStr = ' data-id="'+(row.permissions[i].rolePermissionId==null?'':row.permissions[i].rolePermissionId)+'" '
+							+ ' data-resourceid="'+$('#id').val()+'"'
+							+ ' data-permissionid="'+row.permissions[i].id+'"'
+							+ ' data-resourceType1="'+row.resourceType1+'"'
+							+ ' data-code="'+row.permissions[i].code+'"'
+							+ ' data-roleid="'+row.roleId+'"';
+				
+				v += '<input class="permission-box" type="checkbox" name="" '+attrStr+' title="'+row.permissions[i].name+'" lay-filter="perms" lay-skin="primary" '+checked+' >'
+			}
+		}
+		v +='</div>'; 
+		
+        return v;
+	}
+
+	function reloadTable(){
+		//$('#tablePermission').bootstrapTable('refresh', {pageNumber:1});
+
+    }
+	
+	
+</script>
+<style>
+.resource-form{
+	margin: 0 auto;
+	/* width:60%; */
+}
+.resouce-name{
+	float:left;
+	    /* width: 70%; */
+	width: 170px;
+    text-align: left;
+    word-break: keep-all;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.resouce-box{
+float: right;
+}
+.permission-form{
+	width:80%;
+	float:left;
+	text-align: left;
+}
+.permission-box{
+	float: left;
+}
+.layui-form-checked span {
+    background-color: #ffffff!important;
+}
+.table {table-layout:fixed;}
+
+.layui-form-checked:hover span {
+    background-color: #f5f5f5!important;
+}
+
+
+
+
+</style>

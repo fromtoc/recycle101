@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>访问记录分析</title>
+    <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+    <meta http-equiv="description" content="this is my page">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <#include "common/common.html" />
+    <#include "common/common_table.html" />
+    <#include "common/common_ztree.html" />
+    <script type="text/javascript" src="${basePath}/js/MultipleTreeSelect.js"></script>
+	<script type="text/javascript" charset="utf-8" src="${basePath}/plugins/echartsV3/echarts-all-3.js"></script>
+  </head>
+  
+  <body style="padding:10px;">
+  		<div>
+			<div class="layui-row">
+		    	   <div class="layui-col-md12">
+		    		<div class="layui-tab" lay-filter="test" style="margin-top:0px">
+					  <ul class="layui-tab-title">
+					    <li class="layui-this"><@spring.message "resource.analysis"/></li>
+					    <li><@spring.message "user.analysis"/></li>
+					  </ul>
+					  <div class="layui-tab-content">
+					    <div class="layui-tab-item layui-show" >
+					      <div class="layui-row">
+					      	<div class="layui-row">
+						      	<div class="layui-col-md12">
+						      	  <form id="query_form_resource" class="layui-form layui-form-pane" style="padding-top:5px;">
+						     	  	<input type="hidden" name="createTimeStart" id="createTimeStart">
+						     	  	<input type="hidden" name="createTimeEnd" id="createTimeEnd">
+						     	  	<div class="layui-inline">
+							    		<label class="layui-form-label"><@spring.message "resource.Resource_type"/></label>
+							  			<div class="layui-input-inline">
+							        		<input type="text" name="resourceType" id="resourceType" readonly autocomplete="off" class="layui-input ">
+										</div>
+									</div>
+									<div class="layui-inline">
+							    		<label class="layui-form-label"><@spring.message "temporal.interval"/></label>
+							  			<div class="layui-input-inline">
+							        		<input type="text" id="dataTime" name="dataTime" placeholder="<@spring.message 'comment.Please_select_the_time_interval'/>"
+											autocomplete="off" class="layui-input">
+										</div>
+									</div>
+									<div class="layui-inline">
+							    		<label class="layui-form-label"><@spring.message "resourceLog.Number_of_display_items"/></label>
+							  			<div class="layui-input-inline">
+							        		<input type="number" id="top" name="top" min="1" value="10"  onkeypress="return (/[\d]/.test(String.fromCharCode(event.keyCode)))" style="ime-mode:Disabled;" placeholder="<@spring.message 'tips.input'/>..."
+											autocomplete="off" class="layui-input">
+										</div>
+									</div>
+									<div class="layui-inline">
+										<div class="layui-input-inline">
+					            			<button type="button" id="queryResource" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/></button>
+							    			<button type="button" id="resetBtnResource" class="reset layui-btn layui-btn-sm layui-btn-normal"><i class="glyphicon glyphicon-refresh"></i> <@spring.message 'action.reset'/></button>
+							    		</div>
+									</div>
+						     	  </form>
+						     	</div>
+						      </div>
+						    <div class="layui-col-xs12">
+						      <div class="grid-demo">
+						      		<div id="resourceActive" style="width:100%;height: 680px;"></div>
+						      </div>
+						    </div>
+						  </div>
+					    </div>
+					    
+					    <div class="layui-tab-item">
+					      <div class="layui-row">
+						    <div class="layui-row">
+						      	<div class="layui-col-md12">
+						      	  <form id="query_form_user" class="layui-form layui-form-pane" style="padding-top:5px;">
+						     	  	<input type="hidden" name="userCreateTimeStart" id="userCreateTimeStart">
+						     	  	<input type="hidden" name="userCreateTimeEnd" id="userCreateTimeEnd">
+						     	  	<input type="hidden" name="organization" id="organization">
+						     	  	<div class="layui-inline">
+							    		<label class="layui-form-label"><@spring.message "resourceLog.User_organization"/></label>
+							  			<div class="layui-input-inline">
+							        		<input type="text" name="UserOrganization" id="UserOrganization" lay-filter="UserOrganization" readonly readonly autocomplete="off" class="layui-input ">
+										</div>
+									</div>
+									<div class="layui-inline">
+							    		<label class="layui-form-label"><@spring.message "temporal.interval"/></label>
+							  			<div class="layui-input-inline">
+							        		<input type="text" id="dataTimeUser" name="dataTimeUser" placeholder="<@spring.message 'comment.Please_select_the_time_interval'/>"
+											autocomplete="off" class="layui-input">
+										</div>
+									</div>
+									<div class="layui-inline">
+										<div class="layui-input-inline">
+					            			<button type="button" id="queryUser" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/></button>
+							    			<button type="button" id="resetBtnUser" class="reset layui-btn layui-btn-sm layui-btn-normal"><i class="glyphicon glyphicon-refresh"></i> <@spring.message 'action.reset'/></button>
+							    		</div>
+									</div>
+						     	  </form>
+						     	</div>
+						      </div>
+						    <div class="layui-col-xs12">
+						      <div class="grid-demo">
+						      	<div id="userActive" style="width:100%;height: 680px;"></div>
+						      </div>
+						    </div>
+						  </div>
+					    </div>
+					    
+					  </div>
+					</div>
+				   </div>
+		     </div>
+	     </div>
+  </body>
+  <script>
+			  	
+	$(function(){
+		initForm();
+		initResourceTree();
+		resourceInit();
+		userInit();
+	})
+	
+	function initForm(){
+		var flag = false;//
+		var nowTime = utils.tmDate._format(new Date());
+		var lastMouth = utils.tmDate._minusMonths(new Date(),1);
+		if(!flag){
+			$('#createTimeStart').val(lastMouth);
+		    $('#createTimeEnd').val(nowTime);
+		    $('#userCreateTimeStart').val(lastMouth);
+		    $('#userCreateTimeEnd').val(nowTime);
+		    flag = true;
+		}
+		layui.use(['form','laydate','element','treeSelect'],function() {
+			var form = layui.form,
+		 		laydate = layui.laydate,
+				treeSelect = layui.treeSelect,
+				element = layui.element;	
+			
+				element.on('tab(test)', function(elem){
+					userInit();
+			  	});
+				
+				laydate.render({
+					elem: '#dataTime',
+					range:'~',
+					format: 'yyyy-MM-dd HH:mm:ss',
+					value:lastMouth+' ~ '+nowTime,
+					done: function(value, date, endDate){
+						var startTime = value.split("~");
+						$('#createTimeStart').val(startTime[0]);
+					    $('#createTimeEnd').val(startTime[1]);
+					}
+				});
+				
+				laydate.render({
+					elem: '#dataTimeUser',
+					range:'~',
+					format: 'yyyy-MM-dd HH:mm:ss',
+					value:lastMouth+' ~ '+nowTime,
+					done: function(value, date, endDate){
+						var startTime = value.split("~");
+						$('#userCreateTimeStart').val(startTime[0]);
+					    $('#userCreateTimeEnd').val(startTime[1]);
+					}
+				});
+				
+				$.ajax({
+					type:'POST',
+					url:'${basePath}/organization/listAll',
+					success:function(result){
+						var treeData = utils.toTreeData(result);
+						console.log(treeData);
+						treeSelect.render({
+				            // 选择器
+				            elem: '#UserOrganization',
+				            // 数据
+				            data: treeData,
+				            // 异步加载方式：get/post，默认get
+				            type: 'get',
+				            // 占位符
+				            placeholder: '<@spring.message "userInfo.Select_organization"/>',
+				            // 是否开启搜索功能：true/false，默认false
+				            search: true,
+				            view:{
+				            	showIcon:false,
+				            },
+				            // 点击回调
+				            click: function(d){
+				                $('#organization').val(d.current.id);
+				            },
+				            // 加载完成后的回调函数
+				            success: function (d) {
+				            	console.log(d);
+				            }
+				        });
+					}
+				});
+		});
+	}
+	
+	
+	$('#queryResource').on("click",function(){
+		resourceInit();
+	});
+	
+	$('#queryUser').on("click",function(){
+		userInit();
+	});
+	
+	$('#resetBtnResource').on('click',function(){
+		$('#query_form_resource')[0].reset();
+	});
+	
+	$('#resetBtnUser').on('click',function(){
+		$('#query_form_user')[0].reset();
+	});
+	
+	
+	function oncheckCalbask(Nodelist){
+		
+	}
+	
+	function initResourceTree(resType){
+		var zNodes = getResourceTreeNodes();
+		var defaults = {
+			textLabel: "jasontext",
+			zNodes: zNodes,
+			height:150,
+			callback:{
+			    onCheck: oncheckCalbask
+			}
+	    }
+		$("#resourceType").drawMultipleTree(defaults);
+	}
+	
+	function getResourceParams(){
+		var createTimeStart = $('#createTimeStart').val();
+	    var createTimeEnd = $('#createTimeEnd').val();
+	    var resourceType = $("#resourceType").drawMultipleTree("getChecks","val");
+	    var top = $('#top').val();
+	    var param = {"createTimeStart":createTimeStart,"createTimeEnd":createTimeEnd,"resourceType":resourceType,"top":top};
+	    return param;
+	}
+	
+	function getUserParams(){
+		var createTimeStart = $('#userCreateTimeStart').val();
+	    var createTimeEnd = $('#userCreateTimeEnd').val();
+	    var organization = $("#organization").val();
+	    var param = {"createTimeStart":createTimeStart,"createTimeEnd":createTimeEnd,"organization":organization};
+	    return param;
+	}
+	
+	function getResourceTreeNodes(){
+		var obj = [];
+		$.ajax({
+			url: '${basePath}/resourceType/list',
+			type:'GET',
+			async:false, 
+			dataType: 'json',
+			success: function (d) {
+				if (d.list!=null && d.list.length>0){
+					obj = utils.toTreeData(d.list);
+				}
+			}
+		});
+		return obj;
+	}
+	
+  	function resourceInit(){
+  		var params = getResourceParams(); 
+  		resource_colu = echarts.init(document.getElementById('resourceActive'));
+  		option_colu = {
+  		    tooltip : {
+  		        trigger: 'axis',
+  		        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+  		            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+  		        }
+  		    },
+			legend: {
+	            data:['查看', '下载', '添加收藏','取消收藏','评论','删除评论']
+	        },
+  		    grid: {
+  		        left: '3%',
+  		        right: '4%',
+  		        bottom: '3%',
+  		        containLabel: true
+  		    },
+  		    xAxis :{
+  		        type : 'category',
+  		        data:[]
+  		    },
+  		    yAxis :{
+  		        type : 'value'
+  		    },
+  		    series : []
+  		};
+  		$.ajax({
+  		     type : "post",
+  		     async : true, //同步执行
+  		     url : "${basePath}/resourceLog/analysisResourceActivity",
+  		     data: params,
+  		     dataType : "json", //返回数据形式为json
+  		     success : function(result) {
+  		    	console.log(result);
+  		    	console.log(JSON.stringify(result));
+  		    	option_colu.series = result.series;
+ 		    	option_colu.xAxis.data = result.category;
+ 		    	option_colu.legend.data = result.legend;
+ 		    	resource_colu.setOption(option_colu); 
+ 		    	resource_colu.resize();
+ 		    	//resource_colu.resize();
+  		     }
+  		});
+  		resource_colu.off('click');
+  		resource_colu.on('click', function (params) {
+  			var resourceId = params.data.id;
+  			openResourceLog(resourceId);
+  		});
+  	}
+  	
+  	function openResourceLog(resourceId){
+  		var resourceId = resourceId;
+  		//获取查询的时间
+  		var createTimeStart = $('#createTimeStart').val();
+	    var createTimeEnd = $('#createTimeEnd').val();
+	    var param = "?resourceId="+resourceId+"&createTimeStart="+createTimeStart+"&createTimeEnd="+createTimeEnd;
+	    parent.layer.open({
+			title: '<@spring.message "resourceLog.Log_details"/>',
+			type:2,
+			content:'${basePath!}/resourceLog/resLogReportInfo'+param,
+			area: ['80%', '80%'],
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init();
+			},
+			yes:function(index,layero){
+				parent.layer.close(index);
+    		}
+		});
+  	}
+  	
+  	function userInit(){
+  		$("#userActive").css('width',$("#resourceActive").width());
+  		var params = getUserParams();
+  		var myChart_user = echarts.init(document.getElementById('userActive'));  
+  		//app.title = '坐标轴刻度与标签对齐';
+  		optionM_user = {
+			title: {
+		        text: '<@spring.message "resourceLog.User_Access_Quantity"/>',
+		        left:'center',
+ 			    textStyle:{
+  			　　　　	fontSize:14
+  			    }
+		   	},
+  		    tooltip : {
+  		        trigger: 'axis',
+  		        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+  		            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+  		        }
+  		    },
+  		    grid: {
+  		        left: '3%',
+  		        right: '4%',
+  		        bottom: '3%',
+  		        containLabel: true
+  		    },
+  		    xAxis : {
+	            type : 'category',
+	            axisTick: {
+	                alignWithLabel: true
+	            },
+  		    	data:[]
+  		    },
+  		    yAxis : {
+  		        type : 'value'
+  		    },
+  		    series : [{
+  		    	data:[]	,
+  		    	type:'bar'
+  		    }]
+  		};
+  		$.ajax({
+		     type : "post",
+		     async : true, //同步执行
+		     data: params,
+		     url : "${basePath}/resourceLog/analysisUserActivity",
+		     dataType : "json", //返回数据形式为json
+		     success : function(result) {
+		    	console.log(JSON.stringify(result));
+				optionM_user.series[0].data=result.series[0].data;
+				optionM_user.xAxis.data = result.category;
+				myChart_user.setOption(optionM_user); 
+				//myChart_user.resize();
+			}
+		});
+  		myChart_user.off('click');
+  		myChart_user.on('click', function (params) { 
+  			var userId = params.data.id;
+  			openUserLog(userId);
+  		});
+  	}
+  	
+  	function openUserLog(userId){
+  		var userId = userId;
+  		//获取查询的时间
+  		var createTimeStart = $('#userCreateTimeStart').val();
+	    var createTimeEnd = $('#userCreateTimeEnd').val();
+	    var param = "?creater="+userId+"&createTimeStart="+createTimeStart+"&createTimeEnd="+createTimeEnd;
+	    parent.layer.open({
+			title: '<@spring.message "resourceLog.Log_details"/>',
+			type:2,
+			content:'${basePath!}/resourceLog/resLogUserInfo'+param,
+			area: ['80%', '80%'],
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init();
+			},
+			yes:function(index,layero){
+				parent.layer.close(index);
+    		}
+		});
+  	}
+  </script>
+</html>

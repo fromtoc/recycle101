@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xin.portal.system.mapper.OrganizationMapper">
+	<resultMap id="BaseResultMap" type="com.xin.portal.system.model.Organization">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="parent_id" property="parentId" jdbcType="INTEGER" />
+		<result column="code" property="code" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="state" property="state" jdbcType="INTEGER" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="ext_code" property="extCode" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<select id="selectListWithNoTenant" parameterType="com.xin.portal.system.model.Organization" resultMap="BaseResultMap">
+		SELECT id,parent_id,code ,name ,create_time ,update_time , state ,remark ,ext_code FROM t_organization 
+		<where>
+			<if test="parentId!=null and parentId!=''">
+				parent_id = #{parentId}
+			</if>
+			<if test="code!=null and code!=''">
+				and code = #{code}
+			</if>
+			<if test="name!=null and name!=''">
+				and name = #{name}
+			</if>
+			<if test="extCode!=null and extCode!=''">
+				and ext_code = #{extCode}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insertOrganizationAllColunmForNewTenant" parameterType="com.xin.portal.system.model.Organization" 
+		useGeneratedKeys="true" keyProperty="id" >
+		INSERT INTO t_organization  
+	 	( id,
+		parent_id,
+		code,
+		name,
+		create_time,
+		update_time,
+		status,
+		remark,
+		ext_code,
+		state,
+		sort,
+		tenant_id
+		 )  VALUES 
+	 	( #{id,jdbcType=VARCHAR},
+		#{parentId,jdbcType=VARCHAR},
+		#{code,jdbcType=VARCHAR},
+		#{name,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{updateTime,jdbcType=TIMESTAMP},
+		#{status,jdbcType=INTEGER},
+		#{remark,jdbcType=VARCHAR},
+		#{extCode,jdbcType=VARCHAR},
+		#{state,jdbcType=INTEGER},
+		#{sort,jdbcType=INTEGER},
+		#{tenantId,jdbcType=VARCHAR} )
+	</insert>
+
+	<insert id="insertOrgForLdap" parameterType="com.xin.portal.system.model.Organization" useGeneratedKeys="true" keyProperty="id" >
+		INSERT INTO t_organization
+		(id,
+		parent_id,
+		code,
+		name,
+		create_time,
+		update_time,
+		status,
+		remark,
+		ext_code,
+		state,
+		sort,
+		ext_id
+		)  VALUES
+		( #{id,jdbcType=VARCHAR},
+		#{parentId,jdbcType=VARCHAR},
+		#{code,jdbcType=VARCHAR},
+		#{name,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{updateTime,jdbcType=TIMESTAMP},
+		#{status,jdbcType=INTEGER},
+		#{remark,jdbcType=VARCHAR},
+		#{extCode,jdbcType=VARCHAR},
+		#{state,jdbcType=INTEGER},
+		#{sort,jdbcType=INTEGER},
+		#{extId,jdbcType=VARCHAR}
+	 )
+	</insert>
+
+	<update id="updateOrgForLdap" parameterType="com.xin.portal.system.model.Organization">
+		update  t_organization set
+		name = #{name}
+		<if test="parentId!=null and parentId!=''">
+		,parent_id = #{parentId}
+		</if>
+		where ext_id = #{extId}
+	</update>
+
+	<delete  id="delByLdapIds" parameterType = "java.util.List">
+		  delete from  t_organization
+		  where
+			code  != "Domain"  and
+			status = 2  and
+			ext_id not in
+			<foreach collection="list"  item="item" open="(" separator="," close=")"  >
+				#{item}
+			</foreach>
+	</delete>
+
+
+	<select id="selectByExtId" parameterType="java.lang.String"  resultMap="BaseResultMap">
+		SELECT id,parent_id,code ,name ,create_time ,update_time , state ,remark ,ext_code FROM t_organization
+		where  ext_id = #{extId} and tenant_id = #{tenantId}
+	</select>
+
+</mapper>

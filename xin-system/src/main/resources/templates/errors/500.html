@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="Generator" content="EditPlus®">
+  <meta name="Author" content="">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+  <title>500</title>
+  <style>
+	html,body{ text-align:center;height:100%;background-color:#F6F6F6} 
+	.info {padding-top:4%}
+	.link {    
+		display: block;
+		text-decoration: underline;
+		color: #5d5858;
+		font-weight: bold;
+	}
+  </style>
+ </head>
+ <body>
+  <div class="info">
+	<img src="${basePath}/images/error500.jpg">
+	<a href="javascript:top.window.location.href='${basePath!}/'" class="link" ><@spring.message 'error.back'/></a>
+	<div style="display:none">${msg!}</div>
+  </div>
+ </body>
+</html>

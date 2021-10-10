@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+
+<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+<meta http-equiv="description" content="this is my page">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="${basePath}/css/module.css">
+<link rel="stylesheet" href="${basePath}/plugins/zui/zui.min.css">
+<link rel="stylesheet" href="${basePath}/plugins/zui/zui.dashboard.min.css" />
+<#include "common/common.html" />
+<style>
+body {
+	margin: 0;
+    font-family: "Helvetica Neue",Helvetica,Tahoma,Arial,'Microsoft Yahei','PingFang SC','Hiragino Sans GB','WenQuanYi Micro Hei',sans-serif  !important;
+    font-size: 13px;
+    line-height: 1.53846154;
+    color: #353535;
+    background-color: #fff;
+} 
+header {
+border-bottom: 2px solid #000;
+height: 40px;
+line-height: 40px;
+text-align: center;
+}
+.fileShow {
+border: 1px solid #000;
+background-color: #f1f1f1;
+}
+ul, li {
+	margin: 0;
+	padding: 0;
+}
+#rMenu{
+    width: 110px; 
+    border-bottom: none;
+    position: absolute;
+    display: none;
+    background-color: #ffff;
+    /* box-shadow: rgb(209, 206, 188) 0px 0px 10px; */
+    box-shadow: 2px 2px 5px #888888;
+}
+
+#rMenu ul{
+	list-style: none;
+	text-align: center;
+}
+
+#rMenu li{
+    padding: 5px 10px;
+    cursor: pointer;
+}
+a{
+	color:#000;
+}
+#rMenu li:hover{
+    background-color: #1E9FFF;
+    color:#000;
+}
+.allWrap{
+	position:absolute;
+	top:44px;
+	left:0;
+	bottom:0;
+	width:100%;
+	overflow: auto;
+}
+
+.ligt{
+    border: 5px solid transparent;
+    border-left-color: #000000;
+    position: absolute;
+    margin-top: 6px;
+    margin-left: 16px;
+}
+.addressa{
+	cursor: pointer;
+    position: relative;
+    display: inline-block;
+    font-size: 14px;
+    text-decoration:none !important;
+}
+.adressDiv:hover{
+	background-color: #ccc;
+}
+</style>
+</head>
+<body>
+<div class="allWrap">
+	<div style="position: fixed;background: #fff !important;top: 0;width: 100%;overflow: hidden;height: 44px;border-bottom: 1px solid #ddd;">
+		<div id="navigation" style="font-size:16px;padding: 0 12px 0 12px;line-height: 36px;"></div>
+	</div>
+	<div id="collectList" style="padding-top: 20px;">
+	</div>
+	<div id="rMenu">
+		<ul >
+			<li id="modify_file"><a style="text-decoration:none !important;" href="#"><@spring.message 'action.edit'/><@spring.message 'action.collect'/></a></li>
+		</ul>
+	</div>
+</div>
+</body>
+<script id="fileShow" type="text/html">
+{{#  layui.each(d.list, function(index, item){ }}
+	<div class="col-sm-12 col-md-6 col-lg-2">
+		<div class="card" >
+			<a href="javascript:;">
+			{{# if (item.thumbnail!= null) { }}
+				<img src="${basePath}{{item.thumbnail}}" onerror="javascript:this.src='${basePath}/images/chartBg.jpg';" alt="" onclick="showOrOpen('{{item.id}}','{{item.collectName}}','{{item.resourceId}}','{{item.collectType}}')">
+			{{# } else if(item.collectType== "folder") { }}  
+				<img src="${basePath}/images/folder.jpg" alt="" onclick="showOrOpen('{{item.id}}','{{item.collectName}}','{{item.resourceId}}','{{item.collectType}}')">
+			{{# } else { }}  
+				<img src="${basePath}/images/chartBg.jpg" onerror="javascript:this.src='${basePath}/images/chartBg.jpg';" alt="" onclick="showOrOpen('{{item.id}}','{{item.collectName}}','{{item.resourceId}}','{{item.collectType}}')">
+			{{# } }}
+			</a>
+			<div class="caption" >{{item.collectName}}</div>
+			<div class="card-heading" style="overflow:hidden;white-space: nowrap;text-overflow: ellipsis;"><strong>{{item.collectName}}</strong></div>
+			<div class="card-content text-muted"><@spring.message "introduce"/>：{{# if (item.introduce!= null) { }}{{item.introduce}}{{# } else { }} {{# } }} </div>
+			<div class="card-actions">
+			<button type="button" class="btn btn-danger" onclick="collectClick('{{item.id}}','{{item.collectName}}',true)"><i class="icon-trash"></i> </button>
+			<div class="pull-right text-danger"><i class="icon-heart-empty"></i> {{# if (item.collectNum!= null) { }}{{item.collectNum}}{{# } else { }}0{{# } }}<@spring.message "people_like_it"/></div>
+			</div>
+		</div>
+	</div>
+{{#  }); }}
+</script>
+<script type="text/javascript">
+	var loadType= '${loadType!}';//加载类型 ：一次性加载，异步加载
+	var sysTheme = '${sys_theme}';//导航方式
+	//放入缓存中。
+	window.sessionStorage.setItem("loadType", loadType);
+	function showOrOpen(id,colName,resourceId,colType){
+		if(colType!=null && colType !='' && colType !='folder'){//打开报表
+			viewfile(id,colName,resourceId);
+			adress(colName,id,colType);
+		}else {//打开文件夹
+			layui.use(['form','laytpl' ], function() {
+				var form = layui.form ,laytpl = layui.laytpl;
+				if(loadType==null || loadType=='' || loadType=='undefined'){
+					var loadType = window.sessionStorage.getItem("loadType"); //缓存中取
+				}
+				if(loadType=='asyncLoad'){//异步加载
+					var resultList;
+					$.post(basePath + '/collect/findList',{parentId:id},function(result){
+						var data = { //数据
+							"list":result
+						}
+						resultList = result;
+						var getTpl = fileShow.innerHTML , view = document.getElementById('collectList');
+						laytpl(getTpl).render(data, function(html){
+						  	view.innerHTML = html;
+						});
+						adress(colName,id,colType);
+					});
+				}else {
+					var allCollectList = window.sessionStorage.getItem("allCollectList")==null?new Array():JSON.parse(window.sessionStorage.getItem("allCollectList")); //缓存中取
+					if(allCollectList==null || (allCollectList.constructor==Array && allCollectList.length==0)){
+						$.ajax({  
+							type : "post",  
+							url : basePath + '/collect/findAllList',
+							async : false,  
+							success : function(result){
+								//存入缓存中
+								allCollectList = result;
+								window.sessionStorage.setItem("allCollectList", JSON.stringify(allCollectList));
+							}  
+					    }); 
+					}
+					var childCollect = getChildFromAll(id,allCollectList);
+					var data = { //数据
+						"list":childCollect
+					}
+					var getTpl = fileShow.innerHTML , view = document.getElementById('collectList');
+					laytpl(getTpl).render(data, function(html){
+						  view.innerHTML = html;
+					});
+					adress(colName,id,colType);
+				}
+			});
+		}
+	}
+	
+	var $adress =$('<div></div>');
+	function adress(text,id,coltype){
+		var flag = true;
+		$('#navigation .adressDiv').each(function(i,e){
+			var _id = $(this).data('id');
+			if(_id==id){
+				flag = false;
+				return;
+			}
+		})
+		if(flag){
+			if(coltype=="folder"){
+				if(id==0){
+					$adress.append('<div class="adressDiv"  data-id="'+id+'" data-name="'+text+'" data-type="'+coltype+'" style="display: inline-block;"><a class="addressa">'+text+'</a></div>');
+				}else{
+					$adress.append('<span class="connector">&nbsp;&nbsp;>&nbsp;&nbsp;</span>')
+					$adress.append('<div class="adressDiv"  data-id="'+id+'" data-name="'+text+'" data-type="'+coltype+'" style="display: inline-block;"><a class="addressa">'+text+'</a></div>');
+				}
+			}
+			$("#navigation").html($adress);
+			$('#navigation .adressDiv').each(function(i,e){
+				if($(this).data('type')=="folder"){
+					$(this).click(function(){
+						var id = $(this).data('id');
+						var name = $(this).data('name');
+						var type = $(this).data('type');
+						showOrOpen(id,name,type);
+						var length = $('#navigation .adressDiv').length;
+						for(var a=i;a<length;a++){
+							$('.connector').eq(i).remove();
+							$('#navigation .adressDiv').eq(i+1).remove();
+						}
+					})
+				}
+			})
+			$('.allWrap').animate({scrollTop:0},0);
+		}
+	};
+	
+	function getChildFromAll(parentId,allCollect){
+		var result=new Array();
+		if(allCollect!=null && allCollect!=''){
+			for(var i=0;i<allCollect.length;i++){
+				var collect = allCollect[i];
+				if(collect.parentId==parentId){
+					result.push(collect);
+				}
+			}
+		}
+		return result;
+	}
+	
+	function viewfile(collectId,collectName,resourceId){
+		if(sysTheme=="theme_left_shen"){
+			if(parent.openTab){
+				parent.openTab(resourceId,collectName,"${basePath!}/resource/view/"+resourceId+"?from=collect","iframe")
+			}else{
+				window.open("${basePath!}/resource/view/"+resourceId+"?from=collect");
+			}
+		}else if(sysTheme=="theme_left_black"){
+			if(parent.openTab){
+				parent.openTab(resourceId,collectName,"${basePath!}/resource/view/"+resourceId+"?from=collect","iframe")
+			}else{
+				window.open("${basePath!}/resource/view/"+resourceId+"?from=collect");
+			}
+		}else if(sysTheme=="theme_left_admin"){
+			if(parent.openTab){
+				parent.openTab(resourceId,collectName,"${basePath!}/resource/view/"+resourceId+"?from=collect","iframe");
+			}else{
+				window.open("${basePath!}/resource/view/"+resourceId+"?from=collect");
+			}
+		}else{
+			 if(parent.refreshIframe){
+				parent.refreshIframe("${basePath!}/resource/view/"+resourceId+"?from=collect");
+			}else{
+				window.open("${basePath!}/resource/view/"+resourceId+"?from=collect");	
+			}
+		}
+	}
+	
+	function collectClick(id,colectName,flag){
+		if(flag){
+			layer.confirm('<@spring.message "comment.Confirm_delete"/>？',{title:'<@spring.message "action.info"/>',
+				btn:['<@spring.message "banner.Determine"/>','<@spring.message "action.cancel"/>'],
+				yes: function(index, layero){
+			  		$.post('${basePath}/collect/deleteCollect',{id:id},function(result){
+			    		if (result.code==0) {
+			    			layer.close(index);
+				    		parent.layer.msg("<@spring.message 'result.deleteSuccess'/>！");
+				    		document.location.reload();
+			    		} else{
+			    			layer.close(index);
+				    		parent.layer.msg("<@spring.message 'result.deleteFail'/>！");
+			    		}
+				    });
+				}
+         	});
+		}
+	}
+	
+	$("#modify_file").click(function(){
+		parent.layer.open({
+			title: '<@spring.message "action.edit"/>',
+			type:2,
+			content:'${basePath}/collect/showTree',
+			area: ['600px', '500px'],
+			btn:['<@spring.message "action.complete"/>','<@spring.message "action.exit"/>'],
+			success: function(layero){
+				var editWin = top.window[layero.find('iframe')[0]['name']]; 
+			},
+			yes:function(index,layero){
+				parent.layer.close(index);
+				showOrOpen('0',"<@spring.message 'config.My_Collection'/>",'folder');
+    		}
+		});
+	})
+	
+	$(function(){
+		showOrOpen('0',"<@spring.message 'config.My_Collection'/>",null,'folder');
+		var myMenu = document.getElementById("rMenu");
+		document.addEventListener("contextmenu", function(event){
+		    event.preventDefault();
+			var v_id = $(event.target).attr('id');
+		    myMenu.style.display = "block";
+		  	//获取鼠标视口位置
+		    myMenu.style.top = (event.clientY-44) + "px";
+		    myMenu.style.left = event.clientX + "px";
+			if(v_id!=null && v_id!='' && v_id!='undefined'){
+				//可以用来判断是否取到id
+			}else{
+			}
+		});
+		document.addEventListener("click", function(event){
+		    myMenu.style.display = "none";
+		});
+	});
+</script>
+</html>

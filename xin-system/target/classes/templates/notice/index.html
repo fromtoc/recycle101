@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="keywords" content="">
+    <meta http-equiv="description" content="">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+     <#include "common/common.html" />
+     <#include "common/common_table.html" />
+<style>
+.colSet{
+	overflow: hidden; 
+    text-overflow:ellipsis;  
+    white-space: nowrap; 
+}
+</style>
+  </head>
+  <body >
+  <div class="layui-fluid">
+  		<@system.path id="${menuId!}"></@system.path>
+		<div class="layui-row" >
+			<div class="layui-col-md12">
+			  <div  id="query_div" id="toolbar" class="layui-form layui-form-pane" >
+					<form id="query_form" class="layui-form layui-form-pane" style="padding-top:5px;">
+						<div class="layui-inline">
+							<button type="button" id="btn_add_notice" class="layui-btn layui-btn-sm layui-btn-normal  <@shiro.hasRole name='role_test' >layui-btn-disabled</@shiro.hasRole>" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole>>
+							  <i class="layui-icon">&#xe654;</i> <@spring.message 'action.add'/>
+							</button>
+						</div>
+				    	<div class="layui-inline">
+						    <label class="layui-form-label"><@spring.message 'versionNotice.title'/></label>
+						  	<div class="layui-input-inline">
+						        <input type="text" id="title" name="title" placeholder="<@spring.message 'tips.input'/>"
+								autocomplete="off" class="layui-input">
+							</div>
+						</div>
+						<div class="layui-inline">
+							<div class="layui-input-inline">
+				            	<button type="button" id="query" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/></button>
+						    	<button type="button" class="reset layui-btn layui-btn-sm layui-btn-normal"><i class="glyphicon glyphicon-refresh"></i> <@spring.message 'action.reset'/></button>
+						    </div>
+						</div>
+					</form>
+				</div>
+				<div> 
+    				<table id="table" class="table-condensed"></table>
+    			</div>	
+    			</div>
+	    </div>
+    </div>
+  </body>
+  <script>
+  
+  	var noticeLevel = '${noticeLevel!}';
+	var noticeLevelArr = [];
+	var noticeLevelData = JSON.parse(noticeLevel);
+	$.each(noticeLevelData,function(i,rec){
+		noticeLevelArr[rec.itemValue]=rec.itemName;
+	});
+  	
+  	layui.use([ 'form','layer','upload'],function() {
+		var form = layui.form, 
+			layer = layui.layer;
+		
+		$('#btn_add_notice').on('click',function(data){
+			addNotice();
+		});
+		
+	  	$('#table').bootstrapTable({
+            url: basePath + '/notice/page',         //请求后台的URL（*）
+            contentType : 'application/x-www-form-urlencoded',
+            method: 'post',                      //请求方式（*）
+            toolbar: '#toolbar',                //工具按钮用哪个容器
+            striped: false,                      //是否显示行间隔色
+            cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+            pagination: true,                   //是否显示分页（*）
+            sortable: true,                     //是否启用排序
+            sortOrder: "desc",                   //排序方式
+            queryParamsType:"",
+            queryParams: queryParams,//传递参数（*）
+            sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+            pageNumber: 1,                       //初始化加载第一页，默认第一页
+            pageSize: 10,                       //每页的记录行数（*）
+            fixedColumns:true,
+	        fixedNumber:1,
+            columns: [ {
+                field: 'opt',
+                title: '<@spring.message "action.action"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:opeFormatter
+            },{
+                field:'',
+                title:'<@spring.message "list.serialNum"/>',
+                width:'5px',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:indexFormatter
+            }, {
+                field: 'title',
+                title: '<@spring.message "versionNotice.title"/>',
+                halign: 'center',
+                align: "left",
+                valign:'middle',
+                formatter:titleFormatter
+            },{
+                field: 'validStartTime',
+                title: '<@spring.message "versionNotice.validStartTime"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:dateFormatter
+            }, {
+                field: 'validEndTime',
+                title: '<@spring.message "versionNotice.validEndTime"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:dateFormatter
+            }, {
+                field: 'isForEver',
+                title: '<@spring.message "versionNotice.permanentValid"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:ForEverFormatter
+            }, {
+                field: 'state',
+                title: '<@spring.message "list.state"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:stateFormatter
+            }, {
+                field: 'noticeLevel',
+                title: '<@spring.message "versionNotice.recommendLevel"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:noticeLevelFormatter
+            }, {
+                field: 'sort',
+                title: '<@spring.message "list.order"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            }, {
+                field: 'readNum',
+                title: '<@spring.message "list.viewNum"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            }, {
+                field: 'createrName',
+                title: '<@spring.message "list.creater"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            }, {
+                field: 'createTime',
+                title: '<@spring.message "list.createTime"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:dateTimeFormatter
+            }, {
+                field: 'publisherName',
+                title: '<@spring.message "list.publisher"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            }, {
+                field: 'publishTime',
+                title: '<@spring.message "list.publishTime"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:dateTimeFormatter
+            }, {
+                field: 'updaterName',
+                title: '<@spring.message "list.updater"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            }, {
+                field: 'updateTime',
+                title: '<@spring.message "list.updateTime"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:dateTimeFormatter
+            }],
+            
+        });
+  	});
+  	
+  	$(function(){
+	    $('#query').on('click',function(){
+	    	//$('#table').bootstrapTable('refresh', {query: {code:code,username: username,realname:realname}});
+	    	reloadTable();
+	    });
+	    
+	    $('.reset').on('click',function(){
+			$('#query_form')[0].reset();
+            reloadTable();
+		});
+	});
+  	
+  	function ForEverFormatter(value,row,index){
+  		if(row.isForEver==null || row.isForEver== undefined || row.isForEver==0){
+  			return "<@spring.message 'versionNotice.ValidStateImp'/>";
+  		}else if (row.isForEver == 1){
+  			return "<@spring.message 'versionNotice.ValidStateP'/>";
+  		}else {
+  			return " ";
+  		}
+  	}
+  	
+  	function titleFormatter(value,row,index){
+  		var color = "#000"
+  		if(row.titleColor!=null && row.titleColor!=''){
+  			color = row.titleColor;
+  		}
+  		var v = '<div class="colSet" style="width:300px"><span title="'+value+'" style="color:'+color+'">'+value+'</span><div>'
+  		return v;
+  	}
+  	
+  	function noticeLevelFormatter(value,row,index){
+  		var dict = noticeLevelData;
+  		if(dict!=null && dict!=""){
+  			for (var i = 0;i<dict.length;i++){
+  	  			if(value==dict[i].itemValue){
+  	  			//#f1a325;  #03b8cf;  #3280fc;   #38b03f;
+  	  				var col = value=="1"?"#ea644a":value=="2"?"#f1a325":value=="3"?"#03b8cf":value=="4"?"#3280fc":value=="5"?"#38b03f":"#000"
+  	  				v = '<span style="color:'+col+'">'+dict[i].itemName+'</span>'
+  	  			}
+  	  		}
+  		}else{
+  			v = "<span>"+value+"</span>"
+  		}
+  		return v;
+  	}
+  	
+  	function stateFormatter(value,row,index) {
+  		if (value==0) {
+  			return '<@spring.message "versionNotice.draftState"/>';
+  		} else if (value==1) {
+  			return '<@spring.message "versionNotice.publishState"/>';
+  		}  
+  	}
+  	
+  	function queryParams (params) {
+    	var title = $.trim($('#title').val());
+  		var param = {
+                pageSize: params.pageSize,
+                pageNumber: params.pageNumber,
+                title: title
+            };
+  		return param;
+  	}
+
+	//是否是测试用户
+	var isTestRole = "<@shiro.hasRole name='role_test' >true</@shiro.hasRole>" ? true : false;
+	function opeFormatter(value,row,index) {
+		if (isTestRole) {
+			return '<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled " disabled title="禁用" ><i class="layui-icon layui-icon-more"></i> </button>';
+		}
+		var v = '<div class="layui-btn-group">';
+		if (row.state==0) {
+			v += '<button class="layui-btn layui-btn-normal layui-btn-sm" title="<@spring.message "action.publish"/>" onclick="javascript:publishNotice(\'%\',1)"><i class="layui-icon">&#xe609;</i></button>'
+           	v += '<button class="layui-btn layui-btn-normal layui-btn-sm" title="<@spring.message "action.edit"/>" onclick="javascript:editNotice(\'%\')"><i class="layui-icon">&#xe642;</i></button>';
+			v +='<button class="layui-btn layui-btn-normal layui-btn-sm" title="<@spring.message "action.delete"/>" onclick="javascript:delNotice(\'%\')"><i class="layui-icon">&#xe640;</i></button>'
+                
+		} else if (row.state==1) {
+			v += '<button class="layui-btn layui-btn-normal layui-btn-sm" title="<@spring.message "action.unpublish"/>" onclick="javascript:publishNotice(\'%\',0)"><i class="layui-icon">&#xe65c;</i></button>'
+		}
+		v += '</div>'; 
+        return v.replace(new RegExp(/(%)/g),row.id);
+	}
+  	function addNotice() {
+  		var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message "versionNotice.addNotice"/>',
+			type:2,
+			content:'${basePath}/notice/add',
+			area: ['80%', '600px'],
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']];
+				iframeWin.init(noticeLevelData);
+			},
+			yes:function(index,layero){
+				isSubmit = saveNotice(index,layero,isSubmit);
+    		},
+    		btn3: function(index, layero){
+    		    //return false 开启该代码可禁止点击该按钮关闭
+    		}
+		});
+    }
+  	
+  	function saveNotice(index,layero,isSubmit) {
+  		if(!isSubmit){
+  			isSubmit = true;
+	  		var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+			var data = iframeWin.getData();
+			if (data!=null) {
+		  		$.ajax({
+		            type: "POST",
+		            url:'${basePath}/notice/save',
+		            data:data,
+		            async: false,
+		            error: function(request) {
+		                parent.layer.msg('<@spring.message "result.addFail"/>！');
+		                isSubmit = false;
+		            },
+		            success: function(result) {
+		            	if(result.code==0){
+		            		parent.layer.close(index);
+							parent.layer.msg('<@spring.message "result.addSuccess"/>！');
+							reloadTable();
+		            	}else if(result.code==-1){
+                            parent.layer.msg('<@spring.message "result.addFail"/>！');
+		            		isSubmit = false;
+		            	}else if(result.code==3){
+                            parent.layer.msg('<@spring.message "notice.Valid_date_cannot_be_empty"/>！');
+                            isSubmit = false;
+						}
+		            }
+		        });
+			}else{
+				isSubmit = false;
+			}
+  		}
+  		return isSubmit;
+  	}
+    
+    function delNotice(id,name) {
+        parent.layer.confirm('<@spring.message "versionNotice.deleteNotice"/>？', {title:'<@spring.message "action.info"/>',
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			yes: function(index, layero){
+		  		$.post(basePath + '/notice/delete',{id:id},function(result){
+		    		if(result.code==0){
+                		parent.layer.close(index);
+                		parent.layer.msg('<@spring.message "result.deleteSuccess"/>！');
+                		reloadTable();
+                	}else{
+                        parent.layer.msg('<@spring.message "result.deleteFail"/>！');
+                	}
+		    		
+			    });
+	                
+			}
+        });
+    }
+    
+    function publishNotice(id,state) {
+    	var data = {id:id,state:state};
+    	$.ajax({
+            type: "POST",
+            url:basePath+'/notice/publish',
+            data:data,
+            async: false,
+            error: function(request) {
+            	if(state==0){
+	                parent.layer.msg('<@spring.message "result.unpublishFail"/>！');
+            	}else if (state==1){
+            		parent.layer.msg('<@spring.message "result.publishFail"/>！');
+            	}
+            },
+            success: function(result) {
+            	if(result.code==0){
+            		if(state==0){
+    	                parent.layer.msg('<@spring.message "result.unpublishSuccess"/>！');
+                	}else if (state==1){
+                		parent.layer.msg('<@spring.message "result.publishSuccess"/>！');
+                	}
+					reloadTable();
+            	}else{
+                    parent.layer.msg('<@spring.message "result.publishFail"/>！');
+            	}
+            	
+            }
+        });
+    	
+    }
+    
+    
+    function editNotice(id) {
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message "versionNotice.editNotice"/>',
+			type:2,
+			content:basePath+'/notice/edit?id='+id,
+			area: ['80%', '600px'],
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init(noticeLevelData);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+		   		    	$.ajax({
+			                type: "POST",
+			                url:basePath+'/notice/update',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message "result.updateFail"/>！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('<@spring.message "result.updateSuccess"/>！');
+									reloadTable();
+			                	}else if(result.code==3){
+                                    parent.layer.msg('<@spring.message "notice.Valid_date_cannot_be_empty"/>！');
+			                		isSubmit = false;
+			                	}else {
+                                    parent.layer.msg('<@spring.message "result.updateFail"/>！');
+                                    isSubmit = false;
+                                }
+			                	
+			                }
+			            });
+		            } else{
+		            	isSubmit = false;
+		            }
+				}
+    		}
+		});
+    }
+    
+    function reloadTable() {
+    	$('#table').bootstrapTable('refresh', null);
+    }
+  </script>
+</html>

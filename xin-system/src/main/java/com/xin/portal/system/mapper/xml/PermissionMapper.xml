@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.PermissionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.Permission">
+        <id column="id" property="id" />
+        <result column="resource_type_id" property="resourceTypeId" />
+        <result column="name" property="name" />
+        <result column="code" property="code" />
+		<result column="sort" property="sort" />
+        <result column="tenant_id" property="tenantId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, resource_type_id, name, tenant_id
+    </sql>
+    <!-- 
+    <select id="" >
+    	select distinct p.id,p.name,p.code 
+    	from t_permission p 
+    	left join t_resource r on p.resource_type_id = r.resource_type1
+    	<where>
+    		
+    	</where>
+    </select> -->
+	<insert id="insertPermissionAllColunmForNewTenant" parameterType="com.xin.portal.system.model.Permission"
+	useGeneratedKeys="true" keyProperty="id" >
+		INSERT INTO t_permission  
+	 	( id,
+		resource_type_id,
+		name,
+		code,
+		resource_id,
+		sort,
+		tenant_id
+		 )  VALUES 
+	 	( #{id,jdbcType=VARCHAR},
+		#{resourceTypeId,jdbcType=VARCHAR},
+		#{name,jdbcType=VARCHAR},
+		#{code,jdbcType=VARCHAR},
+		#{resourceId,jdbcType=VARCHAR},
+		#{sort,jdbcType=INTEGER},
+		#{tenantId,jdbcType=VARCHAR} )
+	</insert>
+</mapper>

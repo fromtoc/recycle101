@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.bi.mapper.UserReportMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.bi.model.UserReport">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="name" property="name" />
+        <result column="report_id" property="reportId" />
+        <result column="report_type" property="reportType" />
+        <result column="project_id" property="projectId" />
+        <result column="params" property="params" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id AS userId, report_id AS reportId, report_type AS reportType, project_id AS projectId, params
+    </sql>
+    
+    <select id="findList" parameterType="com.xin.portal.bi.model.UserReport" resultType="com.xin.portal.bi.model.UserReport">
+    	SELECT
+			ur.id,
+			ur.user_id AS userId,
+			NAME,
+			report_id AS reportId,
+			report_type AS reportType,
+			project_id AS projectId,
+			params,
+			ur.create_time AS createTime,
+			read_num as readNum,
+			likes_num as likesNum,
+			score,
+			ul.resource_id as likedId
+		FROM
+			t_user_report ur
+		left join t_user_likes ul on ur.id = ul.resource_id and ul.resource_type = 2 
+		where ur.user_id=#{userId}
+		order by ur.create_time desc
+    </select>
+    
+    
+    <select id="findShareList" parameterType="com.xin.portal.bi.model.UserReport" resultType="com.xin.portal.bi.model.UserReport">
+    	SELECT
+    		distinct
+			ur.id,
+			ur.user_id AS userId,
+			NAME,
+			report_id AS reportId,
+			report_type AS reportType,
+			project_id AS projectId,
+			params,
+			ur.create_time AS createTime,
+			read_num as readNum,
+			likes_num as likesNum,
+			score,
+			ul.resource_id as likedId,
+			u.realname as createrName
+		FROM
+			t_user_share us
+			left join t_user_info u on us.creater = u.id
+			left join t_user_report ur on ur.id = us.resource_id
+			left join t_user_likes ul on ur.id = ul.resource_id and ul.resource_type = 2 
+			<if test="userId!=null and userId!=''">
+				and ul.user_id=#{userId}
+			</if>
+		<where>
+			us.id is not null
+			<if test="creater!=null and creater!=''">
+				and us.creater=#{creater} 
+			</if>
+			<if test="shareType!=null and shareType==2">
+				and (us.share_type=2 and us.user_id=#{userId}) or us.share_type=1 
+			</if>
+		</where>
+		order by ur.create_time desc
+    </select>
+    
+    <update id="updateNum">
+		update t_user_report set ${column} = ${column} ${methodType} 1 where id = #{id}
+	</update>
+	
+	<select id="findReportConmmont" parameterType="com.xin.portal.system.model.UserShare" resultType="com.xin.portal.system.model.UserShare">
+    	SELECT 
+				DISTINCT
+				t.resource_id as id,
+				t.resource_type,
+				t.user_id as creater,
+				t.name,
+				t.remark as introduce,
+				t.create_time
+		FROM 
+		(SELECT 
+				us.id,
+				us.resource_id,
+				us.resource_type,
+				ur.user_id,
+				ur.name,
+				ur.remark,
+				ur.create_time
+				FROM 
+					t_user_share us
+					LEFT JOIN t_user_report ur ON ur.id=us.resource_id
+				WHERE 
+					us.id IS NOT NULL 
+					AND us.user_id IS NULL OR us.user_id =#{userId} OR ur.user_id=#{userId}
+		) t
+		WHERE t.resource_id = #{resourceId} AND t.resource_type = 2
+    	order by t.create_time desc
+    </select>
+	
+</mapper>

@@ -1,0 +1,100 @@
+ <#include "common/common.html" />
+<style>
+.layui-elem-quote {
+    border-left: 5px solid #6fb7ff!important;
+}
+</style>
+
+<form id="form_add" class="layui-form" action=""
+	style="padding-top:10px;">
+	<!-- <div style="margin-left:100px;"> -->
+	 <div class="layui-inline">
+		<!-- 
+		<div class="layui-form-item" id="name_div">
+			<label class="layui-form-label ">资源名称</label>
+			<div class="layui-input-block" >
+				<label id="resource_label" class="layui-form-label " style="width:200px;text-align:left"></label>
+			</div>
+		</div>
+			
+			 -->
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label" id="name_div"><@spring.message "comment.Resource_name"/>:</label>
+				<div class="layui-input-block">
+					<label id="resourceName" class="layui-form-label" style="width:200px;text-align:left"></label>
+				</div>
+		    <label class="layui-form-label my-label" id="name_div"><@spring.message "comment.Commentator"/>:</label>
+		    	<div class="layui-input-block">
+					<label id="commentName" class="layui-form-label" style="width:200px;text-align:left"></label>
+				</div>
+	    </div>
+	    
+	 	 <div class="layui-form-item">
+			<label class="layui-form-label my-label" id="name_div"><@spring.message "comment.Commentary_time"/>:</label>
+				<div class="layui-input-block">
+					<label id="createTime" class="layui-form-label" style="width:200px;text-align:left"></label>
+				</div>
+		    <label class="layui-form-label my-label" id="name_div"><@spring.message "comment.Reply_to_people"/>:</label>
+		    	<div class="layui-input-block">
+					<label id="replyName" class="layui-form-label" style="width:200px;text-align:left"></label>
+				</div>
+	    </div>
+	    
+	     <div class="layui-form-item">
+			<label class="layui-form-label my-label" id="name_div"><@spring.message "comment.Recovery_time"/>:</label>
+				<div class="layui-input-block">
+					<label id="replyTime" class="layui-form-label" style="width:200px;text-align:left"></label>
+				</div>
+		    <label class="layui-form-label my-label" id="name_div"><@spring.message "comment.isTop"/>:</label>
+		    	 <div class="layui-input-block">
+					<label id="roof" class="layui-form-label" style="width:200px;text-align:left"></label>
+				</div>
+	    </div>
+	    
+	    <div class="layui-form-item">
+			<label class="layui-form-label my-label" id="name_div"><@spring.message "comment.Comment_content"/>:</label>
+				<div class="layui-input-block">
+					<label id="content" class="layui-form-label" style="width:625px;height:45px;text-align:left"></label>
+				</div>
+		</div>
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label" id="name_div"><@spring.message "comment.Reply"/>:</label>
+			<div class="layui-input-inline">
+			<input type="text" id="replyContent" class="layui-input" style="width:625px;height:45px">
+			</div>
+		</div>
+	 </div>
+</form>
+
+<script type="text/javascript">
+
+	var id ;
+	var name ;
+	var resourceid ;
+	function init(id, name, user, resourceid,rname) {
+		$.ajax({
+			type : 'Get',
+			url : '${basePath}/comment/info/' + id,
+			success : function(result) {
+				var result = result.data;
+				$('#resourceName').html(name);
+				$('#commentName').html(user);
+				$('#createTime').html(result.createTime);
+				$('#replyName').html(rname);
+				$('#replyTime').html(result.replyTime);
+				$('#content').html(result.content);
+				if(result.roof == 0 && result.roof !=null){
+					$('#roof').html('<@spring.message "tips.no"/>');
+				}else{
+					$('#roof').html('<@spring.message "tips.yes"/>');
+				}
+			}
+		});
+	}
+
+	function getData() {
+		var result = $('#replyContent').val();
+		return result;
+	}
+</script>

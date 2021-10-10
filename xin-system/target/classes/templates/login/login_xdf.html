@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="${basePath}/css/reset.css" />
+		<link rel="stylesheet" href="${basePath}/css/supersized.css" />
+		<link rel="stylesheet" href="${basePath}/plugins/layui/2.4.3/css/layui.css"media="all" />
+		<link rel="stylesheet" type="text/css" href="${basePath}/css/login.css"/>
+		<script type="text/javascript" src="${basePath}/js/jquery-1.8.3.min.js"></script>
+		<script src="${basePath}/js/scripts.js"></script>
+		<script src="${basePath}/js/supersized.3.2.7.min.js"></script>
+		<script type="text/javascript" src="${basePath}/plugins/layui/2.4.3/layui.js"></script>
+		<link href="${basePath}/images/favicon.ico" rel="icon" type="image/x-icon" />
+		<style>
+			body {
+			    background: #f8f8f8;
+			    font-family: 'PT Sans', Helvetica, Arial, sans-serif;
+			    text-align: center;
+			    color: #fff;
+			}
+			.login-input{
+				width:90%
+			}
+			#btn_login{
+				line-height: 48px
+			}
+			.page-container {
+			    margin: 120px auto 0 auto;
+			}
+			.login-box-label{
+				background-color: #ddd!important
+			}
+			.login-input{
+				border-left: 3px solid #fff;
+				background-color: #fff!important
+			}
+			.login-btn{
+				background-color: #ddd !important;
+				color:#5d5252 !important
+			}
+			.error-div {height: 27px;}
+		    .error_msg {
+		        padding-left: 17px;
+		        color: #fff;
+		        font-size:10pt;
+		    }
+		     .check_code{
+		    	text-align: left;
+		    }
+		    .verifyCode ,.verifyCode:hover{
+		    	border-left: 0px solid #4eb4ae;
+		    }
+		    .checkcode-img{
+		    	width:80px
+		    }
+			#tenantId{
+				display: block;
+				border-left: 3px solid #eaf5ff!important;
+				color: #252929 !important;
+				font-size: 18px !important;
+				height: 48px !important;
+				min-height: 36px;
+				padding-left: 13px;
+				border-radius: 4px;
+				width: 95%;
+				margin-left:7px;
+				background-color: #eaf5ff!important;
+			}
+
+		</style>
+	</head>
+	<body class="beg-login-bg" onkeydown="keyLogin();">
+		<!-- <div class="page-container">
+            <h1>Login</h1>
+            <form action="" method="post">
+                <input type="text" name="username" class="username" placeholder="Username">
+                <input type="password" name="password" class="password" placeholder="Password">
+                <button type="submit">Sign me in</button>
+                <div class="error"><span>+</span></div>
+            </form>
+        </div> -->
+        <input type="hidden" value="${basePath}" id="basePath"/>
+		<div class="title" style="margin-top:3%">
+				<img style="width:348px;height:84px" src="${basePath}${(SYS_LOGO!='')?string('${SYS_LOGO}','/images/dataWindow_white.png')}" onerror="javascript:this.src='${basePath}/images/dataWindow_white.png';">
+				<div class="title-chinese">
+					<span class="${(SYS_LOGIN_NAME!=null && SYS_LOGIN_NAME!='')?string('','layui-hide')}" ><span style="letter-spacing: 0px !important;" ></span>${SYS_LOGIN_NAME!''}<span style="letter-spacing: 0px !important;" ></span></span>
+				</div>
+			</div>
+			<div class="login-box">
+			<form action="${basePath}/login" class="layui-form login-form" method="post" id="loginForm" name="f" >
+				<div class="layui-form-item item-username" style="display: <#if SYS_USER_TENANT==1><#else>none</#if>"> 
+				<!-- <div class="layui-form-item item-username"> -->
+					<span class="layui-form-label login-box-label">
+						<img alt="" src="${basePath}/images/tenant2.png">
+					</span>
+					<div class="layui-input-block login-input-div">
+						<select  id="tenantId" name="tenantId" class="layui-inline"  autofocus="autofocus" onchange="changeTenant()">
+							<option  value="1">系统租户</option>
+							<#if tenantList??&&tenantList?size>0>
+							<#list tenantList as rec>
+								<option value = "${rec.id}"  <#if tenantId==rec.id>selected</#if>>${rec.name}</option>
+							</#list>
+							</#if>
+						</select>
+					</div>
+				</div>
+				<div class="layui-form-item item-username">
+					<span class="layui-form-label login-box-label">
+						<img alt="" src="${basePath}/images/user_edu.png">
+					</span>
+					<div class="layui-input-block login-input-div">
+						<input type="text" name="username" value="${username!}" lay-verify="title"  autocomplete="off" placeholder="<@spring.message 'login.username'/>" class="login-input">
+					</div>
+				</div>
+				<div class="layui-form-item item-password">
+					<span class="layui-form-label login-box-label">
+						<img alt="" src="${basePath}/images/ps_edu.png">
+					</span>
+					<div class="layui-input-block login-input-div">
+
+						<input type="password" id="passwordInput" lay-verify="title" autocomplete="off" placeholder="<@spring.message 'login.password'/>" class="login-input">
+						<input type="hidden" name="password" lay-verify="title" autocomplete="off" placeholder="<@spring.message 'login.password'/>" class="login-input">
+					</div>
+				</div>
+				<div  id="check_code_div" class="input_outer layui-form-item check_code" style="margin-bottom: 0px;display:${(SYS_CHECK_CODE=='1')?string('block','none')}">
+							<div class=" login-input-div layui-inline" style="margin-left:0px;width:70%;">
+								<input id="verifyCode" name="verifyCode" autocomplete="off" class="verifyCode login-input" value="" type="text" placeholder="<@spring.message 'login.Verification_Code'/>" style="width:84%">
+							</div>
+							<img src="${basePath}/kaptcha/new" id="checkcode_img" onclick="changeImg()" class="checkcode-img"/>
+	            </div>
+				<div class="layui-form-item error-div" >
+					<span>
+						<span class="error_msg" style="display: ${(message_login!='')?string('block','none')};">${message_login!}</span>
+					</span>
+					
+				</div> 
+				
+				<div class="layui-form-item">
+	            	<a id="btn_login" href="javascript:" class="layui-btn layui-btn-primary login-btn" ><@spring.message 'login.nbspSign'/></a>
+	            </div>
+	            <a class="forget-pwd" target="_blank" style="display: ${(FORGET_PASSWORD_PROMPT!='1')?string('none','block')};" href="${basePath}/userInfo/forget/forgetPwd" style="color: #fff"><@spring.message 'login.Forget_the_password'/>？</a>
+			</form>
+
+
+
+			</div>
+		<footer class="login-footer">
+				<p>${SYS_COPYRIGHT!''}</p>
+		</footer>
+        <script>
+    $(function(){    	
+	    $.supersized({
+	        // Functionality
+	        slide_interval     : 4000,    // Length between transitions
+	        transition         : 1,    // 0-None, 1-Fade, 2-Slide Top, 3-Slide Right, 4-Slide Bottom, 5-Slide Left, 6-Carousel Right, 7-Carousel Left
+	        transition_speed   : 1000,    // Speed of transition
+	        performance        : 0,    // 0-Normal, 1-Hybrid speed/quality, 2-Optimizes image quality, 3-Optimizes transition speed // (Only works for Firefox/IE, not Webkit)
+	
+	        // Size & Position
+	        min_width          : 0,    // Min width allowed (in pixels)
+	        min_height         : 0,    // Min height allowed (in pixels)
+	        vertical_center    : 1,    // Vertically center background
+	        horizontal_center  : 1,    // Horizontally center background
+	        fit_always         : 0,    // Image will never exceed browser width or height (Ignores min. dimensions)
+	        fit_portrait       : 1,    // Portrait images will not exceed browser height
+	        fit_landscape      : 0,    // Landscape images will not exceed browser width
+	
+	        // Components
+	        slide_links        : 'blank',    // Individual links for each slide (Options: false, 'num', 'name', 'blank')
+	        slides             : [    // Slideshow Images
+	                                 {image : '${basePath}/images/login_xdf_1.jpg'},
+	                                 {image : '${basePath}/images/login_xdf_2.jpg'},
+	                                 {image : '${basePath}/images/login_xdf_3.jpg'},
+	                                 {image : '${basePath}/images/login_xdf_4.jpg'}
+	                             ]
+	   		 });
+	
+		});
+
+    function changeTenant(){
+        var tenantId = $("#tenantId").val();
+        window.location.href="${basePath}/login?tenantId="+tenantId;
+	}
+    var usernameCannotBeEmpty = "<@spring.message 'login.The_username_cannot_be_empty'/>";
+    var passwordCannotBeEmpty = "<@spring.message 'login.The_password_cannot_be_empty'/>";
+    var captchaCannotBeEmpty = "<@spring.message 'login.The_captcha_cannot_be_empty'/>";
+    var publicKeyCannotFind = "<@spring.message 'login.publicKey_cannot_find'/>！";
+    var passwordCannotMoreThan64= "<@spring.message 'config.Password_length_should_not_be_more_than_64_place'/>！";
+    
+    /* var flag = false;//是否点击登录的标志
+    $("#btn_login").on("click",function() {
+        if (!flag) {
+            if ($('input[name="username"]').val() == null || $('input[name="username"]').val() == "") {
+                //$(".error_msg").text("用户名不能为空111");
+                $(".error_msg").text("<@spring.message 'login.The_username_cannot_be_empty'/>");
+                $(".error_msg").show();
+                flag = false;
+                return;
+            }
+            if ($('#passwordInput').val() == null || $('#passwordInput').val() == "") {
+               // $(".error_msg").text("密码不能为空");
+                $(".error_msg").text("<@spring.message 'login.The_password_cannot_be_empty'/>");
+                $(".error_msg").show();
+                flag = false;
+                return;
+            }
+            if (!$('#check_code_div').is(":hidden")) {
+                if ($('input[name="verifyCode"]').val() == null || $('input[name="verifyCode"]').val() == "") {
+                   // $(".error_msg").text("验证码不能为空");
+                    $(".error_msg").text("<@spring.message 'login.The_captcha_cannot_be_empty'/>");
+                    $(".error_msg").show();
+                    flag = false;
+                    return;
+                }
+            }
+        }
+    }); */
+    </script>
+    <script type="text/javascript" src="${basePath}/js/Barrett.js"></script>
+	<script type="text/javascript" src="${basePath}/js/BigInt.js"></script>
+	<script type="text/javascript" src="${basePath}/js/RSA.js"></script>   
+	<script type="text/javascript" src="${basePath}/js/login.js"></script>  
+       
+	</body>
+</html>

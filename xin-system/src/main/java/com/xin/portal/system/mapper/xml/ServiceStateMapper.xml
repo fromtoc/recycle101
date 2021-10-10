@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.ServiceStateMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.ServiceState">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="ip" property="ip" jdbcType="VARCHAR"/>
+        <result column="port" property="port" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="state" property="state" jdbcType="INTEGER"/>
+        <result column="remarks" property="remarks" jdbcType="VARCHAR"/>
+        <result column="refresh_time" property="refreshTime" jdbcType="INTEGER"/>
+        <result column="record_type" property="recordType" jdbcType="INTEGER"/>
+        <result column="retention_time" property="retentionTime" jdbcType="INTEGER"/>
+        <result column="mail_frequency" property="mailFrequency" jdbcType="INTEGER"/>
+        <result column="mail_count" property="mailCount" jdbcType="INTEGER"/>
+        <result column="is_sent_mail" property="isSentMail" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="service_state" property="serviceState" jdbcType="INTEGER"/>
+        <result column="service_id" property="serviceId" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, ip, port, email, state, remarks, refresh_time, record_type, retention_time,mail_frequency,mail_count,is_sent_mail
+    </sql>
+    
+    <select id="findList" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.ServiceState">
+   	select <include refid="Base_Column_List"></include> from t_service_state 
+   		<where >
+   			<if test="name!=null and name!=''">
+   				<bind name="pattern1" value="'%'+name+'%'"/>
+				name like #{pattern1}
+			</if>
+		</where>
+   	order by name
+   </select>
+   
+   <select id="findStateList" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.ServiceState">
+   	select b.id,b.name,b.ip,b.port,b.a.service_id,a.create_time,a.service_state from 
+   	(SELECT service_id,create_time,service_state from t_service_state_record order by create_time desc ) a  
+   	LEFT JOIN t_service_state b on b.id = a.service_id group by a.service_id
+   </select>
+   
+   <select id="findStateList" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.ServiceState" databaseId="oracle">
+		SELECT 
+		  MAX(b.id) AS id,
+		  MAX(b.name) AS NAME,
+		  MAX(b.ip) AS ip,
+		  MAX(b.port) AS PORT,
+		  a.service_id,
+		  MAX(a.create_time) AS create_time,
+		  MAX(a.service_state) AS service_state
+		FROM
+		  (SELECT 
+		    service_id,
+		    create_time,
+		    service_state 
+		  FROM
+		    t_service_state_record 
+		  ORDER BY create_time DESC) a 
+		  LEFT JOIN t_service_state b 
+		    ON b.id = a.service_id 
+		GROUP BY a.service_id 
+   </select>
+   
+   <update id="updateState" parameterType="com.xin.portal.system.model.ServiceState">
+   	update t_service_state set state = #{state} where id = #{id}
+   </update>
+
+    <update id="updateIsSentMail" parameterType="com.xin.portal.system.model.ServiceState">
+        update t_service_state set is_sent_mail = #{isSentMail} where id = #{id}
+    </update>
+   
+   <update id="updateServiceState" parameterType="com.xin.portal.system.model.ServiceState">
+   	UPDATE t_service_state SET name=#{name}, ip=#{ip}, port=#{port}, email=#{email},
+   	state=#{state}, remarks=#{remarks}, tenant_id=1 WHERE id=#{id}
+   </update>
+   
+   <update id="updateConfig" parameterType="com.xin.portal.system.model.ServiceState">
+   	UPDATE t_service_state SET refresh_time = #{refreshTime}, record_type = #{recordType}, retention_time = #{retentionTime}
+   </update>
+   
+   <insert id="insertRecord" parameterType="com.xin.portal.system.model.ServiceState" databaseId="oracle">
+   	insert into t_service_state_record VALUES (#{serviceId,jdbcType=VARCHAR},sysdate,#{serviceState,jdbcType=INTEGER},1)
+   </insert>
+   
+   <insert id="insertRecord" parameterType="com.xin.portal.system.model.ServiceState">
+   	insert into t_service_state_record VALUES (#{serviceId,jdbcType=VARCHAR},SYSDATE(),#{serviceState,jdbcType=INTEGER},1)
+   </insert>
+   
+   <delete id="deleteRecord" parameterType="com.xin.portal.system.model.ServiceState">
+   	delete t_service_state_record where service_id = #{serviceId} and create_time &lt; #{createTime}
+   </delete>
+
+</mapper>

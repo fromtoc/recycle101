@@ -1,0 +1,205 @@
+ <#include "common/common.html" />
+ <#include "common/common_ztree.html" />
+		<form id="form_add" class="layui-form" action=""
+			style="padding-top:10px;">
+			<div>
+				<input type="hidden" name="orgCode" id="orgCode">
+				<div class="layui-form-item">
+					<label class="layui-form-label "><@spring.message 'user.belongOrg'/></label>
+					<div class="layui-inline" style="width:80%">
+						<input type="text" id="orgName" name="orgName" readonly value=""
+							class="layui-input">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<div class="layui-inline">
+						<label class="layui-form-label my-label"><@spring.message 'user.username'/></label>
+						<div class="layui-input-inline">
+							<input type="text" id="username" name="username"  lay-verify="required" placeholder="<@spring.message 'tips.input'/>"
+								autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-inline">
+					<label class="layui-form-label my-label"><@spring.message 'user.realname'/></label>
+					<div class="layui-input-inline">
+						<input type="text" name="realname" placeholder="<@spring.message 'tips.input'/>"
+							autocomplete="off" class="layui-input">
+					</div>
+					</div>
+					<!-- <div class="layui-inline">
+						<label class="layui-form-label my-label">密码</label>
+						<div class="layui-input-inline">
+							<input type="text" id="password" name="password"  lay-verify="required" placeholder="请输入名称"
+								autocomplete="off" class="layui-input">
+						</div>
+					</div> -->
+				</div>
+				<!-- <div class="layui-form-item">
+					
+						<div class="layui-inline">
+							<label class="layui-form-label my-label">学号</label>
+							<div class="layui-input-inline">
+								<input type="text" id="code" name="code"  lay-verify="required" placeholder="请输入名称"
+									autocomplete="off" class="layui-input">
+							</div>
+						</div>
+				</div>
+				 -->
+				<div class="layui-form-item">
+				</div>
+				<div class="layui-form-item">
+					<div class="layui-inline">
+						<label class="layui-form-label my-label"><@spring.message 'user.phone'/></label>
+						<div class="layui-input-inline">
+							<input type="text" id="phone" name="phone" placeholder="<@spring.message 'tips.input'/>"
+								autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-inline">
+						<label class="layui-form-label my-label"><@spring.message 'user.email'/></label>
+						<div class="layui-input-inline">
+							<input type="email" id="email" name="email" placeholder="<@spring.message 'tips.input'/>"
+								autocomplete="off" class="layui-input">
+						</div>
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label my-label"><@spring.message 'user.validTime'/></label>
+					<div class="layui-input-inline">
+						<input type="text" id="activate_time"  placeholder="<@spring.message 'tips.choos'/>"
+							autocomplete="off" class="layui-input">
+						<input type="hidden" id="activate_start_time" name="activateStartTime" placeholder="<@spring.message 'tips.choos'/>"
+							autocomplete="off" class="layui-input">
+						<input type="hidden" id="activate_end_time" name="activateEndTime"  placeholder="<@spring.message 'tips.choos'/>"
+							autocomplete="off" class="layui-input">
+					</div>
+					<div class="layui-inline">
+						<label class="layui-form-label my-label"><@spring.message 'user.gender'/></label>
+						<div class="layui-input-inline">
+							<input type="radio" name="gender" value="1" title="<@spring.message 'user.male'/>" checked>
+			      			<input type="radio" name="gender" value="2" title="<@spring.message 'user.female'/>" >
+						</div>
+					</div>
+					
+				</div>
+				
+				
+				
+				<div class="layui-form-item layui-hide">
+					<label class="layui-form-label my-label"><@spring.message 'user.MSTRUser'/></label>
+					<div class="layui-input-inline">
+						<input type="checkbox" value="1" name="mstrUser" lay-skin="switch" lay-text="<@spring.message 'tips.yes'/>|<@spring.message 'tips.no'/>">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<div class="layui-input-block" style="width:70%">
+						<blockquote class="layui-elem-quote layui-quote-nm"><@spring.message 'user.defaultPwd'/>：${defaultPassword!}</blockquote>
+					</div>
+				</div>
+			</div>
+		</form>
+    <div class="layui-tab-item">
+    	<ul id="tree" class="ztree" style="overflow:auto;"></ul>
+    </div>
+
+
+<script type="text/javascript">
+	function init (parentNode) {
+		$('#orgName').val(parentNode.name);
+		$('#orgCode').val(parentNode.code);
+	}
+	
+	
+	function check() {
+		var selectors = ["#username","#email"];
+		var result = true;
+		$.each(selectors,function(index, rec){
+			if (!checkField(rec)) {
+				result = false;
+				return false;//调出循环
+			}
+			
+		});
+  		return result;
+  	}
+	
+	//判断手机号码格式是否合法
+	function check_phone(value){
+	 	var regx=/^(?:13\d|15\d|16\d|17\d|18[123456789])-?\d{5}(\d{3}|\*{3})$/;
+	 	if(regx.test(value)){
+	 		return true;
+	 	}else{
+	 		$('#phone').addClass("layui-form-danger");
+			$('#phone').focus();
+			layer.tips("<@spring.message 'user.phoneTips'/>", '#phone');
+	  		return false;
+	 	}
+	}
+
+	 
+	//判断邮箱地址格式是否合法
+	function check_mail(value){
+		var regm = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;//验证Mail的正则表达式,^[a-zA-Z0-9_-]:开头必须为字母,下划线,数字,
+	 	if (regm.test(value)){
+	  		return true;
+	 	} else{
+			$('#email').addClass("layui-form-danger");
+			$('#email').focus();
+			layer.tips("<@spring.message 'user.emailTips'/>", '#email');
+	  		return false;
+	 	}
+	}
+  	
+  	function checkField(selector){
+  		var value = $(selector).val();
+  		if (value==null || value == '') {
+  			$(selector).addClass("layui-form-danger");
+  			$(selector).focus();
+  			layer.tips("<@spring.message 'tips.inputSome'/>", selector);
+  			return false;
+  		}
+  		if (selector=='#phone') {
+  			return check_phone(value);
+  		} else if (selector=='#email') {
+  			return check_mail(value);
+  		} 
+  		return true;
+  		
+  	}
+	
+	function getData(){
+		if (check()) {
+			return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+  	}
+	
+	layui.use([ 'form', 'element','laydate' ],function() {
+		var form = layui.form, 
+			laydate = layui.laydate,
+			element = layui.element;
+		
+			laydate.render({ 
+			  elem: '#activate_time'
+			  ,range: true //或 range: '~' 来自定义分割字符
+			  ,min:0
+			  ,done: function(value, date, endDate){
+				  if (value!=null && value!='') {
+				    $('#activate_start_time').val(date.year+'-'+date.month+'-'+date.date);
+				    $('#activate_end_time').val(endDate.year+'-'+endDate.month+'-'+endDate.date);
+				  }
+				}
+			});
+	})
+	
+    /* function init(userId) {
+    	$.post('${basePath}/roleUser/findRoleByUser',{userId:userId},function(result){
+    		for (var i=0, l=result.length; i < l; i++) {
+    			var node = zTreeRole.getNodesByParam("id", result[i], null);
+				zTreeRole.checkNode(node[0], true, false);
+			}
+    	});
+    } */
+    
+</script>

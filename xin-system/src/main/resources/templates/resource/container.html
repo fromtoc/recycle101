@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" style="overflow: hidden;">
+  <head>
+    <#include "common/common.html" />
+	<#include "common/common_table.html"/>
+    <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+    <meta http-equiv="description" content="this is my page">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title></title>
+    <script type="text/javascript">
+  function changeFrameHeight(){
+	    //var ele= document.getElementById("my-video"); 
+	    //var height=document.documentElement.clientHeight-60;
+	  $('#iframe').css('height',document.documentElement.clientHeight-50);
+	}
+	window.onresize=function(){  
+	     changeFrameHeight();  
+	} 
+  </script>
+  </head>
+  <body onload="changeFrameHeight()">
+    <@system.path id="${menuId!}"></@system.path>
+    <div>
+    	<iframe id="iframe" src="${url!}" frameborder="0" width="100%" height="100%" scrolling="no"/>
+    </div>
+  </body>
+  
+</html>

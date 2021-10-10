@@ -1,0 +1,329 @@
+	  <div  id="content_${typeCase}" isAuto="false">
+	      
+	  </div>
+  <script id="itemContent_${typeCase}" type="text/html">
+  {{#  layui.each(d.rows, function(index, item){ }}
+  {{#  if(index%2==0){ }}
+	  <div class="layui-row">
+  {{#  } }} 
+			    <div class="layui-col-md6 md" >
+			    	<div class="item" >   
+					  {{#  if(${typeCase}==1 || ${typeCase}==2){ }}                                               
+					  <div class="item-link" onclick="javascript:showCourseAndResource(${typeCase},{{item.id}},'{{item.fileId||''}}','{{item.reportId||''}}',{{item.projectId}},{{item.reportType}})">
+					  {{# } }}	
+						<div class="item-left">
+                          <img src="${basePath}/{{item.imgUrl||'images/course.jpg'}}" alt="{{item.name||''}}" />
+                      	</div>
+                      	<div class="item-right">
+                          <div class="item-right-title">
+                              <span>{{item.name||''}}</span>
+                          </div>
+						  {{#  if(${typeCase}==2 || ${typeCase}==3){ }}
+                          <div class="item-right-desc" title="{{formatDesc(item.description||'暂无')}}">
+								简介：{{formatDesc(item.description||'暂无')}}
+								{{# if(${typeCase}==3){ }}
+									<div style="float: right;">
+										<span class="item-link" onclick="javascript:showCase('{{item.id}}','{{item.docUrl}}')">观看文档</span>
+										<span class="item-link" onclick="javascript:showCase('{{item.id}}','{{item.reportUrl}}')">观看作品</span>
+									</div>
+								{{# } }}
+                          </div>
+						  {{#  } }} 
+						  {{#  if(${typeCase}==1){ }}
+                          <div class="item-right-desc" title="{{formatDesc(item.introduce||'暂无')}}">
+								设计说明：{{formatDesc(item.introduce||'暂无')}}
+                          </div>
+						  {{#  } }} 
+                      	</div>
+					  {{#  if(${typeCase}==1 || ${typeCase}==2){ }}   
+					  </div>
+					  {{#  } }} 
+                      <div class="clear"></div>
+                      <div class="item-footer">
+                          <span><i class="fa fa-clock-o"></i>&nbsp;&nbsp;{{utils.tmDate.getFormatDateByLong(item.createTime,'yyyy-MM-dd')}}</span>
+                          {{#  if(${typeCase}==2 || ${typeCase}==3){ }}
+						  <span class="footer-author"><i class="fa fa-user"></i>&nbsp;&nbsp;{{item.createrName||''}}</span>
+						   {{#  } }} 
+						  <div class="footer-viewinfo" onclick="javascript:star(${typeCase},{{item.id}},'add')">
+							<i id="star_${typeCase}_{{item.id}}" class="fa fa-star"></i>&nbsp;<span id="collect_${typeCase}_{{=item.id}}" >{{item.collectionNum||0}}</span>
+						  </div>
+							{{#  if(${typeCase}==2){ }}
+						  <span class="footer-viewinfo download" onclick="javascript:download(${typeCase},{{item.fileId||0}},{{item.id||0}})"><i class="fa fa-download"></i>&nbsp;<span id="download_${typeCase}_{{item.id}}">{{item.downloadNum||0}}</span></span>
+						   {{#  } }} 
+                      </div>
+                      </div>
+			    </div>
+	{{#  if(index%2==1){ }}
+	  </div>
+	  {{#  } }} 
+	{{#  }); }}
+
+  </script>
+  
+  <script>
+  /* <span><i class="fa fa-tag"></i>&nbsp;&nbsp;<a href="#">Web前端</a></span> */
+  	
+  	layui.use([ 'form','flow','laytpl','layer'],function() {
+		var form = layui.form,
+			$ = layui.jquery, //不用额外加载jQuery，flow模块本身是有依赖jQuery的，直接用即可。
+			flow = layui.flow,
+			layer = layui.layer,
+			laytpl = layui.laytpl;
+		
+		
+		flow.load({
+		    elem: '#content_${typeCase!}', //指定列表容器
+		    isAuto:false,
+		    //scrollElem:'#',
+		    done: function(page, next){ //到达临界点（默认滚动触发），触发下一页
+		      var lis = [];
+		      //以jQuery的Ajax请求为例，请求下一页数据（注意：page是从2开始返回）
+		      var params = {
+		    		  pageNumber:page,
+		    		  pageSize:6,
+		    		  colType:'${typeCase!}'
+		      }
+		      $.post('${basePath}/collect/showCollectOfType',params, function(res){
+		        //假设你的列表返回在data集合中
+		        var getTpl = itemContent_${typeCase}.innerHTML;
+		        var tplHtml = laytpl(getTpl).render(res);
+		        //layui.each(res.rows, function(index, item){
+		        //  lis.push('<li>'+ item.desc +'</li>');
+		        //}); 
+		        //执行下一页渲染，第二参数为：满足“加载更多”的条件，即后面仍有分页
+		        //pages为Ajax返回的总页数，只有当前页小于总页数的情况下，才会继续出现加载更多
+		        //next(lis.join(''), page < res.total/res.pageSize);   
+		        next(tplHtml, page < res.total/res.pageSize); 
+		        
+		        $('.fa-star').off('mouseover').on('mouseover',function(){
+		        	layer.tips('取消收藏', this, {
+			        	  tips: [1, '#cecece'], //还可配置颜色
+			        	  time:1000
+			        	});
+				});
+		        
+		        $('.fa-download').off('mouseover').on('mouseover',function(){
+		        	layer.tips('下载', this, {
+			        	  tips: [1, '#cecece'], //还可配置颜色
+			        	  time:1000
+			        	});
+				});
+		        
+		        
+		        /* $('.item').off('mouseover').on('mouseover',function(){
+		        	console.log(res);
+					console.log(this);
+					
+				}); */
+		      });
+		    }
+		  });
+		
+			
+  	});
+  	
+  	function queryParams (params) {
+  		var temp = {  //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+                //limit: params.limit,  //页面大小
+                //page: params.offset, //页码  
+
+                pageSize: params.pageSize,
+                pageNumber: params.pageNumber,
+            };
+  		return temp;
+  	}
+  	
+  
+	function star(colType,id,action){
+ 			var methodType = '+';
+ 			if ($('#star_'+colType+"_"+id).hasClass('fa-star-o')){//未收藏变已收藏
+ 				$('#star_'+colType+"_"+id).removeClass('fa-star-o');
+ 				$('#star_'+colType+"_"+id).addClass('fa-star');
+ 				$('#collect_'+colType+"_"+id).html(Number($('#collect_'+colType+"_"+id).html())+1);
+ 			} else {
+ 				$('#star_'+colType+"_"+id).removeClass('fa-star');
+ 				$('#star_'+colType+"_"+id).addClass('fa-star-o');
+ 				$('#collect_'+colType+"_"+id).html(Number($('#collect_'+colType+"_"+id).html())-1);
+ 				methodType = '-';
+ 			};
+ 			if(colType==1){
+ 				$.post('${basePath}/collect/updateNum/collect',{colType:colType,id:id,methodType:methodType},function(result){
+ 	 				
+ 	 			});
+ 			}
+ 			/* else if(colType==2){
+ 				$.post('${basePath}/course/updateNum/collect',{id:id,methodType:methodType},function(result){
+ 				
+ 	 			});
+ 			}else if(colType==3){
+ 				$.post('${basePath}/course/updateNum/collect',{id:id,methodType:methodType},function(result){
+ 	 				
+ 	 			});
+ 			} */
+ 			//要重新刷新
+ 			document.location.reload();
+ 	}
+	
+  	function showCourseAndResource(colType,id,fileId,projectId,reportType,reportId){
+  		if(colType==1){//报表
+  			$.get('${basePath}/userReport/show/edit',{id:id,projectId:projectId,reportType:reportType,reportId:reportId},function(result){
+  		  		location.href=result.data;	
+  	  		});
+  		}
+  		/* else if(colType==2){//课件
+  			$.post('${basePath}/course/checkAuth',{courseId:id,type:"viewEnable"},function(result){
+  				if(result.code == 0){
+			  		$.post('${basePath}/course/updateNum/read',{id:id},function(){
+				  		//location.href='${basePath}/plugins/pdfjs/web/viewer.html?file=${basePath}'+fileUrl;
+			  			location.href='${basePath}/file/view/'+fileId;	
+			  		});
+  				}else if(result.code == -1){
+  	  				layer.msg(result.msg);
+  	  			}else{
+  	  				layer.msg("网络繁忙，请稍后重试！");
+  	  			}	
+  			});
+  		} */
+  	}
+  	
+  	function showCase(id,url){
+  		/* $.post('${basePath}/course/checkAuth',{courseId:id,type:"viewEnable"},function(result){
+  			if(result.code == 0){
+		  		if(url!=null && url!='' && url!="undefined"){
+			  		$.post('${basePath}/course/updateNum/read',{id:id},function(){
+				  			window.open(url);
+			  		});
+		  		}else{
+		  			layer.msg('未设置链接！');
+		  		}
+  			}else if(result.code == -1){
+  				layer.msg(result.msg);
+  			}else{
+  				layer.msg("网络繁忙，请稍后重试！");
+  			}	
+  		}); */	
+  	}
+  	
+  	
+  	
+  	var isDownload = false;
+  	function download(colType,fileId,id){
+  		/* if (!isDownload) {
+  			$.post('${basePath}/course/checkAuth',{courseId:id,type:"downEnable"},function(result){
+  				if(result.code == 0){
+		  			isDownload = true;
+		  			$('#download_'+colType+"_"+id).html(Number($('#download_'+colType+"_"+id).html())+1);
+		  			$.post('${basePath}/course/updateNum/download',{id:id},function(){
+		  				isDownload=false;
+		  			});
+			  		window.open('${basePath}/file/download/'+fileId);
+  				}else if(result.code == -1){
+  	  				layer.msg(result.msg);
+  	  			}else{
+  	  				layer.msg("网络繁忙，请稍后重试！");
+  	  			}
+  			});	
+  		} */
+  	}
+  	
+  	function formatDesc(description){
+  			if (description.length>10) {
+  				return description.substr(0,10) + '...';
+  			} else {
+  				return description;
+  			}
+  	}
+  	
+  
+	
+    
+  </script>
+  <style>
+  .type-case-name {
+  font-size: 18pt;
+    padding-bottom: 11px;
+  }
+  .md {
+  	padding-right:33px;
+  	width: 50%;
+  }
+  	.item {
+  	margin-bottom:15px;
+    box-shadow: 0 2px 10px 0 rgba(0,0,0,.1);
+    padding: 10px;
+    min-height: 140px;
+    position: relative;
+}
+.item:hover {
+	 box-shadow: 2px 2px 10px 2px #a4dac4;
+	 transform:scale(1.0);
+	 transition:all 0.5s;
+	 -webkit-transform: scale(1.00);
+	 z-index:999;
+	 background-color: #fff;
+	 
+}
+.item-link {
+	cursor: pointer;
+}
+.item-left {
+	width: 25%;
+    float: left;
+}
+.item-left > img {
+	width: 100%;
+    height: 140px;
+    display: inline-block;
+    border: none;
+    min-height:140px;
+}
+.item-right {
+width: 73%;
+    float: right;
+    padding-left: 2%;
+}
+.item-right-title {
+font-size: 18px;
+}
+.item-right-desc {
+font-size: 14px;
+    display: block;
+    margin-top: 10px;
+    text-indent: 2em;
+    color: #cecece;
+    overflow: hidden;
+    height: 50px;
+}
+.item-footer {
+	    margin-top: 10px;
+    font-size: 13px;
+    padding: 2px;
+    color: #a6a6a6;
+    bottom: 10px;
+    position: absolute;
+    width: 68%;
+    right: 10px;
+}
+.item-footer > span {
+	   padding-right: 3%;
+}
+
+.footer-author {
+display: inline;
+}
+.footer-viewinfo {
+	display: inline;
+    float: right;
+}
+
+.download:hover {
+	cursor: pointer;
+}
+.read:hover {
+	cursor: pointer;
+}
+.clear {
+/* clear: both; */
+
+}
+  </style>

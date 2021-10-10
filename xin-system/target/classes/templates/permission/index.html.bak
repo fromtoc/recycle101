@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="keywords" content="">
+    <meta http-equiv="description" content="">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+     <#include "common/common.html" />
+     <#include "common/common_table.html" />
+  </head>
+  <body style="padding:10px;">
+  	 <div >
+     	<div class="layui-inline">
+     		<button id="btn_add_permission" class="layui-btn layui-btn-sm layui-btn-normal">
+			  <i class="layui-icon">&#xe654;</i> <@spring.message "resource.new-build"/>
+			</button>
+	    </div>
+    </div>
+    <table id="table"></table>
+  </body>
+  <script>
+  	
+  	layui.use([ 'form','layer'],function() {
+		var form = layui.form, 
+			layer = layui.layer;
+		
+		$('#btn_add_permission').on('click',function(data){
+			addPermission();
+		});
+		
+		
+		
+	  	$('#table').bootstrapTable({
+            url: '${basePath!}/permission/page',         //请求后台的URL（*）
+            contentType : 'application/x-www-form-urlencoded',
+            method: 'get',                      //请求方式（*）
+            striped: false,                      //是否显示行间隔色
+            cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+            pagination: true,                   //是否显示分页（*）
+            sortable: true,                     //是否启用排序
+            sortOrder: "desc",                   //排序方式
+            queryParamsType:"",
+            queryParams: queryParams,//传递参数（*）
+            sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+            pageNumber: 1,                       //初始化加载第一页，默认第一页
+            pageSize: 10,                       //每页的记录行数（*）
+            uniqueId:'id',
+            columns: [{
+                field:'',
+                title:'<@spring.message "list.serialNum"/>',
+                width:'5px',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:indexFormatter
+            }, 
+            {
+                field: 'id',
+                title: 'id',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'resourceTypeId',
+                title: '<@spring.message "resource.Resource_type"/>id',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+                {
+                    field: 'resourceId',
+                    title: '<@spring.message "wechat.Resources"/>id',
+                    halign: 'center',
+                    align: 'center',
+                    valign:'middle',
+                },
+            {
+                field: 'name',
+                title: '<@spring.message "permission.Name_of_permission"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+                {
+                    field: 'code',
+                    title: '<@spring.message "permissions.permissions"/>code',
+                    halign: 'center',
+                    align: 'center',
+                    valign:'middle',
+                },
+            {
+                field: 'tenantId',
+                title: 'tenantId',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+            },
+            {
+                field: 'opt',
+                title: '<@spring.message "comment.operation"/>',
+                halign: 'center',
+                align: 'center',
+                valign:'middle',
+                formatter:opeFormatter
+            }
+            ],
+        });
+	  	
+  	});
+  	
+  	function queryParams (params) {
+  		return params;
+  	}
+  	
+  	function opeFormatter(value,row,index){
+  		var v = '<div class="layui-btn-group layui-btn-group-xs" >'
+  				+ '<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" title="<@spring.message "action.edit"/>" onclick="javascript:editPermission(\'%\')"><i class="layui-icon layui-icon-edit"></i></button>'
+  				+ '<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" title="<@spring.message "action.delete"/>" onclick="javascript:deletePermission(\'%\')" ><i class="layui-icon layui-icon-delete"></i></button>'
+  			  + '</div>';
+  		return v.replace(new RegExp(/(%)/g),row.id);
+		
+  	} 
+	
+  	function addPermission() {
+  		var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message "resource.new-build"/>',
+			type:2,
+			content:'${basePath!}/permission/add',
+			area: ['60%', '70%'],
+            btn:['<@spring.message"action.ok"/>','<@spring.message"action.cancel"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init();
+			},
+			yes:function(index,layero){
+				if (!isSubmit) {
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+						$.ajax({
+			                type: "POST",
+			                url:'${basePath!}/permission/save',
+			                data:data,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message "result.addFail"/>！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('<@spring.message "result.addSuccess"/>！');
+									reloadTable();
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+					} else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+    
+    function editPermission(id) {
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message "action.edit"/>',
+			type:2,
+			content:'${basePath!}/permission/edit',
+			area: ['60%', '70%'],
+            btn:['<@spring.message"action.ok"/>','<@spring.message"action.cancel"/>'],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init($('#table').bootstrapTable('getRowByUniqueId',id));
+			},
+			yes:function(index,layero){
+				if (!isSubmit) {
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath!}/permission/update',
+			                data:data,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message "result.updateFail"/>！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('<@spring.message "result.updateSuccess"/>！');
+									reloadTable();
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                	
+			                }
+			            });
+		            } else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+    
+    function deletePermission(id){
+		parent.layer.confirm('<@spring.message "comment.Confirm_delete"/>？',{
+            btn:['<@spring.message"action.ok"/>','<@spring.message"action.cancel"/>'],
+			yes : function(index,layero) {
+				$.ajax({
+						url : '${basePath!}/permission/delete/'+id,
+						type : 'DELETE',
+						success : function(result) {
+							if (result.code == 0) {
+								parent.layer.msg('<@spring.message "result.deleteSuccess"/>');
+								reloadTable();
+							} else {
+								parent.layer.msg('<@spring.message "result.deleteFail"/>');
+							}
+							layer.close(index);
+						}
+				});
+			}
+		});
+	}
+    
+    function reloadTable() {
+    	$('#table').bootstrapTable('refresh', {pageNumber:1});
+    }
+  </script>
+</html>

@@ -1,0 +1,96 @@
+html,body {
+	height:100%;
+	margin:0;
+	padding:0;
+	box-sizing: border-box ;
+}
+
+.layui-btn-sm {
+    height: 30px;
+    line-height: 30px;
+    padding: 0 10px;
+    font-size: 9pt;
+}
+
+.layui-layout-admin {
+	height: 100%;
+    padding: 60px 0 0;
+    box-sizing: border-box ; 
+    position: relative;
+    margin: 0;
+}
+
+.layui-layout-admin .admin-side {
+	height: 100%;
+    float: left;
+    bottom: 0;
+    z-index: 999;
+    width: 200px;
+    overflow-x: hidden;
+}
+
+.layui-layout-admin .layui-header {
+	position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.layui-code, .layui-upload-list {
+    margin: 5px 0;
+}
+
+.btn-upload-case {
+	margin-top: 5px;
+}
+.head {
+	display:inline-flex;
+}
+
+.head-logo {
+    display: inline;
+    line-height: 60px;
+    padding-left: 30px;
+    color:#615d5d!important;
+    font-size: 18pt;
+   	font-family: '微软雅黑';
+	
+}
+.head-logo img {
+		background-repeat: no-repeat;
+	    width: 122px;
+	    height: 34px;
+	    background-position: center;
+	    background-size: contain;
+}
+.layui-nav .layui-this:after, .layui-nav-bar, .layui-nav-tree .layui-nav-itemed:after {
+	background: none!important;
+}
+
+.layui-container {
+	width:100%;
+}
+.main-body {
+	overflow:hidden;
+	height: 100%;
+}
+.left200 {
+	left:200px!important;
+}
+.layui-btn-primary:hover {
+    border-color: #c9c9c9;
+}
+
+.content-body {
+	padding:10px;
+}
+.head {
+	display:inline-block;
+    vertical-align: middle;
+}
+.layui-nav .layui-nav-item {
+    vertical-align: super;
+}
+.head-user {
+	float:right;
+}

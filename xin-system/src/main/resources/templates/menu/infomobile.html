@@ -1,0 +1,346 @@
+<style>
+.label-highlighted{
+	font-size: 1.3em;
+    color: red;
+}
+</style>
+<form id="form_menu_mobile" class="layui-form" action=""
+	style="padding-top:10px;" lay-filter="form_menu_mobile">
+	<div style="margin-left:50px;">
+		<input type="hidden" name="id" id="idMobile">
+		<input type="hidden" name="isMobile" id="isMobileMobile" value="1">
+		<!-- MSTR报表属性 -->
+		<input type="hidden" name="projectId" id="projectIdMobile">
+		<input type="hidden" name="reportId" id="reportIdMobile">
+		<input type="hidden" name="typeName" id="typeNameMobile">
+		<input type="hidden" name="typeValue" id="typeValueMobile">
+		<input type="hidden" name="lv" id="lvMobile" value="1">
+		<input type="hidden" name="reports" id="reportsMobile">
+		<input type="hidden" name="resourceId" id="resourceIdMobile">
+		<input type="hidden" name="resourceType1" id="resourceType1Mobile">
+		<input type="hidden" name="resourceType2" id="resourceType2Mobile">
+		<input type="hidden" name="linkType" id="linkTypeMobile" value="1">
+		<input type="hidden" name="state" id="stateMobile" value="1">
+		<input type="hidden" name="level" id="levelMobile" value="1">
+
+		<div class="layui-form-item" id="name_div_mobile">
+			<label id="Operation_label_mobile" class="layui-form-label label-highlighted"></label>
+		</div>	
+		<div class="layui-form-item">
+			<label class="layui-form-label "><@spring.message"menu.Superior_menu"/></label>
+			<div class="layui-input-block">
+				<input type="text" id="parentIdMobile" name="parentId" lay-filter="parentIdMobile" autocomplete="off"
+					class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label "><@spring.message"menu.Menu_type"/></label>
+			<div class="layui-input-block">
+				<input type="text" id="typeMobile" name="type" lay-filter="typeMobile"  autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		
+		<div class="layui-form-item " id="name_div_mobile" >
+			<label class="layui-form-label label-required-diy"><@spring.message"menu.Menu_name"/></label>
+			<div class="layui-input-block" >
+				<input type="text" name="name" id="nameMobile"  lay-verify="required|length" lay-verType="tips" placeholder="<@spring.message'userInfo.Please_enter_a_name'/>"
+					autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label "><@spring.message"list.order"/></label>
+			<div class="layui-input-block">
+				<input type="number" name="sort" max="9999" min="1" value="1"
+					placeholder="<@spring.message'resource.please_enter_value'/>" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		
+		<div class="layui-form-item" id="name_div_mobile">
+			<label class="layui-form-label "><@spring.message"comment.Resource_name"/></label>
+			<div class="layui-input-block" >
+				<label id="resource_label_mobile" class="layui-form-label " style="width:200px;text-align:left"></label>
+			</div>
+		</div>
+		<div class="layui-form-item layui-hide" id="resourceName_div_mobile" >
+			<label class="layui-form-label "><@spring.message"comment.Resource_name"/></label>
+			<div class="layui-input-block" >
+				<input type="text" name="resourceName" readonly id="resourceNameMobile"  placeholder="<@spring.message'userInfo.Please_enter_a_name'/>"
+					autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item layui-hide" id="reports_div_mobile">
+			<label class="layui-form-label "><@spring.message"BI.report"/></label>
+			<div class="layui-input-block" >
+				<textarea  placeholder="<@spring.message'tips.inputSome'/>" class="layui-textarea" readonly id= "reports_name_mobile" >
+				</textarea>
+			</div>
+		</div>
+		
+		<div class="layui-form-item" id="name_div_mobile">
+			<label class="layui-form-label "><@spring.message"versionNotice.linkaddress"/></label>
+			<div class="layui-input-block" >
+				<label id="linkUrl_label_mobile" class="layui-form-label " style="width:400px;text-align:left"></label>
+			</div>
+		</div>
+		
+		<div class="layui-form-item layui-hide" id="linkUrl_div" >
+			<label class="layui-form-label "><@spring.message"versionNotice.linkaddress"/></label>
+			<div class="layui-input-block" >
+				<textarea placeholder="<@spring.message'tips.inputSome'/>" readonly class="layui-textarea" name="linkUrl" id= "linkUrlMobile" >${(record.linkUrl)!}</textarea>
+			</div>
+		</div>
+		
+		<div class="layui-form-item" id="name_div_mobile">
+			<label class="layui-form-label "><@spring.message"resource.Explain"/></label>
+			<div class="layui-input-block" >
+				<label id="introduce_label_mobile" class="layui-form-label " style="width:400px;text-align:left"></label>
+			</div>
+		</div>
+		
+		<div class="layui-form-item layui-hide" id="linkUrl_div_mobile" >
+			<label class="layui-form-label "><@spring.message"resource.Explain"/></label>
+			<div class="layui-input-block">
+				<textarea  class="layui-textarea" readonly name="introduce" id= "introduceMobile" ></textarea>
+			</div>
+		</div>
+		<div class="layui-form-item">
+		    <div class="layui-input-block">
+		      <button type="button" class="layui-btn layui-btn-sm layui-btn-normal <@shiro.hasRole name='role_test' >layui-btn-disabled</@shiro.hasRole>" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> id="btn_preview_mobile"><@spring.message'menu.Resource_Preview'/></button>
+		      <button class="layui-btn layui-btn-sm layui-btn-normal <@shiro.hasRole name='role_test' >layui-btn-disabled</@shiro.hasRole>" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> lay-submit lay-filter="btn_submit_mobile" id="btn_submit_mobile"><@spring.message'menu.Immediately_submit'/></button>
+		      <button type="button" class="layui-btn layui-btn-sm layui-btn-normal <@shiro.hasRole name='role_test' >layui-btn-disabled</@shiro.hasRole>" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> id="btn_reset_mobile"><@spring.message'action.reset'/></button>
+		      <button type="button" class="layui-btn layui-btn-sm layui-btn-normal layui-hide <@shiro.hasRole name='role_test' >layui-btn-disabled</@shiro.hasRole>" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> id="btn_del_mobile"><@spring.message'action.delete'/></button>
+		    </div>
+		  </div>
+	</div>
+</form>
+<script>
+layui.use([ 'form','element','treeSelect'],function() {
+	var form = layui.form, 
+		element = layui.element,
+		treeSelect = layui.treeSelect;
+	
+	$.ajax({
+		type:'GET',
+		url:'${basePath}/resourceType/list',
+		success:function(result){
+			var treeData = utils.toTreeData(result.list);
+			treeSelect.render({
+	            // 选择器
+	            elem: '#typeMobile',
+	            // 数据
+	            data: treeData,
+	            // 异步加载方式：get/post，默认get
+	            type: 'get',
+	            // 占位符
+	            placeholder: '<@spring.message"banner.Selection_of_resource_types"/>',
+	            // 是否开启搜索功能：true/false，默认false
+	            search: true,
+	            view:{
+	            	showIcon:false,
+	            },
+	            // 点击回调
+	            click: function(d){
+	                var parentNode = treeSelect.zTree('typeMobile').getNodeByParam('id',d.current.parentId);
+	                if (parentNode!=null) {
+	                	$('#resourceType1Mobile').val(parentNode.id);
+	                	$('#resourceType2Mobile').val(d.current.id);
+		                showSelResource(parentNode,d.current);
+	                } else {
+	                	$('#resourceType1Mobile').val(d.current.id);
+	                	showSelResource(d.current);
+	                }
+	                $('#typeMobile').val(d.current.id);
+	            },
+	            // 加载完成后的回调函数
+	            success: function (d) {
+	            }
+	        });
+			
+		}
+	});
+	
+	
+	$.ajax({
+		type:'GET',
+		url:'${basePath}/menu/list?isMobile=1',
+		success:function(result){
+			var treeData = utils.toTreeData(result);
+			console.log(treeData);
+			treeSelect.render({
+	            elem: '#parentIdMobile',
+	            // 数据
+	            data: treeData,
+	            //data: "${basePath}/menu/list",
+	            // 异步加载方式：get/post，默认get
+	            type: 'get',
+	            // 占位符
+	            placeholder: '<@spring.message"menu.Select_the_superior_menu"/>',
+	            // 是否开启搜索功能：true/false，默认false
+	            search: true,
+	            view:{
+	            	showIcon:false,
+	            },
+	            // 点击回调
+	            click: function(d){
+	            	debugger
+	            	$('#parentIdMobile').val(d.current.id);
+	            	$('#levelMobile').val(Number(d.current.level)+1);
+	            },
+	            // 加载完成后的回调函数
+	            success: function (d) {
+	                //treeSelect.checkNode('parentId', d.data[0].id);
+	            }
+	        });
+			
+		}
+	});
+	
+	
+	
+	//$('#parentId').val(menuData[0].id);
+	var isSubmit = false;
+	form.on('submit(btn_submit_mobile)', function(data){
+	    if(!isSubmit){
+			isSubmit = true;
+			if (data!=null) {
+   		    	$.ajax({
+	                type: "POST",
+	                url:'${basePath}/menu/saveOrUpdate',
+	                data:data.field,
+	                error: function(request) {
+	                    parent.layer.msg('<@spring.message"result.fail"/>！');
+	                    isSubmit = false;
+	                },
+	                success: function(result) {
+	                	if(result.code==0){
+                            parent.layer.msg('<@spring.message"result.success"/>');
+							/* var id = $('#id').val();
+							if (id==null||id=='') {
+								var nodes = zTree.getSelectedNodes();
+								if (nodes.length==0) {
+									zTree.addNodes(null, result.data);
+								} else {
+									zTree.addNodes(nodes[0], result.data);
+								}
+								zTree.reAsyncChildNodes(nodes[0], "refresh");
+							} else {
+								var node = zTree.getNodeByParam('id',id);
+								//zTree.reAsyncChildNodes(node, "refresh");
+								node.name=result.data.name;
+								node.parentId=result.data.parentId;
+								node.resourceType1=result.data.resourceType1;
+								node.resourceType2=result.data.resourceType2;
+								node.type=result.data.type;
+								zTree.updateNode(node);
+							}
+							initMenuSel(); */
+							zTreeMobile.reAsyncChildNodes(null, "refresh");
+	                	}else{
+                            parent.layer.msg("<@spring.message 'result.fail'/>");
+	                	}
+	                	isSubmit = false;
+	                }
+	            });
+			}else {
+				isSubmit = false;
+			}
+	    return false;
+	  }
+	    return false;
+	});
+	
+	form.verify({
+		length: function(value,item){
+			if(value.length < 2 || value.length > 30){
+				return '<@spring.message"biMapping.please_enter_2_to_30_characters"/>';
+			}
+		},
+	});
+	
+	$('#btn_preview_mobile').on('click',function(){
+		var menuId = $('#idMobile').val();
+		var resourceId = $('#resourceIdMobile').val();
+		if (menuId!=null && menuId!='') {
+			window.open('${basePath}/menu/view/'+menuId);
+		} else if (resourceId!=null && resourceId!='') {
+			window.open('${basePath}/resource/view/'+resourceId);
+		}
+	});
+	
+	
+	$('#btn_reset_mobile').on('click',function(){
+		$('#form_menu_mobile')[0].reset();
+		$("#form_menu_mobile input[type='hidden']").val('');
+		$("#btn_del_mobile").addClass('layui-hide');
+	});
+	
+	$('#btn_del_mobile').on('click',function(){
+		
+		var id = $('#idMobile').val();
+		var name = $('#nameMobile').val();
+		if (id!=null) {
+			parent.layer.confirm('<@spring.message"menu.delete_menu"/>【'+name+'】？', {title:'<@spring.message "action.info"/>',
+				btn:['<@spring.message"banner.Determine"/>','<@spring.message"action.cancel"/>'],
+				yes: function(index, layero){
+					$.ajax({url:'${basePath}/menu/delete/'+id,type:'delete',
+			  			success:function(result){
+				    		/* if (result.code==0) {
+				    			zTree.removeNode(treeNode);
+				    		} */
+				    		
+				    		zTreeMobile.reAsyncChildNodes(null, "refresh",function(){
+					    		var nodes = zTreeMobile.getNodes();
+						    	layui.treeSelect.zTree('parentIdMobile').loadData(nodes);
+							});
+				    		$('#form_menu_mobile')[0].reset();
+				    		$("#form_menu_mobile input[type='hidden']").val("");
+                            if (result.code==0) {
+                                parent.layer.msg("<@spring.message 'result.success'/>");
+                            }else{
+                                parent.layer.msg("<@spring.message 'result.fail'/>");
+							}
+
+				    	}
+			  		});
+				}
+			})
+			
+		}
+		
+	});
+	
+	
+	
+	
+	
+	function showSelResource(pNode,node){
+		parent.layer.open({
+			title: '<@spring.message"banner.select_resources"/>',
+			type:2,
+			content:'${basePath}/resource/select?resourceType1='+pNode.id+'&resourceType2='+(node==null?'':node.id)+'&isMobile=1',
+			area: ['70%', '80%'],
+            btn:['<@spring.message"banner.Determine"/>','<@spring.message"action.cancel"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				iframeWin.init(pNode,node);
+			},
+			yes:function(index,layero){
+    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				var data = iframeWin.getData();
+				if (data!=null&&data.length>0) {
+	   		    	$('#resourceIdMobile').val(data[0].id);
+	   		    	$('#nameMobile').val(data[0].name);
+	   		    	$('#resourceNameMobile').val(data[0].name);
+	   		    	$('#linkUrlMobile').val(data[0].linkUrl);
+	   		    	$('#introduceMobile').val(data[0].introduce);
+	   		    	$('#linkTypeMobile').val(data[0].linkType);
+	   		    	parent.layer.close(index);
+				}
+    		}
+		});
+	}
+	
+});
+</script>
+				

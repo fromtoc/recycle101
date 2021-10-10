@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+	<title>Picture Add</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
+	<#include "common/common.html" />
+	<style>  
+	.btn-blockquote{
+		display: inline-block;
+	    border-left: 5px solid #539fff;
+	    line-height: 0px;
+	    font-size: 10pt;
+	}
+	</style>
+
+</head>
+<body>
+    <div id="content" class="layui-container">	
+    	<div class="layui-upload">
+		  <button type="button" class="layui-btn layui-btn-normal" id="uploadChoose"> <i class="layui-icon">&#xe67c;</i><@spring.message "banner.upload_pictures"/></button> 
+		  <button type="button" class="layui-btn" id="uploadAction"><@spring.message 'picture.begin_upload'/></button>
+		  <blockquote class=" layui-elem-quote btn-blockquote"><@spring.message 'banner.Please_upload_jpg_PNG_type_pictures_no_more_than_2M'/></blockquote>
+		  <div class="layui-upload-list">
+		    <table class="layui-table">
+		      <thead>
+		        <tr>
+		        <th></th>
+		        <th><@spring.message 'File.filename'/></th>
+		        <th><@spring.message 'File.file_size'/></th>
+		        <th><@spring.message 'picture.status'/></th>
+		        <th><@spring.message 'comment.operation'/></th>
+		      </tr></thead>
+		      <tbody id="uploadBody"></tbody>
+		    </table>
+		  </div>
+		</div> 
+    </div>
+	<script>
+	layui.use([ 'form','layer','upload'],function() {
+		var form = layui.form, 
+			layer = layui.layer,
+			upload = layui.upload;
+		
+		//多文件列表示例
+		  var demoListView = $('#uploadBody')
+		  ,uploadListIns = upload.render({
+		    elem: '#uploadChoose'
+		    ,url: '${basePath}/file/picture/upload/picture' //改成您自己的上传接口
+		    ,accept: 'images' //只允许上传图片
+		    ,acceptMime: 'image/*' //只筛选图片
+		    /* ,exts: 'jpg|png' */
+		    ,multiple: true
+		    ,size: 2*1024*1024 //限定大小
+		    ,auto: false
+		    ,bindAction: '#uploadAction'
+		    ,choose: function(obj){   
+		      var files = this.files = obj.pushFile(); //将每次选择的文件追加到文件队列
+		      //读取本地文件
+		      obj.preview(function(index, file, result){
+		    	 /* 文件大小超出限制 */
+		    	 if(file.size >2*1024*1024){                 //判断上传每个图片大小
+	                 // delete files[index];                     //过大删除指定图片
+	                 // $('#remove_' + index).remove();   //展示容器移除
+	                 layer.msg('<@spring.message 'banner.Please_upload_jpg_PNG_type_pictures_no_more_than_2M'/>', {icon: 2});  //layui弹出层，icon：5，时，是一个嘴角向下的脸
+	                 return null;
+	             }
+		    	if(file.name.length<4||file.name.length>50){
+		    		layer.msg('<@spring.message 'banner.Names_must_be_4_to_50_digits'/>', {icon: 2});  //layui弹出层，icon：5，时，是一个嘴角向下的脸
+	                return null;
+		    	}
+		    	  
+		        var tr = $(['<tr id="upload-'+ index +'">'
+		          ,'<td><img src="'+result+'" alt="'+ '" class="layui-upload-img">' +'</td>'
+		          ,'<td>'+ file.name +'</td>'
+		          ,'<td>'+ (file.size/1024).toFixed(1) +'kb</td>'
+		          ,'<td><@spring.message 'picture.wait_upload'/></td>'
+		          ,'<td>'
+		            ,'<button class="layui-btn layui-btn-xs demo-reload layui-hide"><@spring.message 'picture.reupload'/></button>'
+		            ,'<button class="layui-btn layui-btn-xs layui-btn-danger demo-delete"><@spring.message 'action.delete'/></button>'
+		          ,'</td>'
+		        ,'</tr>'].join(''));
+		        
+		        //单个重传
+		        tr.find('.demo-reload').on('click', function(){
+		          obj.upload(index, file);
+		        });
+		        
+		        //删除
+		        tr.find('.demo-delete').on('click', function(){
+		          delete files[index]; //删除对应的文件
+		          tr.remove();
+		          uploadListIns.config.elem.next()[0].value = ''; //清空 input file 值，以免删除后出现同名文件不可选
+		        });
+		        
+		        demoListView.append(tr);
+		      });
+		    }
+		    ,before: function(obj){
+		      //预读本地文件示例，不支持ie8
+		      /* obj.preview(function(index, file, result){
+		        $('#demo2').append('<img src="'+ result +'" alt="'+ file.name +'" class="layui-upload-img">')
+		      }); */
+		    }
+		    ,done: function(res, index, upload){
+		      if(res.code==3){ //上传成功
+		        var tr = demoListView.find('tr#upload-'+ index)
+		        ,tds = tr.children();
+		        tds.eq(3).html('<span style="color: #5FB878;"><@spring.message 'banner.successfully_upload'/></span>');
+		        tds.eq(4).html(''); //清空操作
+		        return delete this.files[index]; //删除文件队列已经上传成功的文件
+		      }
+		      this.error(index, upload);
+		    }
+		    ,error: function(index, upload){
+		      var tr = demoListView.find('tr#upload-'+ index)
+		      ,tds = tr.children();
+		      tds.eq(3).html('<span style="color: #FF5722;"><@spring.message 'picture.upload_fail'/>(<@spring.message 'picture.upload_fail_prompt'/>)</span>');
+		      tds.eq(4).find('.demo-reload').removeClass('layui-hide'); //显示重传
+		    }
+		  });
+		
+		
+		
+
+  	});
+	
+	</script>  
+	
+</body>
+</html>

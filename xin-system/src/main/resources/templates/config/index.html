@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<style>
+    .btn-blockquote{
+        display: inline-block;
+        border-left: 5px solid #539fff;
+        line-height: 0px;
+        font-size: 10pt;
+    }
+</style>
+<script type="text/javascript">
+    $(function(){
+        var LOGIN_OPTION = "${LOGIN_OPTION}"
+        var REPEAT_LOGIN = "${REPEAT_LOGIN}";
+        var PASSWORD_STRENGTH_REQUIRE = "${PASSWORD_STRENGTH_REQUIRE}";
+        var LEAST_LENGTH = "${LEAST_LENGTH}";
+        var PASSWORD_UPDATE_REGULARLY = "${PASSWORD_UPDATE_REGULARLY}";
+        var PREFERENCE_TYPE = "${PREFERENCE_TYPE}";
+        var PASSWORD_ERROR_LOCK = "${PASSWORD_ERROR_LOCK}";
+        if(REPEAT_LOGIN=="1"){$("#hideArea").hide()}
+        if(PASSWORD_STRENGTH_REQUIRE=="0"){$("#hideArea1").hide()}
+        if(LEAST_LENGTH=="0"){$("#hideArea2").hide()}
+        if(PASSWORD_UPDATE_REGULARLY=="0"){$("#hideArea3").hide()}
+        if(PASSWORD_ERROR_LOCK=="0"){$("#hideArea4").hide()}
+        if(PREFERENCE_TYPE=="docObject"||PREFERENCE_TYPE=="catalogue"){$("#radio_text").show()}
+        if(LOGIN_OPTION=="2"){
+            $("#domain_area").show()
+        }else{
+            $("#domain_area").hide()
+        }
+
+    })
+
+
+    layui.use([ 'form', 'element','laydate','upload', ],function(){
+        var form = layui.form
+            ,layer = layui.layer
+            , upload = layui.upload;
+
+
+
+        upload.render({
+            elem: '#SYS_LOGO', //绑定元素
+            url: basePath + '/config/upload?type=SYS_LOGO', //上传接口
+            method: 'POST',
+            auto:true,
+            accept:'images',
+            choose: function(obj){
+                //将每次选择的文件追加到文件队列
+              /*  files = obj.pushFile();*/
+                //预读本地文件，如果是多文件，则会遍历。(不支持ie8/9)
+                obj.preview(function(index, file, result){
+                   /* $('#SYS_LOGO_URL').attr('src', result);*/ //图片链接（base64）
+                });
+            },
+            done: function(res){
+                //上传完毕回调
+                if(res.code=="0"){
+                    submitPost("SYS_LOGO",res.data.filePathView,"LOGO");
+                    $('#SYS_LOGO_URL').attr('src', "${basePath}"+res.data.filePathView);
+                    parent.layer.msg("<@spring.message 'banner.successfully_upload'/>");
+                }else if(res.code==1){
+                    parent.layer.msg("<@spring.message 'banner.The_uploaded_file_size_exceeds_the_upper_limit'/>");
+                }else if(res.code==2){
+                    parent.layer.msg("<@spring.message 'banner.File_format_that_does_not_meet_upload_requirements'/>");
+                }
+                else{
+                    layer.msg("<@spring.message 'config.uploadErrorFileLarge'/>");
+                }
+
+            },error: function(res){
+                //请求异常回调
+                console.log(res);
+            }
+        });
+        upload.render({
+            elem: '#SYS_MAIN_LOGO', //绑定元素
+            url: basePath + '/config/upload?type=SYS_MAIN_LOGO', //上传接口
+            method: 'POST',
+            auto:true,
+            accept:'images',
+            choose: function(obj){
+                //将每次选择的文件追加到文件队列
+              /*  files = obj.pushFile();*/
+                //预读本地文件，如果是多文件，则会遍历。(不支持ie8/9)
+                obj.preview(function(index, file, result){
+                   /* $('#SYS_MAIN_LOGO_URL').attr('src', result);*/ //图片链接（base64）
+                });
+            },
+            done: function(res){
+                //上传完毕回调
+                if(res.code=="0"){
+                    submitPost("SYS_MAIN_LOGO",res.data.filePathView,"LOGO");
+                    $('#SYS_MAIN_LOGO_URL').attr('src', "${basePath}"+res.data.filePathView);
+                }else{
+                    layer.msg("<@spring.message 'config.uploadErrorFileLarge'/>");
+                }
+
+            },error: function(res){
+                //请求异常回调
+                console.log(res);
+            }
+        });
+        //复选框提交
+        form.on('checkbox(checkboxFilter)', function(data){
+            var code = data.elem.name;
+            var value  = '0';
+            if(data.elem.checked){
+                value='1'
+            }
+            submitPost(code,value,'checkbox');
+            if(code=="LEAST_LENGTH"&&data.elem.checked){
+                $("#hideArea2").show()
+            }else if(code=="LEAST_LENGTH"&&!data.elem.checked){
+                $("#hideArea2").hide()
+            }
+        });
+        //下拉选监听
+        form.on('select(selectFilter)', function(data){
+            var code = data.elem.name;
+            var value = data.value;
+            if(code=="LOGIN_OPTION"){
+                loginOption(value);
+                if(value=="1"){
+                    submitPost(code,value,'select');
+                    return;
+                }else if(value=="2"){
+                    return;
+                }
+            }
+            submitPost(code,value,'select');
+        });
+        //单选框监听
+        form.on('radio(radioFilter)', function(data){
+            var code = data.elem.name;
+            var value =data.value;
+            submitPost(code,value,'radio');
+        });
+        //开关提交方法
+        form.on('switch(switchListen)', function(data){
+            var value = '0';
+            if(this.checked==true){
+                value="1";
+            }
+            var code = data.elem.name;
+            submitPost(code,value,'switch');
+            if(code=="REPEAT_LOGIN" && value=="0"){
+                $("#hideArea").show()
+            }else if(code=="REPEAT_LOGIN" && value=="1"){
+                $("#hideArea").hide()
+            }else if(code=="PASSWORD_STRENGTH_REQUIRE" && value=="1"){
+                $("#hideArea1").show()
+            }else if(code=="PASSWORD_STRENGTH_REQUIRE" && value=="0"){
+                $("#hideArea1").hide()
+            }else if(code=="PASSWORD_UPDATE_REGULARLY" && value=="1"){
+                $("#hideArea3").show()
+            }else if(code=="PASSWORD_UPDATE_REGULARLY" && value=="0"){
+                $("#hideArea3").hide()
+            }else if(code=="PASSWORD_ERROR_LOCK" && value=="1"){
+                $("#hideArea4").show()
+            }else if(code=="PASSWORD_ERROR_LOCK" && value=="0"){
+                $("#hideArea4").hide()
+            }
+
+
+        });
+
+    });
+
+    //打开目录或文档的选择页面
+    function showSelectPage(type){
+        var title="";
+        var url="";
+        if(type=="catalogue"){
+            title='<@spring.message "Directory_selection"/>';
+            url='${basePath}/menu/selctMenu/1';
+        }else if(type=="docObject"){
+            title='<@spring.message "Document_object_selection"/>';
+            url='${basePath}/menu/selctMenu/2';
+        }
+        parent.layer.open({
+            title:title,
+            type:2,
+            content:url,
+            area: ['700px', '550px'],
+            btn:['<@spring.message"action.ok"/>','<@spring.message"action.cancel"/>'],
+            success: function(layero){
+                var iframeWin = top.window[layero.find('iframe')[0]['name']];
+                iframeWin.init();
+            },
+            yes:function(index,layero){
+                var iframeWin = top.window[layero.find('iframe')[0]['name']];
+                var data = iframeWin.getData();
+                if(data){
+                    putData(data);
+                    parent.layer.close(index);
+                }else{
+                    parent.layer.msg("<@spring.message 'Unselected_content'/>");
+                }
+            },
+            btn2:function(index,layero){
+                selectFirst();
+            },
+            cancel: function(index,layero){
+                selectFirst();
+            }
+        });
+    }
+    //系统首页类型选中目录或文档放入选中的对象值
+    function  putData(data){
+        $("#radio_text").val(data[0].name);
+        $('#PREFERENCE_VALUE').val(data[0].id);
+        submitPost("PREFERENCE_VALUE",data[0].name+","+data[0].id,'theme');
+    }
+    //在未选择目录或文档时默认选中第一个“组织首页”
+    function selectFirst(){
+        var PREFERENCE_VALUE=$('#PREFERENCE_VALUE').val();
+        if(PREFERENCE_VALUE.length>0){
+            var arr  = $('div[name=PREFERENCE_TYPE]');
+            for(var i=0;i<arr.length;i++){
+                $(arr[i]).removeClass("layui-form-checked");
+            }
+            $(arr[0]).addClass("layui-form-checked");
+            submitPost("PREFERENCE_TYPE","orgHome",'theme');
+        }
+    }
+
+    //文本框提交方法
+    function editText(obj){
+        var code = obj.id;
+        var value = obj.value;
+        if(code=="LENGTH_VALUE"&&Number(value)<6){
+            layer.msg("<@spring.message 'config.Password_length_should_not_be_less_than_6_place'/>");
+            obj.value="6";
+            return;
+        }
+        if(code=="LENGTH_VALUE"&&Number(value)>64){
+            layer.msg("<@spring.message 'config.Password_length_should_not_be_more_than_64_place'/>");
+            obj.value="64";
+            return;
+        }
+        submitPost(code,value,'text');
+    }
+
+  //密码错误次数提交方法
+    function editNumber(obj){
+    	var code = obj.name;
+    	var value = obj.value;
+    		submitPost(code,value,'number');
+        
+    }
+
+    //导航与登录与首页的样式栏监听
+    function theme(obj){
+        var code = $(obj).attr("name");
+        var value = $(obj).attr("value");
+        if(value=="catalogue"||value=="docObject"){
+            $("#radio_text").show();
+            showSelectPage(value);
+        }else if(value=="orgHome" || value=="favorites" || value=="personalPage"){
+            $("#radio_text").hide();
+            submitPost("PREFERENCE_VALUE","",'theme');
+        }
+        var id = "#"+$(obj).attr("id");
+        var arr  = $('div[name='+code+']');
+        for(var i=0;i<arr.length;i++){
+            $(arr[i]).removeClass("layui-form-checked");
+        }
+        $(id).addClass("layui-form-checked");
+        submitPost(code,value,'theme');
+    }
+
+    //异步提交方法
+    function submitPost(code,value,type){
+        $.post('${basePath}/config/updateByCode',{ code:code,value:value},function(result){
+            if(type!='text'){
+                if(result.code=='0'){
+                    layer.msg("<@spring.message 'result.success'/>");
+                }else{
+                    layer.msg("<@spring.message 'result.fail'/>");
+                }
+            }
+        });
+    }
+    
+    function checkSendMail(){
+    	$.post('${basePath}/config/checkEmailSend',function(result){
+            if(result.code==0){
+            	layer.msg("<@spring.message 'config.Email_sent_successfully'/>");
+            }else{
+            	layer.msg("<@spring.message 'config.Email_send_failed'/>");
+            }
+        });
+    }
+
+    function loginOption(val){
+        if(val=="2"){
+            $("#domain_area").show()
+        }else{
+            $("#domain_area").hide()
+        }
+    }
+    function checkLdapConnect(){
+        $.post('${basePath}/config/checkLdapConnect',function(result){
+            if(result.code==0){
+                layer.msg("<@spring.message 'config.Authentication_successful_Domain_associated'/>");
+            }else{
+                layer.msg("<@spring.message 'config.Connection_failed_please_check_the_connection_information'/>");
+            }
+        });
+    }
+
+</script>
+</head>
+<body>
+<div class="layui-fluid">
+    <@system.path id="${menuId!}"></@system.path>
+<div class="layui-row">
+    <div >
+        <form id="form" class="layui-form" action="">
+            <div class="layui-tab layui-tab-brief" >
+                <ul class="layui-tab-title">
+                    <li class="layui-this"> <@spring.message 'login.sign'/><!--登录--> </li>
+                    <li> <@spring.message 'config.in_common_use'/><!--常用--> </li>
+                    <li> <@spring.message 'userInfo.email'/><!--邮箱--> </li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show" style="height:1077px;">
+                        <!-------------------------------------------->
+                        <div class="layui-tab layui-tab-brief ">
+                        <ul class="layui-tab-title ">
+                            <li class="layui-this"><@spring.message 'config.Login_settings'/><!--登录设置--></li>
+                            <li><@spring.message 'config.Login_Page_Style'/><!--登录页样式--></li>
+                        </ul>
+                        <div class="layui-tab-content">
+                            <div class="layui-tab-item layui-show">
+                                <div class="layui-collapse">
+                                    <div class="layui-colla-item">
+                                        <h2 class="layui-colla-title"><@spring.message 'config.Login_settings'/><!--登录设置--></h2>
+                                        <div class="layui-colla-content layui-show">
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label my-label" style="width:167px;text-align: left"><@spring.message 'config.Login_options'/><!--登录选项--></label>
+                                                <div class="layui-input-inline">
+                                                    <select  id="LOGIN_OPTION" name="LOGIN_OPTION"  class="layui-inline" lay-filter="selectFilter">
+                                                        <option <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> value="1"<#if LOGIN_OPTION=='1'>selected</#if>> <@spring.message 'config.dataWindow_User_login'/> </option>
+                                                        <option <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> value="2"<#if LOGIN_OPTION=='2'>selected</#if>> <@spring.message 'config.Domain_user_login'/> </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div id="domain_area">
+                                                <div class="layui-form-item">
+                                                    <label class="layui-form-label" style="width:167px;text-align: left"><@spring.message 'config.Domain_name'/><!--域名--></label>
+                                                    <div class="layui-input-inline">
+                                                        <input type="text"  id="DOMAIN_NAME" placeholder="<@spring.message 'config.example'/>：datawindow.vm.com" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="DOMAIN_NAME" value="${DOMAIN_NAME}"class="layui-input <@shiro.hasRole name='role_test' >layui-disabled</@shiro.hasRole>"  onblur="editText(this)">
+                                                    </div>
+                                                    <div class="layui-form-mid layui-word-aux">
+                                                        <button onclick="checkLdapConnect()"type="button" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> class="layui-btn layui-btn-sm layui-btn-normal <@shiro.hasRole name='role_test' >layui-btn-disabled</@shiro.hasRole>"><@spring.message 'config.Authentication_connection'/></button>
+                                                    </div>
+                                                </div>
+                                                <div class="layui-form-item">
+                                                    <label class="layui-form-label" style="width:167px;text-align: left"><!--域服务器IP--><@spring.message 'config.Domain_server_IP'/></label>
+                                                    <div class="layui-input-inline">
+                                                        <input type="text"  id="DOMAIN_IP" placeholder="<@spring.message 'wechat.Example'/>：127.0.0.1" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="DOMAIN_IP" value="${DOMAIN_IP}"class="layui-input <@shiro.hasRole name='role_test' >layui-disabled</@shiro.hasRole>" onblur="editText(this)">
+                                                    </div>
+                                                </div>
+                                                <div class="layui-form-item">
+                                                    <label class="layui-form-label" style="width:167px;text-align: left"><!--管理员账号(域)--><@spring.message 'config.Administrator_account_Domain'/></label>
+                                                    <div class="layui-input-inline">
+                                                        <input type="text"  id="DOMAIN_ACCOUNT" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="DOMAIN_ACCOUNT" value="${DOMAIN_ACCOUNT}"class="layui-input <@shiro.hasRole name='role_test' >layui-disabled</@shiro.hasRole>" onblur="editText(this)">
+                                                    </div>
+                                                </div>
+                                                <div class="layui-form-item">
+                                                    <label class="layui-form-label" style="width:167px;text-align: left"><!--密码（域）--><@spring.message 'config.password_Domain'/></label>
+                                                    <div class="layui-input-inline">
+                                                        <input type="password"  id="DOMAIN_PASSWORD" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="DOMAIN_PASSWORD" value="${DOMAIN_PASSWORD}"class="layui-input <@shiro.hasRole name='role_test' >layui-disabled</@shiro.hasRole>" onblur="editText(this)">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label my-label" style="width:167px;text-align: left"><@spring.message 'config.Repeat_login'/><!--重复登录--></label>
+                                                <input id="REPEAT_LOGIN" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="REPEAT_LOGIN" type="checkbox"   lay-skin="switch" lay-filter="switchListen" lay-text="<@spring.message 'config.allow'/>|<@spring.message 'config.Not_allow'/>"<#if REPEAT_LOGIN=='1'>checked</#if>>
+                                                <div id="hideArea">
+                                                    <input type="radio" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="NOT_ALLOW_REPEAT_LOGIN_WAY" lay-filter="radioFilter" value="0" title="<@spring.message 'config.No_further_landing_allowed'/>" <#if NOT_ALLOW_REPEAT_LOGIN_WAY=='0'>checked</#if>>
+                                                    <input type="radio" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="NOT_ALLOW_REPEAT_LOGIN_WAY" lay-filter="radioFilter" value="1" title="<@spring.message 'config.After_login_kick_out_log_in_first'/>"<#if NOT_ALLOW_REPEAT_LOGIN_WAY=='1'>checked</#if>>
+                                                </div>
+                                            </div>
+                                            <div class="layui-form-item">
+                                                <div class="layui-inline" style="height:160px;">
+                                                    <label class="layui-form-label my-label" style="width:167px;text-align: left"><@spring.message 'config.Login_prompt_information'/><!--登录提示信息--></label>
+                                                    <input id="LOGIN_PROMPT"  <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="LOGIN_PROMPT"  type="checkbox"  lay-skin="switch" lay-filter="switchListen" lay-text="<@spring.message 'model.open'/>|<@spring.message 'action.close'/>"<#if LOGIN_PROMPT=='1'>checked</#if>>
+                                                </div>
+                                                <div class="layui-inline" style="box-shadow: 0 0 12px #696565;margin:3px 0px 0px 37px">
+                                                    <div style="line-height: 1.8;text-align: left;padding: 0 50px;">
+                                                        <i style="font-size:30px" class="layui-icon">&#xe60e;</i>
+                                                            <span style="font-size: 16px;vertical-align: text-top;margin-left: 20px;position: relative;top: -10px;"><@spring.message "theme.Last_login_information"/></span>
+                                                            <div style="font-size: 16px;" >
+                                                                <p style="display: inline-block;width: 39px;"><@spring.message "resource.Time"/></p>：<span>2019-06-03 11:23:04</span>
+                                                            </div>
+                                                            <div style="font-size: 16px;" >
+                                                                <p style="display: inline-block;width: 39px;">IP</p>：<span>192.168.50.26</span>
+                                                            </div>
+                                                            <div style="font-size: 16px;" >
+                                                                <p style="display: inline-block;width: 39px;"><@spring.message "theme.place"/></p>：<span><@spring.message 'beijing'/></span>
+                                                            </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label my-label" style="width:167px;text-align: left"><@spring.message 'config.session_time'/><!--重复登录--></label>
+                                                <div class="layui-input-inline">
+                                                    <select  id="SESSION_TIME" name="SESSION_TIME" class="layui-inline" lay-filter="selectFilter">
+                                                        <option <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> value="3"<#if SESSION_TIME=='3'>selected</#if>> 3<@spring.message 'wechat.minute'/> </option>
+                                                        <option <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> value="5"<#if SESSION_TIME=='5'>selected</#if>> 5<@spring.message 'wechat.minute'/> </option>
+                                                        <option <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> value="10"<#if SESSION_TIME=='10'>selected</#if>> 10<@spring.message 'wechat.minute'/> </option>
+                                                        <option <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> value="15"<#if SESSION_TIME=='15'>selected</#if>> 15<@spring.message 'wechat.minute'/> </option>
+                                                        <option <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> value="30"<#if SESSION_TIME=='30'>selected</#if>> 30<@spring.message 'wechat.minute'/> </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label my-label" style="width:167px;text-align: left"><@spring.message 'config.password_error_lock'/><!--是否开启输入密码错误自动锁定功能--></label>
+                                                <input id="PASSWORD_ERROR_LOCK" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="PASSWORD_ERROR_LOCK" type="checkbox" lay-skin="switch" lay-filter="switchListen" lay-text="<@spring.message 'model.open'/>|<@spring.message 'action.close'/>"<#if PASSWORD_ERROR_LOCK=='1'>checked</#if>>
+                                            </div>
+                                            <div class="layui-form-item"id="hideArea4">
+                                                <label class="layui-form-label my-label" style="width:167px;text-align: left"><@spring.message 'config.password_error_count'/><!--密码错误次数--></label>
+                                                <div class="layui-input-inline">
+      												<input id="PASSWORD_ERROR_COUNT" type="number" name="PASSWORD_ERROR_COUNT" value="5" required  lay-verify="required" placeholder="<@spring.message 'config.inputPasswordErrorCount'/>" autocomplete="off" class="layui-input" onblur="editNumber(this)">
+      											</div>
+                                        	</div>
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="layui-colla-item">
+                                        <h2 class="layui-colla-title"><@spring.message 'config.Password_Policy'/><!--密码策略--></h2>
+                                        <div class="layui-colla-content layui-show">
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label my-label" style="width:167px;text-align: left"><@spring.message 'config.Whether_to_Open_Forget_Password'/><!--是否开启忘记密码--></label>
+                                                <input id="FORGET_PASSWORD_PROMPT" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="FORGET_PASSWORD_PROMPT" type="checkbox"   lay-skin="switch" lay-filter="switchListen" lay-text="<@spring.message 'model.open'/>|<@spring.message 'action.close'/>"<#if FORGET_PASSWORD_PROMPT=='1'>checked</#if>>
+                                            </div>
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label my-label" style="width:167px;text-align: left"><@spring.message 'config.Whether_to_open_password_update_regularly'/><!--是否开启密码定期更新--></label>
+                                                <input id="PASSWORD_UPDATE_REGULARLY" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="PASSWORD_UPDATE_REGULARLY" type="checkbox" lay-skin="switch" lay-filter="switchListen" lay-text="<@spring.message 'model.open'/>|<@spring.message 'action.close'/>"<#if PASSWORD_UPDATE_REGULARLY=='1'>checked</#if>>
+                                            </div>
+                                            <div class="layui-form-item"id="hideArea3">
+                                                <label class="layui-form-label my-label" style="width:167px;text-align: left"><@spring.message 'config.Periodic_update_time'/><!--定期更新时间--></label>
+                                                <div class="layui-inline" >
+                                                    <select name="PASSWORD_UPDATE_REGULARLY_TIME"  lay-filter="selectFilter">
+                                                        <option <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> value="1"<#if PASSWORD_UPDATE_REGULARLY_TIME=='1'>selected</#if>> <@spring.message 'config.one_month'/> </option>
+                                                        <option <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole>  value="2"<#if PASSWORD_UPDATE_REGULARLY_TIME=='2'>selected</#if>> <@spring.message 'config.two_month'/> </option>
+                                                        <option <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole>  value="3"<#if PASSWORD_UPDATE_REGULARLY_TIME=='3'>selected</#if>> <@spring.message 'config.three_month'/> </option>
+                                                        <option <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole>  value="6"<#if PASSWORD_UPDATE_REGULARLY_TIME=='6'>selected</#if>> <@spring.message 'config.six_month'/> </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label my-label" style="width:167px;text-align: left"><@spring.message 'config.Password_Strength_Requirements'/><!--密码强度要求--></label>
+                                                <input id="PASSWORD_STRENGTH_REQUIRE" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="PASSWORD_STRENGTH_REQUIRE" type="checkbox"    lay-skin="switch" lay-filter="switchListen" lay-text="<@spring.message 'model.open'/>|<@spring.message 'action.close'/>"<#if PASSWORD_STRENGTH_REQUIRE=='1'>checked</#if>>
+                                                <div class="layui-input-block" id="hideArea1">
+                                                    <input type="checkbox" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="CONTAINT_LETTERS" lay-filter="checkboxFilter" title="<@spring.message 'config.Containing_letters'/>"  <#if CONTAINT_LETTERS=='1'>checked</#if>>
+                                                    <input type="checkbox" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="CONTAINT_SYMBOLS" lay-filter="checkboxFilter" title="<@spring.message 'config.Containing_symbols'/>"  <#if CONTAINT_SYMBOLS=='1'>checked</#if>>
+                                                    <input type="checkbox" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="CONTAIN_NUMBER"   lay-filter="checkboxFilter"  title="<@spring.message 'config.Containing_numbers'/>"  <#if CONTAIN_NUMBER=='1'>checked</#if>>
+                                                    <input type="checkbox" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="LEAST_LENGTH"      lay-filter="checkboxFilter"title="<@spring.message 'config.Minimum_length'/>"    <#if LEAST_LENGTH=='1'>checked</#if>>
+                                                    <div class="layui-inline" id="hideArea2"style=" margin-top: 5px;">
+                                                    <input type="number" id="LENGTH_VALUE" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> class="<@shiro.hasRole name='role_test' >layui-disabled</@shiro.hasRole>" name="LENGTH_VALUE" max="64" style="text-align:center;width:50px;" onblur="editText(this)" value="${LENGTH_VALUE}"><@spring.message'config.place'/><!--位-->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="layui-colla-item">
+                                        <h2 class="layui-colla-title"><@spring.message 'config.Verification_Code_Strategy'/><!--验证码策略--></h2>
+                                        <div class="layui-colla-content layui-show">
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label my-label" style="width:167px;text-align: left"><@spring.message 'config.Whether_to_Open_Verification_Code'/><!--是否开启验证码--></label>
+                                                <input id="SYS_CHECK_CODE" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="SYS_CHECK_CODE" type="checkbox"   lay-skin="switch" lay-filter="switchListen" lay-text="<@spring.message 'model.open'/>|<@spring.message 'action.close'/>"<#if SYS_CHECK_CODE=='1'>checked</#if>>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- 只有系统租户才能看到此配置，普通租户看不到 -->
+                                    <div class="layui-colla-item" style="display: <#if tenantId=='1'>block<#else>none</#if>">
+                                        <h2 class="layui-colla-title"><@spring.message 'config.Tenant_Strategy'/><!--多租户策略--></h2>
+                                        <div class="layui-colla-content layui-show">
+                                            <div class="layui-form-item">
+					                            <label class="layui-form-label my-label" style="width:167px;text-align: left"><@spring.message 'config.Open_tenant'/><!--是否开启多租户--></label>
+					                            <input id="SYS_USER_TENANT" type="checkbox" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole>  name="SYS_USER_TENANT" lay-skin="switch" lay-filter="switchListen" lay-text="<@spring.message'tips.yes'/>|<@spring.message'tips.no'/>"<#if SYS_USER_TENANT=='1'>checked</#if>>
+					                        </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <div class="layui-tab-item" >
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label my-label" style="width:107px;text-align: left"><@spring.message 'config.Login_page_title'/><!--登录页标题--></label>
+                                    <input type="text" id="SYS_LOGIN_NAME" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="SYS_LOGIN_NAME" style="width:42%;"class="layui-input <@shiro.hasRole name='role_test' >layui-disabled</@shiro.hasRole>" onblur="editText(this)" value="${SYS_LOGIN_NAME}">
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label my-label" style="width:107px;text-align: left"><@spring.message 'config.Login_page'/><!--登录页LOGO--></label>
+                                    <div class="layui-input-block">
+
+                                       <!-- <img src="${basePath}${SYS_LOGO}" id="SYS_LOGO_URL"  style="width:200px;height:107px;"/>-->
+                                        <img id="SYS_LOGO_URL"  style="width:200px;height:107px;" src="${basePath}${(SYS_LOGO!='')?string('${SYS_LOGO}','/images/dataWindow_black.png')}"  />
+                                        <button type="button" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> class="layui-btn layui-btn-sm layui-btn-normal <@shiro.hasRole name='role_test' >layui-btn-disabled</@shiro.hasRole>"  id="SYS_LOGO" ><@spring.message "action.upload"/>LOGO</button>
+                                        <blockquote class="layui-elem-quote btn-blockquote">
+                                            <@spring.message 'config.Please_upload_photos_no_less_than_100*200'/><!--请上传不低于100*200的图片-->
+                                        </blockquote>
+                                    </div>
+                                </div><br><br>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label my-label" style="width:107px;text-align: left"><@spring.message 'config.Login_Page_Style'/><!--登录页风格--></label>
+                                   <!-- <div class="layui-inline">
+                                        <img class="layui-inline" src="${basePath}/images/login_lenovo.png" style="width:227px;height:127px;">
+                                        <div style="margin-left:72px;">
+                                            <div id="pattern1" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="SYS_LOGIN_PAGE" value="login/login_lenovo" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if SYS_LOGIN_PAGE=='login/login_lenovo'>layui-form-checked</#if>">
+                                                <span><@spring.message 'config.style'/>1&lt;!&ndash;风格1&ndash;&gt;</span><i class="layui-icon layui-icon-ok"></i>
+                                            </div>
+                                        </div>
+                                    </div> -->
+                                   <!-- <div class="layui-inline">
+                                        <img class="layui-inline" src="${basePath}/images/login_shen.png" style="width:227px;height:127px;margin-left: 37px;">
+                                        <div style="margin-left:102px;">
+                                            <div id="pattern2" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="SYS_LOGIN_PAGE" value="login/login_shen" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if SYS_LOGIN_PAGE=='login/login_shen'>layui-form-checked</#if>">
+                                                <span><@spring.message 'config.style'/>2&lt;!&ndash;风格2&ndash;&gt;</span><i class="layui-icon layui-icon-ok"></i>
+                                            </div>
+                                        </div>
+                                    </div> -->
+                                    <div class="layui-inline">
+                                        <img class="layui-inline" src="${basePath}/images/login_xdf.png" style="width:227px;height:127px;margin-left: 0px;">
+                                        <div style="margin-left:75px;">
+                                            <div id="pattern3" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="SYS_LOGIN_PAGE" value="login/login_xdf" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if SYS_LOGIN_PAGE=='login/login_xdf'>layui-form-checked</#if>">
+                                                <span><@spring.message 'config.style'/>1<!--风格1--></span><i class="layui-icon layui-icon-ok"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="layui-inline">
+                                        <img class="layui-inline" src="${basePath}/images/login_edu.png" style="width:227px;height:127px;margin-left: 0px;">
+                                        <div style="margin-left:72px;">
+                                            <div id="pattern4" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="SYS_LOGIN_PAGE" value="login/login_edu" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if SYS_LOGIN_PAGE=='login/login_edu'>layui-form-checked</#if>">
+                                                <span><@spring.message 'config.style'/>2<!--风格2--></span><i class="layui-icon layui-icon-ok"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="layui-inline">
+                                        <img class="layui-inline" src="${basePath}/images/login_3D.jpg" style="width:227px;height:127px;margin-left: 0px;">
+                                        <div style="margin-left:75px;">
+                                            <div id="pattern5" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="SYS_LOGIN_PAGE" value="login/login_3D" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if SYS_LOGIN_PAGE=='login/login_3D'>layui-form-checked</#if>">
+                                                <span><@spring.message 'config.style'/>3<!--风格3--></span><i class="layui-icon layui-icon-ok"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label my-label" style="width:107px;text-align: left"><@spring.message 'config.System_Copyright'/><!--系统版权--></label>
+                                    <input id="SYS_COPYRIGHT" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="SYS_COPYRIGHT" type="text" style="width:42%;"class="layui-input <@shiro.hasRole name='role_test' >layui-disabled</@shiro.hasRole>"  onblur="editText(this)" value="${SYS_COPYRIGHT}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        <!-------------------------------------------->
+                    </div>
+                    <div class="layui-tab-item"  style="height:1000px;">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label my-label" style="width:207px;text-align: left"><@spring.message 'config.System_title'/><!--系统标题--></label>
+                            <input type="text" style="width:42%;"class="layui-input <@shiro.hasRole name='role_test' >layui-disabled</@shiro.hasRole>"  id="SYS_NAME" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="SYS_NAME" value="${SYS_NAME}" onblur="editText(this)">
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label my-label" style="width:207px;text-align: left"><@spring.message 'config.Top_of_the_system'/>LOGO<!--系统顶部LOGO--></label>
+                            <div class="layui-input-block">
+                                <img id="SYS_MAIN_LOGO_URL" style="width:200px;height:107px;" src="${basePath}${(SYS_MAIN_LOGO!='')?string('${SYS_MAIN_LOGO}','/images/dataWindow_black.png')}"  />
+                                <button type="button" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> class="layui-btn layui-btn-sm layui-btn-normal <@shiro.hasRole name='role_test' >layui-disabled</@shiro.hasRole> "  id="SYS_MAIN_LOGO" ><@spring.message "action.upload"/>LOGO</button>
+                                <blockquote class="layui-elem-quote btn-blockquote">
+                                    <@spring.message 'config.Please_upload_photos_no_less_than_100*200'/><!--请上传不低于100*200的图片-->
+                                </blockquote>
+                                <button type="button" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> class="layui-hide"  id="resource_img_upload1" ><@spring.message "action.upload"/>Action</button>
+                            </div>
+                        </div>
+                        <br><br><br>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label my-label" style="width:207px;text-align: left"><@spring.message 'config.Navigation_Bar_Style'/><!--导航栏风格--></label>
+                            <div class="layui-inline">
+                                <img class="" src="${basePath}/images/theme_default.png" style="width:277px;height:127px;"><br>
+                                <div style="margin-left:77px;">
+                                    <div id="theme1" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="SYS_THEME" value="theme_default" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if SYS_THEME=='theme_default'>layui-form-checked</#if>">
+                                        <span><@spring.message 'config.Lateral_Navigation'/><!--横向导航--></span><i class="layui-icon layui-icon-ok"></i>
+                                    </div>
+                                </div>
+                            </div>
+                           <!-- <div class="layui-inline">
+                                <img class="" src="${basePath}/images/theme_left_shen.png" style="width:277px;height:127px;margin-left: 37px;"><br>
+                                <div style="margin-left:117px;">
+                                    <div id="theme2" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="SYS_THEME" value="theme_left_shen" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if SYS_THEME=='theme_left_shen'>layui-form-checked</#if>">
+                                        <span><@spring.message 'config.Longitudinal_navigation'/>1&lt;!&ndash;纵向导航1&ndash;&gt;</span><i class="layui-icon layui-icon-ok"></i>
+                                    </div>
+                                </div>
+                            </div>-->
+                            <div class="layui-inline">
+                                <img class="" src="${basePath}/images/theme_left_black.png" style="width:277px;height:127px;margin-left: 37px;"><br>
+                                <div style="margin-left:117px;">
+                                    <div id="theme3" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="SYS_THEME" value="theme_left_black" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if SYS_THEME=='theme_left_black'>layui-form-checked</#if>">
+                                        <span><@spring.message 'config.Longitudinal_navigation'/>1<!--纵向导航1--></span><i class="layui-icon layui-icon-ok"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <img class="" src="${basePath}/images/theme_left_admin.png" style="width:277px;height:127px;margin-left: 37px;"><br>
+                                <div style="margin-left:117px;">
+                                    <div id="theme4" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="SYS_THEME" value="theme_left_admin" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if SYS_THEME=='theme_left_admin'>layui-form-checked</#if>">
+                                        <span><@spring.message 'config.Longitudinal_navigation'/>2<!--纵向导航2--></span><i class="layui-icon layui-icon-ok"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label my-label" style="width:207px;text-align: left"><@spring.message"config.System_Home_Page_Name"/><!--系统首页名称--></label>
+                            <input type="text" onblur="editText(this)" id="SYS_HOME_PAGE_NAME" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="SYS_HOME_PAGE_NAME"  value="${SYS_HOME_PAGE_NAME}" style="width:42%;"class="layui-input <@shiro.hasRole name='role_test' >layui-disabled</@shiro.hasRole>">
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label my-label" style="width:207px;text-align: left"><@spring.message"config.System_Default_Language"/><!--系统默认语言--></label>
+                            <div class="layui-inline" >
+                                <div id="zh_CN" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="CONFIG_LOCALE" value="zh_CN" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if CONFIG_LOCALE=='zh_CN'>layui-form-checked</#if>">
+                                    <span><@spring.message 'sysConfig.langTypeCN'/><!--简体中文--></span><i class="layui-icon layui-icon-ok"></i>
+                                </div>
+                                <div id="zh_TW" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="CONFIG_LOCALE" value="zh_TW" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if CONFIG_LOCALE=='zh_TW'>layui-form-checked</#if>">
+                                    <span><@spring.message 'sysConfig.langTypeTW'/><!--繁体中文--></span><i class="layui-icon layui-icon-ok"></i>
+                                </div>
+                                <div id="en_US" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="CONFIG_LOCALE" value="en_US" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if CONFIG_LOCALE=='en_US'>layui-form-checked</#if>">
+                                    <span><@spring.message 'sysConfig.langTypeUS'/><!--英文--></span><i class="layui-icon layui-icon-ok"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label my-label" style="width:207px;text-align: left"><@spring.message"config.System_Home_Page_Type"/><!--系统首页类型--></label>
+                            <div class="layui-inline" id="radio_div">
+                                <div id="orgHome" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="PREFERENCE_TYPE" value="orgHome" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if PREFERENCE_TYPE=='orgHome'>layui-form-checked</#if>">
+                                    <span><@spring.message 'Organization_front_page'/><!--组织首页--></span><i class="layui-icon layui-icon-ok"></i>
+                                </div>
+                                <div id="favorites" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="PREFERENCE_TYPE" value="favorites" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if PREFERENCE_TYPE=='favorites'>layui-form-checked</#if>">
+                                    <span><@spring.message"config.My_Collection"/><!--我的收藏--></span><i class="layui-icon layui-icon-ok"></i>
+                                </div>
+                                <div id="personalPage" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="PREFERENCE_TYPE" value="personalPage" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if PREFERENCE_TYPE=='personalPage'>layui-form-checked</#if>">
+                                    <span><@spring.message"personal_homepage"/><!--个人主页--></span><i class="layui-icon layui-icon-ok"></i>
+                                </div>
+                                <div id="catalogue" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="PREFERENCE_TYPE" value="catalogue" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if PREFERENCE_TYPE=='catalogue'>layui-form-checked</#if>">
+                                    <span><@spring.message"config.Catalog_Page"/><!--目录页面--></span><i class="layui-icon layui-icon-ok"></i>
+                                </div>
+                                <div id="docObject" <@shiro.hasRole name='role_test' >style="pointer-events: none;"</@shiro.hasRole> name="PREFERENCE_TYPE" value="docObject" onclick="theme(this)" class="layui-unselect layui-form-checkbox <#if PREFERENCE_TYPE=='docObject'>layui-form-checked</#if>">
+                                    <span><@spring.message 'Document_object'/><!--文档对象--></span><i class="layui-icon layui-icon-ok"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label my-label" style="width:207px;text-align: left"><!------Hidden----></label>
+                            <input type="text" readonly  id="radio_text" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="radio_text"  value="${PREFERENCE_NAME}" style="display:none;width:42%;"class="layui-input layui-inline">
+                            <input type="hidden" id="PREFERENCE_VALUE" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="PREFERENCE_VALUE" value="${PREFERENCE_VALUE}" >
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label my-label" style="width:207px;text-align: left"><@spring.message 'config.Does_the_left_tree_style_display_menu_icons'/><!--左侧树风格是否显示菜单小图标--></label>
+                            <input id="SYS_MENU_ICON" type="checkbox" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole>  name="SYS_MENU_ICON" lay-skin="switch" lay-filter="switchListen" lay-text="<@spring.message 'BIPrompt.show'/>|<@spring.message 'BIPrompt.hide'/>" <#if SYS_MENU_ICON=='1'>checked</#if>>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label my-label" style="width:207px;text-align: left"><@spring.message 'config.Is_the_user_prompted_to_update_his_password_when_he_first_logs_in?'/><!--用户首次登陆是否提示更新密码--></label>
+                            <input id="SYS_FIRST_UPDATE_PWD" type="checkbox" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole>  name="SYS_FIRST_UPDATE_PWD" lay-skin="switch" lay-filter="switchListen" lay-text="<@spring.message 'config.prompt'/>|<@spring.message 'action.close'/>"<#if SYS_FIRST_UPDATE_PWD=='1'>checked</#if>>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label my-label" style="width:207px;text-align: left"><@spring.message 'config.File_upload_path'/><!--文件上传路径--></label>
+                            <input type="text" onblur="editText(this)" id="SYS_UPLOAD_PATH" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="SYS_UPLOAD_PATH"  value="${SYS_UPLOAD_PATH}" style="width:42%;"class="layui-input <@shiro.hasRole name='role_test' >layui-disabled</@shiro.hasRole>">
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label my-label" style="width:207px;text-align: left"><@spring.message 'config.Whether_to_recommend_notifications_when_creating_users'/><!--创建用户时是否推荐通知--></label>
+                            <input id="SYS_USER_EMAIL" type="checkbox" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole>  name="SYS_USER_EMAIL" lay-skin="switch" lay-filter="switchListen" lay-text="<@spring.message'tips.yes'/>|<@spring.message'tips.no'/>"<#if SYS_USER_EMAIL=='1'>checked</#if>>
+                        </div>
+                    </div>
+                    <div class="layui-tab-item" >
+                        <div class="layui-card" >
+                            <div class="layui-card-header"><@spring.message 'config.Sender_account'/><!--发件人账户--></div>
+                            <div class="layui-card-body">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label my-label" style="width:147px;text-align: left"><@spring.message 'config.Mail_Server'/><!--邮件服务器-->(SMTP)</label>
+                                    <div class="layui-input-inline">
+                                        <select  id="MAIL_HOST" name="MAIL_HOST" class="layui-inline" lay-filter="selectFilter">
+                                            <option <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole>><@spring.message 'tips.choos'/></option>
+                                            <option <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> value="smtp.exmail.qq.com"<#if MAIL_HOST=='smtp.exmail.qq.com'>selected</#if>> smtp.exmail.qq.com </option>
+                                        </select>
+                                    </div>
+                                    <!--<div class="layui-form-mid layui-word-aux"><a>端口和加密</a></div>-->
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label" style="width:147px;text-align: left"><@spring.message 'config.sender_address'/><!--发件人地址--></label>
+                                    <div class="layui-input-inline">
+                                        <input type="text"  id="MAIL_FROM" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="MAIL_FROM" value="${MAIL_FROM}" class="layui-input <@shiro.hasRole name='role_test' >layui-disabled</@shiro.hasRole>" onblur="editText(this)">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label" style="width:147px;text-align: left"><@spring.message 'serviceState.port'/><!--端口--></label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" id="MAIL_PORT" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="MAIL_PORT"  value="${MAIL_PORT}" class="layui-input <@shiro.hasRole name='role_test' >layui-disabled</@shiro.hasRole>" onblur="editText(this)">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label" style="width:147px;text-align: left"><@spring.message 'login.password'/><!--密码--></label>
+                                    <div class="layui-input-inline">
+                                        <input type="text"  id="MAIL_PASSWORD" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="MAIL_PASSWORD" value="${MAIL_PASSWORD}"class="layui-input <@shiro.hasRole name='role_test' >layui-disabled</@shiro.hasRole>" onblur="editText(this)">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label" style="width:147px;text-align: left"><@spring.message 'config.Display_name'/><!--显示姓名--></label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" id="MAIL_ACCOUNT" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole> name="MAIL_ACCOUNT" value="${MAIL_ACCOUNT}" class="layui-input <@shiro.hasRole name='role_test' >layui-disabled</@shiro.hasRole>" onblur="editText(this)">
+                                    </div>
+                                    <div class="layui-form-mid layui-word-aux"><a <@shiro.hasRole name='role_test' >style="pointer-events:none;"</@shiro.hasRole> onclick="checkSendMail()"  ><@spring.message 'config.Send_test_mail'/><!--发送测试邮件--></a></div>
+                                </div>
+                               <!-- <div class="layui-form-item">
+                                    <label class="layui-form-label" style="width:147px;text-align: left">端口与加密</label>
+                                    <div class="layui-input-inline">
+                                        <input id="po" name="po" type="checkbox"   lay-skin="switch" lay-filter="switchListen" lay-text="开启|关闭"<#if 1=='1'>checked</#if>>
+                                    </div>
+                                </div>-->
+                               <!-- <div class="layui-form-item">
+                                    <label class="layui-form-label my-label" style="width:147px;text-align: left">加密方式</label>
+                                    <div class="layui-input-inline">
+                                        <select >
+                                            <option> 请选择 </option>
+                                        </select>
+                                    </div>
+                                </div>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+</body>
+
+</html>

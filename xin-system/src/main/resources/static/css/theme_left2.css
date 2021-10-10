@@ -1,0 +1,17 @@
+.content-body {
+		padding:10px;
+		padding-left: 200px;
+	    padding-right: 200px;
+}
+
+.system-name {
+		font-size: 13pt;
+	    border-left: 1px solid;
+	    border-width: 2px;
+	    padding-left: 10px;
+	}
+	
+		.dowebok { width: 380px; height: 22px!important; margin: 0 auto; line-height: 30px;}
+.dowebok li { overflow: hidden; zoom: 1;}
+.dowebok a { color: #333; text-decoration: none;}
+.dowebok a:hover { color: #000;text-decoration:underline}

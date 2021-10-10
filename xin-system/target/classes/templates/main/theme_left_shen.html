@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+
+<html style="overflow: auto;">
+
+<head>
+<meta charset="utf-8">
+<title>${SYS_NAME!'系统主页'} </title>
+<meta name="renderer" content="webkit">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<link href="${basePath}/images/favicon.ico" rel="icon" type="image/x-icon" />
+<link rel="shortcut icon" href="${basePath}/images/favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="${basePath}/plugins/layui/2.4.3/css/layui.css"media="all" />
+<link rel="stylesheet" href="${basePath}/css/global.css" media="all">
+<link rel="stylesheet" href="${basePath}/css/kute.css" media="all">
+<link rel="stylesheet" href="${basePath}/css/liMarquee.css">
+<link rel="stylesheet" href="${basePath}/plugins/zui/zui.min.css">
+<link rel="stylesheet" href="${basePath}/plugins/zui/zui.tabs.css">
+<script src="${basePath}/js/jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="${basePath}/plugins/layui/2.4.3/layui.js"></script>
+<script type="text/javascript">
+	var basePath = '${basePath}';
+</script>
+<script type="text/javascript" src="${basePath}/js/system.js"></script>
+<!-- ZUI 标准版压缩后的 JavaScript 文件 -->
+
+<script src="${basePath}/plugins/zui/zui.min.js"></script>
+<script src="${basePath}/plugins/zui/zui.tabs.js"></script>
+<script type="text/javascript" src="${basePath}/js/util.js"></script>
+<#include "common/common_ztree.html" />
+<link href="${basePath}/plugins/zTree/css/menuStyle.css" rel="stylesheet" />
+<link rel="stylesheet" href="${basePath}/plugins/font-awesome-4.7.0/css/font-awesome.css" media="all">
+<style type="text/css">
+	*{margin: 0;padding: 0}
+	body{font-size: 12px;}
+	ul,li{list-style: none;}
+	a:link,a:visited{text-decoration: none;}
+	.list ul li{background-color:#009fe7;  }
+	.list ul li a{padding:0 20px;color: #fff; font-size:12pt; display: block; height:45px;line-height: 45px;position: relative;
+	}
+	.list ul li a:hover{background: #58a1e0}
+	.list ul li .inactive{ background:url(images/off.png) no-repeat 184px center;}
+	.list ul li .inactives{background:url(images/on.png) no-repeat 184px center;} 
+	.list ul li ul{display: none;}
+	.list ul li ul li { border-left:0; border-right:0; background: linear-gradient(to right, #0367BA, #009EE6) }
+	.list ul li ul li ul{display: none;}
+	.list ul li ul li a{ padding-left:20px;font-size:11pt;color: #dedede;}
+	.list ul li ul li a:hover{background: #58a1e0}
+	.list ul li ul li ul li { background-color:#51a0e8;  }
+	.last{ background-color:#51a0e8;  }
+	.list ul li ul li ul li a{  padding-left:30px;font-size:10pt;color: #dedede;}
+	.list ul li ul li ul li a:hover{background: #58a1e0}
+	.list .menu-more {
+	content: '';
+	    width: 0;
+	    height: 0;
+	    border-style: solid dashed dashed;
+	    border-color: #fff transparent transparent;
+	    overflow: hidden;
+	    cursor: pointer;
+	    transition: all .2s;
+	    -webkit-transition: all .2s;
+	    position: absolute;
+	    top: 50%;
+	    right: 31px;
+	    margin-top: -3px;
+	    border-width: 6px;
+	    border-top-color: rgba(255,255,255,.7);
+	    }
+	 .list .itemd {   
+	    border-style: dashed dashed solid;
+	    border-color: transparent transparent #fff;
+	    top: 36%;
+	}
+	.list .lv1-hover {background: linear-gradient(to right, #0259af, #009EE6);}
+	.list a .menu-this {background: #58a1e0}
+	.layui-tab-brief>.layui-tab-more li.layui-this:after, .layui-tab-brief>.layui-tab-title .layui-this:after{
+		border-bottom: 2px solid #1E9FFF;
+	}
+	 .layui-icon-notice:before {
+	    content: "\e667";
+	    position: relative;
+	    top: 1px;
+	    font-size: 16px;
+	}
+	.layui-icon-notice {
+		position: relative;
+	    top: 1px;
+	    font-size: 2px;
+	}
+	.layui-badge-dot {
+	    margin-left: 11px!important;
+	} 
+	.layui-tab-title >li:hover{
+		background: #dddef1;
+		text-decoration: none;
+		outline: 0;
+		border-radius:20px;
+		transition: all .2s ease;
+		/* -webkit-transition: all .2s ease;
+		-moz-transition: all .2s ease;
+		-ms-transition: all .2s ease;
+		-o-transition: all .2s ease */
+		
+	}
+	.layui-this{
+		background: #dddef1;
+		border-radius:20px;
+	}
+	.layui-icon{
+		font-size: 18px!important;
+	}
+	.move{
+		position: absolute;
+		width:30px;
+		height:28px;
+		line-height:28px;
+		display:none
+	}
+	.layui-tab-close{
+		color:#153071
+	}
+	.move :hover{
+		background: #EE7621
+	}
+	.layui-tab-title{
+		height:28px;
+	}
+	.layui-tab{
+	margin-top:8px
+	}
+	.layui-tab-title li{
+		font-size:12px !important;
+		width:150px;
+		line-height:28px;
+		overflow:hidden;
+		padding:0px
+	}
+	.layui-select-title{
+		padding-top:6px;
+		padding-bottom:6px
+	}
+	.tab{
+		width:120px;
+		overflow:hidden;
+		float:left;
+	}
+	.layui-tab-content-div{
+		overflow: hidden;
+		height:27px
+	}
+	.iconCss{
+		margin-left:20px
+	}
+	.level1{
+		background: #D5E6FA
+	}
+	.level2{
+		background: #EFF6FF
+	}
+	.level_2{
+		-webkit-transform : scale(0.84,0.84) ;
+		font-size:11.5px!important
+	}
+	.level_3{
+	 	-webkit-transform : scale(0.84,0.84) ;
+		font-size:11px!important
+	}
+	.tabs-container > .tab-pane.active{
+		display: inline; 
+	}
+	.tabs-container{
+	     position: relative; 
+	     width:100%;
+	     height:100%;
+	     top:10px;
+	}
+	.tab-nav-link > .title{
+		font-size:12px;
+	}
+	.layui-btn-sm{
+		font-size:9pt!important;
+	}
+	.system-name {
+		font-size: 13pt;
+	    border-left: 1px solid;
+	    border-width: 2px;
+	    padding-left: 10px;
+	}
+	ul li ul{
+	 /* background: #2967B0  */
+	  background: #b0c3d2
+	}
+	.dowebok { width: 380px; height: 22px!important;line-height: 30px;margin-top:-15px;left:-10%}
+	.dowebok li { overflow: hidden; zoom: 1;}
+	.dowebok a { color: #333; text-decoration: none;}
+	.dowebok a:hover { color: #000;text-decoration:underline}
+	
+	.version-info {
+		position: relative;
+	    display: inline-block;
+	    vertical-align: middle;
+	    line-height: 60px;
+	    vertical-align: super;
+	    color: #96BBE8
+	}
+	@-webkit-keyframes twinkling{
+	  0% {
+	      opacity: 0; 
+	  }
+	  100% {
+	      opacity: 1; 
+	  }
+	}
+	.flashing {
+	    -webkit-animation: twinkling 1.5s infinite ease-in-out; 
+	}
+.layui-tab-title-li{
+	color:#000;
+	width: 50% !important;
+}
+.layui-tab-title-ul{
+	padding-left: 0px;
+}
+.layui-zeroMarge{
+	margin:0;
+}
+.layui-unpadding{
+	padding: 0;
+}
+.layui-noticeBottomDiv{
+	height: 41px;
+    color: #001;
+    line-height: 46px;
+    text-align: center;
+    border-top: 1px solid #e8e8e8;
+    border-radius: 0 0 4px 4px;
+    transition: all .3s;
+    width: 238px;
+}
+.layui-noticeRead{
+	display: inline-block;
+    width: 50%;
+    cursor: pointer;
+    transition: all .3s;
+    user-select: none;
+}
+.layui-noticeMore{
+	display: inline-block;
+    width: 50%;
+    cursor: pointer;
+    transition: all .3s;
+    user-select: none;
+    border-left: 1px solid #e8e8e8;
+}
+.layui-tab-title .layui-this:after {
+    position: absolute;
+    left: 0;
+    top: 37px !important;
+    content: '';
+    width: 100%;
+    height: 41px;
+    border-width: 1px;
+    border-style: solid;
+    border-bottom-color: #fff;
+    border-radius: 2px 2px 0 0;
+    box-sizing: border-box;
+    pointer-events: none;
+}
+.layui-lineDiv{
+	display: flex;
+    flex: 1 1;
+    align-items: flex-start;
+    font-size: 0;
+}
+.divHover:hover{
+	background:#e6f7ff;
+}
+
+</style>
+<script type="text/javascript">
+	var basePath = '${basePath}';
+</script>
+<script type="text/javascript" src="${basePath}/js/index.js"></script>
+<script type="text/javascript" src="${basePath}/js/jquery.vticker.min.js"></script>
+<script type="text/javascript" src="${basePath}/js/jquery.liMarquee.js"></script>
+<script type="text/javascript" src="${basePath}/plugins/layui/2.4.3/lay/modules/common.js"></script>
+<script type="text/javascript" src="${basePath}/plugins/layui/2.4.3/lay/modules/navbar.js"></script>
+</head>
+<body onload="javascript:onLoad()">
+	<!-- jQuery方式左右滚动的通知 -->
+	<#if (notices && notices?size>0)>
+	<div id="headernotice" style="width:50%; overflow: hidden; margin-left:360px;margin-top:20px;position:absolute;z-index:99999">
+		<#list notices as rec> &nbsp;&nbsp;&nbsp;&nbsp;<i class="layui-icon">&#xe645;
+		</i><a href="javascript:noticeInfo('${(rec.id)}',${(rec.type)},'${(rec.title)}');"
+			style="color: #5497e6; font-size: 14px;">${(rec.title)!}</a>&nbsp;&nbsp;&nbsp;&nbsp;
+		</#list>
+	</div>
+	</#if>
+	<div class="layui-layout layui-layout-admin">
+		<div class="layui-header ">
+			<div class="head-logo">
+					<img style="width: 157px; height: 43px" 
+					src="${basePath}${(SYS_MAIN_LOGO!='')?string('${SYS_MAIN_LOGO}','/images/dataWindow_black.png')}" />&nbsp;&nbsp;
+					<span class="system-name" >${SYS_NAME!''} </span>
+			</div>
+            <div class="head head-user" id="head"  lay-filter="head">
+				<#include "main/theme_left_shen_head.html"/>
+			</div>
+		</div>
+		<div class="layui-fluid bodyHeight" style="padding:0px">
+				<div class="layui-row bodyHeight" >
+				    <div id="bodyLeft" class="layui-col-sm2 bodyHeight" style="">
+				    	<div id="menu_search" class="layui-form scrollbar-hover" lay-filter="test1" style="background: #B9D0EF" >
+							<input type="text" id="parentName" name="parentName" value=""
+								class="layui-input search-input layui-hide" placeholder="输入关键字搜索"  > 
+								<select id="menu-sel" name="menu-sel" lay-verify="" value=""  
+								lay-search lay-filter="menu-filter" >
+							</select>
+						</div>
+						
+						<div class="admin-side treeHeight" id="admin-side" style="width: 100%">
+							<div class="layui-side-scroll" id="admin-navbar-side" lay-filter="side" style="width: 100%">
+								<ul id="tree" class="ztree" style="overflow: hidden;"></ul>
+							</div>
+						</div>
+				    </div>
+				    <div class="layui-col-sm10 bodyHeight" style="">
+				    	<div class="main-body left200" id="admin-body" style="height: 100% ;"></div>
+				    </div>
+			    </div>
+		</div>
+		</div>
+</body>
+
+<script>
+
+			var orgSign= '${orgSign!}';
+			var change= '${Change!}';
+			var days= '${days!}';
+			//报表请求地址
+			var menuRequestUrl = "${basePath}/menu/view/";
+			var resourceRequestUrl = "${basePath}/resource/view/";
+			var reportRequestUrl = "${basePath}/bi/mstr/reportContainer?";
+			var boReportUrl = "${basePath}/bi/bo/report/";
+			
+			var preferType = '${preferType!}';
+			var preferValue = '${preferValue!}';
+            var SYS_HOME_PAGE_NAME = '${SYS_HOME_PAGE_NAME!}';
+			var moduleId = '${moduleId!}';
+			var changePWD = '${changePWD!}';
+			var menuIcon = '${menuIcon!}';
+			var loginPrompt = '${LOGIN_PROMPT}';
+			var lastLoginTime = '${lastLoginTime}';
+			var lastLoginip = '${lastLoginip}';
+			var lastLoginAdress = '${lastLoginAdress}';
+			var updatePwdPrompt = '${UPDATE_REGULARLY_PROMPT}';
+			var pwdUpdateReg = '${PASSWORD_UPDATE_REGULARLY}';
+			var form;
+			/* $(function(){
+				$('#headernotice').liMarquee();
+				//初始化.layui-layout-admin 高度
+				var curHeight=$(window).height();
+				var headerHeight=$('.layui-header').outerHeight();
+				var treeHeight=curHeight-headerHeight-47;
+				var mainBodyHeight=curHeight-headerHeight;
+				$(".bodyHeight").height(mainBodyHeight);
+				$(".treeHeight").height(treeHeight);
+				
+				$("#hiddenLeft").on("click",function(){
+					$("#admin-side").toggle("slow",function(){
+						if($("#admin-side").is(":hidden")){
+						 $("#leftMove").css("left",0)	
+						  //如果元素为隐藏,则将它显现
+						 $("#hiddenLeftIcon").removeClass("layui-icon-shrink-right").addClass("layui-icon-spread-left");
+						}else{
+						  $("#leftMove").css("left",250)
+						  //如果元素为显现,则将其隐藏
+						  $("#hiddenLeftIcon").removeClass("layui-icon-spread-left").addClass("layui-icon-shrink-right");
+						}
+					});
+				})
+				//兼容性
+				var curWidth=$(window).width();
+				var treeWidth=$('.admin-side').outerWidth();
+				var bodyWidth=curWidth-treeWidth-5;
+				$("#main-body").width(bodyWidth);
+				
+				loadSearchData();
+			}); */
+			//初始化一个空的tab
+			var myTab;
+			window.onload=function (){
+				var url = getHomeUrl(preferType,preferValue,moduleId);
+				var name = getHomeName(preferType,preferValue,moduleId);
+				$('#admin-body').tabs({tabs: myTab});
+				myTabs = $('#admin-body').data('zui.tabs');
+				myTabs.close();
+				/* var url="${basePath}/module/moduleHome/";
+				var moduleId='${moduleId}'; */
+				openTab("home",name,url,'iframe');
+
+                var url='';
+                var AvatarPath = "${AvatarPath}";
+                if(AvatarPath.length != null && AvatarPath.length < 60){
+                    url = "${basePath}"+"/"+AvatarPath;
+                }else{
+                    url = AvatarPath;
+                }
+                $('#headPic').attr("src",url);
+			}
+
+
+            function moreNotice(){
+                parent.layer.open({
+                    type: 2,
+                    title: '更多公告',
+                    area: ['70%', '70%'],
+                    content: "${basePath}/moContent/content_notice_more/null",
+                    cancel: function(){
+                        $("#head").load("${basePath}/reloadHead", null,function(){
+                            setPic();
+                            layui.use('element', function () {
+                                var element = layui.element;
+                                element.render('nav', 'nav_filter');
+                            })
+                        })
+                    }
+                });
+            }
+
+            function setPic(){
+                var url='';
+                var AvatarPath = "${AvatarPath}";
+                if(AvatarPath.length != null && AvatarPath.length < 60){
+                    url = "${basePath}"+"/"+AvatarPath;
+                }else{
+                    url = AvatarPath;
+                }
+                $('#headPic').attr("src",url);
+            }
+
+            function noticeInfo1(id,type,title) {
+                var url = '';
+                if (type == 1) {
+                    url = basePath + '/notice/info?id=' + id;
+                } else if (type == 2) {
+                    var notice;
+                    $.ajax({
+                        type: 'post', // 提交方式 get/post
+                        async: false,
+                        url: '${basePath}/notice/findOneNotice', // 需要提交的 url
+                        data: {
+                            'id': id
+                        },
+                        success: function (res) {
+                            notice = res;
+                        }
+                    });
+                    url = notice.content;
+                }
+            }
+
+
+
+            function personalRecord(){
+                parent.layer.open({
+                    title: '<@spring.message"PersonalPortrait"/>',
+                    type:2,
+                    content:'${basePath}/userInfo/userMessage',
+                    area: ['777px', '567px'],
+                    yes:function(index,layero){
+                        parent.layer.close(index);
+                    }
+                });
+            }
+			
+			function getHomeUrl(type,value,id){
+				var URL = '';
+				if(type == 'orgHome' || type==null || type=='' || type=='undefined'){
+					URL = '${basePath}/module/moduleHome/'+id;
+				}else if(type == 'favorites'){
+					URL = '${basePath}/collect/index';
+				}else if(type == 'personalPage'){
+		            URL = '${basePath}/userInfo/personalPage';
+		        }else if(type == 'catalogue'){
+					URL = '${basePath}/menu/preferView/'+value;
+				}else{//docObject
+					URL = '${basePath}/menu/view/'+value;
+				}
+				return URL;
+			}
+			
+			function openTabUrl(url){
+		        $('#content_iframe').attr('src', url);
+		    }
+			
+			function getHomeName(type,value,id){
+				var name = '';
+				if(type == 'orgHome' || type==null || type=='' || type=='undefined'){
+					name = SYS_HOME_PAGE_NAME;
+				}else if(type == 'favorites'){
+					name = '我的收藏';
+				}else if(type == 'personalPage'){
+					name = '个人主页';
+		        }else if(type == 'catalogue'){//目录
+					name = getName(value);
+				}else{//docObject
+					name = getName(value);;
+				}
+				return name;
+			}
+			
+			function getName(id){
+				var name = '';
+				$.ajax({
+		            type: "GET",
+		            url:'${basePath}/menu/info/'+id,
+		            async: false,
+		            error: function(request) {
+		            },
+		            success: function(result) {
+		            	if(result.data!=null){
+		            		var data = result.data;
+		            		name = data.name;
+		            	}
+		            }
+		        });
+				return name;
+			}
+			
+			
+			var lastTabId;
+			//遍历对象
+			var parseParam=function(param, key){ 
+				
+				  var paramStr=""; 
+				 
+				  if(param instanceof String||param instanceof Number||param instanceof Boolean){ 
+				 
+				    paramStr+="&"+key+"="+encodeURIComponent(param); 
+				 
+				  }else{ 
+				    $.each(param,function(i){ 
+				 
+				      var k=key==null?i:key+(param instanceof Array?"["+i+"]":"."+i); 
+				 
+				      paramStr+='&'+parseParam(this, k); 
+				 
+				    }); 
+				 
+				  } 
+				 
+				  return paramStr.substr(1); 
+				 
+				};	
+			layui.use(['form','layer','laytpl'], function() {
+				 var $ = layui.jquery
+				 ,element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块
+				//菜单打开一个折叠其他的
+				$('ul.layui-nav li').click(function(){
+						$(this).siblings("li").removeClass('layui-nav-itemed');
+						if($(this).hasClass('layui-nav-itemed')){
+						$(this).addClass('layui-nav-itemed');
+						}else{
+						$(this).removeClass('layui-nav-itemed');
+						}
+					});
+				
+				var layer = layui.layer,
+				laytpl = layui.laytpl;
+				form = layui.form;
+				/* var navbar = layui.navbar(); */ 
+				var myTabs;
+				
+				form.on('select(menu-filter)', function(data){
+					var dataValue = data.value.split('@');
+					if (dataValue[0]=='loadPage') {
+						var mydata={id:dataValue[1],name:dataValue[2],linkType:dataValue[3]};
+	                	var node= zTree.getNodeByParam("id", dataValue[5]);
+	                	zTree.selectNode(node);
+						// 获取标签页管理器对象实例
+	    				myTabs = $('#admin-body').data('zui.tabs');
+						if(mydata.linkType!=null&&mydata.linkType==1){
+							openTab(mydata.id,mydata.name,resourceRequestUrl+mydata.id,'iframe');
+						}else{
+							window.open(resourceRequestUrl+mydata.id);
+						}
+	    				
+	    				
+					} 
+					
+					$("#menu-sel").val("111");
+					form.render('select');
+				});   
+				
+				 function openTab(id,name,url,type){
+				    	// 要打开的标签页对象
+						var myTab = {
+							id:'tabs_'+id,
+						    url:  encodeURI(url),
+						    type: type,
+						    title: name
+						};
+						// 打开标签页
+						myTabs.open(myTab);
+				    }
+				
+		        function changePassword(msg) {
+		        	parent.layer.open({
+						title: '修改密码'+ msg,
+						type:2,
+						content:'${basePath}/userInfo/setPassword',
+						area: ['800px', '400px'],
+						btn:['确定','取消'],
+						success: function(layero){
+						},
+						yes:function(index,layero){
+			    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+							var data = iframeWin.getData();
+							if (data!=null) {
+								$.ajax({
+					                type: "POST",
+					                url:'${basePath}/user/updatePwd',
+					                data:data,
+					                async: false,
+					                error: function(request) {
+					                    parent.layer.msg('添加失败！');
+					                },
+					                success: function(result) {
+					                	if(result.code==0){
+					                		parent.layer.close(index);
+					                		layer.confirm('密码修改成功,请重新登录!', {title:'<@spring.message "action.info"/>',
+											  btn: ['确定'] //按钮
+											}, function(indexCon){
+											  	layer.close(indexCon);
+											  	window.location.href = basePath + '/logout';
+											});
+					                	}else{
+					                		parent.layer.msg(result.msg);
+					                	}
+					                }
+					            });
+							}
+			   		    	
+			    		}
+					});
+		        }
+		        
+		        function loginPromptInfo(){
+		        	var html = '<div style="line-height: 1.8;text-align: left;padding: 0 50px;">'
+		        	+'<i style="font-size:30px" class="layui-icon">&#xe60e;<i/>'
+		        	+'<span style="font-size: 16px;vertical-align: text-top;margin-left: 20px;">上次登录信息</span>'
+		        	+'<div style="font-size: 16px;" ><p style="display: inline-block;width: 34px;">时间</p>：<span>'+lastLoginTime+'</span></div>'
+		        	+'<div style="font-size: 16px;" ><p style="display: inline-block;width: 34px;">IP</p>：<span>'+lastLoginip+'</span></div>'
+		        	+'<div style="font-size: 16px;" ><p style="display: inline-block;width: 34px;">地点</p>：<span>'+lastLoginAdress+'</span></div>'
+		        	+'</div>';
+		        	parent.layer.open({
+		        		title: '登录消息',
+		        		type: 1, 
+		        		offset: 'rb', //右下角弹出
+		        		area: ['340px', '215px'],
+                        shadeClose:true,
+		        		content: html 
+		        	});
+		        }
+		        
+		        function promptUpdatePwd(){
+		        	var msg = "";
+		        	parent.layer.open({
+		        		title: '密码定期修改提示',
+		        		type: 1, 
+		        		offset: 'rb', //右下角弹出
+		        		area: ['340px', '215px'],
+		        		content: '<div style="padding: 15px;" >'
+		        		+'<div><span style="font-size: 16px;">您的密码已经超出修改期限，请及时修改。</span></div>'
+		        		+'<div style="padding-top: 20px;padding-left: 20px;" ><span style="color: red;">>>></span><a style="cursor:pointer;" id="promptUpdatePwd" >修改密码</a></div>'
+		        		+'</div>' 
+		        	});
+		        }
+		        $(document).on('click', '#promptUpdatePwd', function () {
+		        	changePassword("");
+		        });
+		        
+		        $(function(){
+		        	$('#headernotice').liMarquee();
+					//初始化.layui-layout-admin 高度
+					var curHeight=$(window).height();
+					var headerHeight=$('.layui-header').outerHeight();
+					var treeHeight=curHeight-headerHeight-47;
+					var mainBodyHeight=curHeight-headerHeight;
+					$(".bodyHeight").height(mainBodyHeight);
+					$(".treeHeight").height(treeHeight);
+					
+					$("#hiddenLeft").on("click",function(){
+						$("#admin-side").toggle("slow",function(){
+							if($("#admin-side").is(":hidden")){
+							 $("#leftMove").css("left",0)	
+							  //如果元素为隐藏,则将它显现
+							 $("#hiddenLeftIcon").removeClass("layui-icon-shrink-right").addClass("layui-icon-spread-left");
+							}else{
+							  $("#leftMove").css("left",250)
+							  //如果元素为显现,则将其隐藏
+							  $("#hiddenLeftIcon").removeClass("layui-icon-spread-left").addClass("layui-icon-shrink-right");
+							}
+						});
+					})
+					//兼容性
+					var curWidth=$(window).width();
+					var treeWidth=$('.admin-side').outerWidth();
+					var bodyWidth=curWidth-treeWidth-5;
+					$("#main-body").width(bodyWidth);
+					
+					loadSearchData();
+					
+					if(loginPrompt=="1"){
+						loginPromptInfo();
+					}
+					if(pwdUpdateReg=="1" && updatePwdPrompt=="1"){
+						promptUpdatePwd();
+					}
+					if (changePWD == '0') {
+						changePassword('(首次登录，请修改密码)');
+					} else if (updatePwdPrompt=="1" && changePWD=="1") {
+						changePassword('(密码已重置，请修改密码)');
+					}
+					
+				});
+				$('#setPassword').on('click',function(){
+					changePassword('');
+				});
+				$('#skin').on('click',function(){
+					changeSkin('');
+				});
+				if(change == "0") {
+					changePassword('（初次登录，请修改密码）');
+				} else if(days != null && days != "") {
+					changePassword('（密码长时间未修改，请修改密码）');
+				}
+			});
+
+			var errorUrl = basePath + '/error/system';
+			var menuData = JSON.parse('${user_menus_json!}');
+			/* console.log(menuData);  */
+			var zTree;
+		    var menuTreeSetting = {
+		        check: {
+		            enable: false
+		        },
+		        view: {
+		            dblClickExpand: false,
+		            showLine: false,
+		            showIcon:false,
+		            selectedMulti: false,
+		        	addDiyDom: addDiyDom
+		        },
+		        data: {
+		            simpleData: {
+		                enable:true,
+		                idKey: "id",
+		                pIdKey: "parentId",
+		                rootPId: "0"
+		            }
+		        },
+		        callback: {
+		            onClick: zTreeOnClick,
+		            beforeExpand:zTreeBeforeExpand,
+		            onExpand: onExpand,
+		            //onAsyncSuccess: onResourceTreeAsyncSuccess
+		        }
+		    };
+		 	/*初始化左边菜单栏 */
+			$.fn.zTree.init($("#tree"), menuTreeSetting,menuData);
+	        zTree = $.fn.zTree.getZTreeObj("tree");
+	        
+		    function addDiyDom(treeId, treeNode) {
+		    	var aObj = $("#" + treeNode.tId + "_a");
+		    	var iconName = "";
+		    	if(menuIcon!= null && menuIcon!="0"){
+		    		iconName = utils.tmFile.isEmpty(treeNode.iconName)?'fa-dot-circle-o':treeNode.iconName;
+		    	}
+		    	if ($("#diyBtn_"+treeNode.id).length>0) return;
+		    	var editStr;
+		    	//没加菜单序号
+	    		editStr = "<span id='diyBtn_space_" +treeNode.id+ "' > </span>"
+	    		//加菜单序号
+    			if(treeNode.level==0){
+    				editStr += "<i class='fa "+iconName+"'  aria-hidden='true'></i>";
+    				$("#" + treeNode.tId + "_span").addClass("level_1");
+	    			$("#" + treeNode.tId + "_span").html(treeNode.sort+"&nbsp;"+$("#" + treeNode.tId + "_span").html());
+	    		}else if (treeNode.level==1){
+	    			//收藏不用加序号
+	    			if(treeNode.parentId==0){
+	    				editStr += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+"<i class='fa "+iconName+"'  aria-hidden='true'></i>";
+	    				$("#" + treeNode.tId + "_span").addClass("level_2");
+	    			}
+	    			else{
+	    				editStr += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+"<i class='fa "+iconName+"'  aria-hidden='true'></i>";
+	    				$("#" + treeNode.tId + "_span").addClass("level_2");
+		    			$("#" + treeNode.tId + "_span").html(Undefined(treeNode.getParentNode().sort)+"."+Undefined(treeNode.sort)+"&nbsp;"+$("#" + treeNode.tId + "_span").html());
+	    			}
+		    	}else if(treeNode.level==2){
+		    		editStr += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+"<i class='fa "+iconName+"'  aria-hidden='true'></i>";
+		    		$("#" + treeNode.tId + "_span").addClass("level_3");
+		    		$("#" + treeNode.tId + "_span").html(Undefined(treeNode.getParentNode().getParentNode().sort)+"."+Undefined(treeNode.getParentNode().sort)+"."+Undefined(treeNode.sort)+"&nbsp;"+$("#" + treeNode.tId + "_span").html());
+		    	}
+		    	else if(treeNode.level==3){
+		    		editStr += "<i class='fa "+iconName+"'  aria-hidden='true'></i>";
+		    		$("#" + treeNode.tId + "_span").addClass("level_4");
+		    		$("#" + treeNode.tId + "_span").html("&nbsp;&nbsp;&nbsp;&nbsp;"+Undefined(treeNode.getParentNode().getParentNode().getParentNode().sort)+"."+Undefined(treeNode.getParentNode().getParentNode().sort)+"."+Undefined(treeNode.getParentNode().sort)+"."+Undefined(treeNode.sort));
+		    	}  
+		    	aObj.prepend(editStr);
+		    	if (treeNode.isParent) {
+		    		aObj.append("<span class='menu-more'></span> ");
+	    		}
+		    };
+		    
+		    
+		    function zTreeOnClick(event, treeId, treeNode) {
+		    	zTree.expandNode(treeNode, null, null, null, true);
+		    	if(treeNode.isParent==false){
+		    		if(treeNode.linkType!=null&&treeNode.linkType==1){
+						openTab(treeNode.id,treeNode.name,menuRequestUrl+treeNode.id,'iframe');
+					}else{
+						window.open(menuRequestUrl+treeNode.id);
+					}
+		    	}
+		    }
+		    
+		    function openTab(id,name,url,type){
+		    	// 要打开的标签页对象
+				var myTab = {
+					id:'tabs_'+id,
+				    url:  url,
+				    type: type,
+				    title: name
+				};
+				// 打开标签页
+				myTabs.open(myTab);
+		    }
+		    
+		    var curExpandNode = null;
+			function zTreeBeforeExpand(treeId, treeNode) {
+				var pNode = curExpandNode ? curExpandNode.getParentNode():null;
+				var treeNodeP = treeNode.parentTId ? treeNode.getParentNode():null;
+				for(var i=0, l=!treeNodeP ? 0:treeNodeP.children.length; i<l; i++ ) {
+					if (treeNode !== treeNodeP.children[i]) {
+						zTree.expandNode(treeNodeP.children[i], false);
+					}
+				}
+				while (pNode) {
+					if (pNode === treeNode) {
+						break;
+					}
+					pNode = pNode.getParentNode();
+				}
+				if (!pNode) {
+					singlePath(treeNode);
+				}
+
+			}
+			function singlePath(newNode) {
+				if (newNode === curExpandNode) return;
+
+	            var rootNodes, tmpRoot, tmpTId, i, j, n;
+
+	            if (!curExpandNode) {
+	                tmpRoot = newNode;
+	                while (tmpRoot) {
+	                    tmpTId = tmpRoot.tId;
+	                    tmpRoot = tmpRoot.getParentNode();
+	                }
+	                rootNodes = zTree.getNodes();
+	                for (i=0, j=rootNodes.length; i<j; i++) {
+	                    n = rootNodes[i];
+	                    if (n.tId != tmpTId) {
+	                        zTree.expandNode(n, false);
+	                    }
+	                }
+	            } else if ((curExpandNode && curExpandNode.open) || 
+	            		(curExpandNode.getParentNode() && curExpandNode.getParentNode().open)) {
+					if (newNode.parentTId === curExpandNode.parentTId) {
+						zTree.expandNode(curExpandNode, false);
+					} else {
+						var newParents = [];
+						while (newNode) {
+							newNode = newNode.getParentNode();
+							if (newNode === curExpandNode) {
+								newParents = null;
+								break;
+							} else if (newNode) {
+								newParents.push(newNode);
+							}
+						}
+						if (newParents!=null) {
+							var oldNode = curExpandNode;
+							var oldParents = [];
+							while (oldNode) {
+								oldNode = oldNode.getParentNode();
+								if (oldNode) {
+									oldParents.push(oldNode);
+								}
+							}
+							if (newParents.length>0) {
+								zTree.expandNode(oldParents[Math.abs(oldParents.length-newParents.length)-1], false);
+							} else {
+								zTree.expandNode(oldParents[oldParents.length-1], false);
+							}
+						}
+					}
+				}
+				curExpandNode = newNode;
+			}
+
+			function onExpand(event, treeId, treeNode) {
+				curExpandNode = treeNode;
+			}
+		    
+			function noticeInfo(id,type,title) {
+                var url = '';
+                if(type==1){
+                    url = basePath + '/notice/info?id='+id;
+                }else if(type==2){
+                    var notice;
+                    $.ajax({
+                        type: 'post', // 提交方式 get/post
+                        async:false,
+                        url: '${basePath}/notice/findOneNotice', // 需要提交的 url
+                        data:{
+                            'id':id
+                        },
+                        success: function(res) {
+                            z
+                            notice = res;
+                        }
+                    });
+                    url = notice.content;
+                }
+                setreadNum(id);
+                parent.layer.open({
+                    type: 2,
+                    title: title,
+                    shadeClose: true,
+                    shade: 0.8,
+                    area: ['80%', '70%'],
+                    content: url, //iframe的url
+                    cancel: function(){
+                        $("#head").load("${basePath}/reloadHead", null,function(){
+                            setPic();
+                            layui.use('element', function () {
+                                var element = layui.element;
+                                element.render('nav', 'nav_filter');
+                            })
+                        })
+                    }
+                });
+			}
+			
+			function Undefined(str){
+				return typeof(str)=="undefined"?"":str;
+			}
+			function refreshTree(resourceId){
+				$.ajax({
+	                type: "POST",
+	                url:'${basePath}/resource/menu',
+	                data:{},
+	                async: false,
+	                error: function(request) {
+	                },
+	                success: function(result) {
+	                	$.fn.zTree.init($("#tree"), menuTreeSetting,result);
+	                	zTree = $.fn.zTree.getZTreeObj("tree");
+	                	var node= zTree.getNodeByParam("id", resourceId);
+	                	zTree.selectNode(node);
+	                }
+	            });
+			}
+			/*修改公告的浏览次数--也记录了一个用户多次浏览同一公告的次数*/
+			function setreadNum(id){
+				$.ajax({
+		              type: 'post', // 提交方式 get/post
+		              url: '${basePath}/notice/updateReadNum', // 需要提交的 url
+		              data:{
+		              	'id':id  
+		              },
+		              async: true,
+		              success: function(res) { 
+		              }
+		          });
+			}
+			
+			function MessageInfo(id,type,title){
+				url = basePath + '/messageCenter/info/'+id;
+				updateMessageState(id);
+				parent.layer.open({
+					  type: 2,
+					  title: '消息详情',
+					  shadeClose: true,
+					  shade: 0.5,
+					  area: ['80%', '70%'],
+					  content: url, //iframe的url
+						cancel: function(){
+						   $("#head").load("${basePath}/reloadHead", null,function(){
+	                           setPic();
+	                           layui.use('element', function () {
+	                               var element = layui.element;
+	                               element.render('nav', 'nav_filter');
+	                           })
+						   })
+					  }
+
+				});
+			}
+			
+			function updateMessageState(id){
+				$.ajax({
+		              type: 'post', // 提交方式 get/post
+		              url: '${basePath}/messageCenter/update', // 需要提交的 url
+		              data:{
+		              	'id':id , 
+		              	'isRead':1
+		              },
+		              async: true,
+		              success: function(res) { 
+		              }
+		        });
+			}
+			
+			function reloadTab(){
+				// 获取标签页管理器对象实例
+				var myTabs = $('#admin-body').data('zui.tabs');
+				// 重新载入当前激活的标签页
+				myTabs.reload();
+			}
+
+
+            function setPreference(id){
+            	openTab('setPreference','个人设置','${basePath}/userInfo/preference/'+id,'iframe')
+            }
+            
+           function reloadHeadFun(){//定义刷新head的方法，方便子页面调用父页面方法。
+            	$("#head").load("${basePath}/reloadHead", null,function(){
+                    setPic();
+                    layui.use('element', function () {
+                        var element = layui.element;
+                        element.render('nav', 'nav_filter');
+                    })
+                })
+            }
+			
+			function loadSearchData(){
+				$.ajax({
+		            type: "GET",
+		            url:basePath+'/resource/list',
+		            success: function(result) {
+		            	var search="<option value=''>搜索</option>";
+		            	var data=utils.toTreeData(result);
+		            	for(var i=0;i<result.length;i++){
+		            		if(result[i].code!=null&&result[i].code!=""){
+		            			search+="<option value='loadPage@"+result[i].id+"@"+result[i].name+"@"+result[i].linkType+"'>"+result[i].name+"("+result[i].code.toUpperCase()+")"+"</option>";
+		            		}else{
+		            			search+="<option value='loadPage@"+result[i].id+"@"+result[i].name+"@"+result[i].linkType+"'>"+result[i].name+"</option>";
+		            		}
+		            	}
+		            	$("#menu-sel").append(search);
+		            	layui.form.render();
+		            }
+		    	});
+			}
+			
+			function setAllNoticeRead(){//设置全部通知为已读
+				$.ajax({
+		              type: 'post', // 提交方式 get/post
+		              url: '${basePath}/notice/setAllNoticeRead', // 需要提交的 url
+		              async: false,
+		              success: function(res) { 
+		              }
+		        });
+				reloadHeadFun();
+			}
+			
+			function setAllMessageRead(){//设置全部消息为已读
+				$.ajax({
+		              type: 'post', // 提交方式 get/post
+		              url: '${basePath}/messageCenter/setAllRead', // 需要提交的 url
+		              async: false,
+		              success: function(res) { 
+		              }
+		        });
+				reloadHeadFun();
+			}
+			
+			function moreMessage(){//
+				parent.layer.open({
+	                type: 2,
+	                title: '更多消息',
+	                area: ['70%', '70%'],
+	                content: "${basePath}/moContent/content_message_more",
+	                cancel: function(){
+	                    $("#head").load("${basePath}/reloadHead", null,function(){
+	                        setPic();
+	                        layui.use('element', function () {
+	                            var element = layui.element;
+	                            element.render('nav', 'nav_filter');
+	                        })
+	                    })
+	                }
+	            });
+			}
+			
+			/* 退出登录 */
+			/* 	 $("#logout").click(function() {
+				$.ajax({
+		            type: "POST",
+		            url:basePath+'/sysLog/logout',
+		            async: false,
+		            error: function(request) {
+		            },
+		            success: function(result) {
+		            	window.location.href="${basePath}/logout";
+		            }
+		    	}); 
+			 }) */
+</script>
+<script type="text/javascript" src="${basePath}/js/comments.js"></script>
+</html>

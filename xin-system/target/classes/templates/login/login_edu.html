@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="format-detection" content="telephone=no">
+
+		<link rel="stylesheet" href="${basePath}/plugins/layui/2.4.3/css/layui.css"media="all" />
+		
+		<link rel="stylesheet" type="text/css" href="${basePath}/css/login.css"/>
+		<script type="text/javascript" src="${basePath}/plugins/layui/2.4.3/layui.js"></script>
+		<link href="${basePath}/images/favicon.ico" rel="icon" type="image/x-icon" />
+ 
+		<style type="text/css">
+			.beg-login-bg {
+				background: url(${basePath}/images/login_bg_edu.png) no-repeat center center fixed;
+				background-color: #1dbeac;
+				background-size: 100%;
+			}
+			body {
+				overflow: auto;
+    			line-height: 100%;
+			}
+			.error-div {height: 27px;}
+		    .error_msg {
+		        padding-left: 17px;
+		        color: #ff0000;
+		        font-size:10pt;
+		    }
+		    .title{
+		    	margin-top:4%
+		    }
+		    .item-message{
+		    	margin-bottom:0px
+		    }
+		    .check_code{
+		    	text-align: left;
+		    }
+		    .verifyCode ,.verifyCode:hover{
+		    	border-left: 0px solid #4eb4ae;
+		    }
+		    .checkcode-img{
+		    	width:80px
+		    }
+			#tenantId{
+				display: block;
+				border-left: 3px solid #eaf5ff!important;
+				color: #252929 !important;
+				font-size: 18px !important;
+				height: 48px !important;
+				min-height: 36px;
+				padding-left: 13px;
+				border-radius: 4px;
+				width: 120%;
+				margin-left:-54px;
+				background-color: #eaf5ff!important;
+			}
+
+		</style>
+		<script>
+			/*layui.use(['layer', 'form'], function() {
+				var layer = layui.layer,
+					$ = layui.jquery,
+					form = layui.form;
+				if(top.window.location.href != window.location.href){
+				    top.location.replace('${basePath}/login');
+				}
+				
+				form.on('submit(login)',function(data){
+					return true;
+				});
+			});*/
+		</script>
+	</head>
+
+	<body class="beg-login-bg" onkeydown="keyLogin();">
+	<input type="hidden" value="${basePath}" id="basePath"/>
+		<div class="title">
+				<img style="width:348px;height:84px" src="${basePath}${(SYS_LOGO!='')?string('${SYS_LOGO}','/images/dataWindow_white.png')}" onerror="javascript:this.src='${basePath}/images/dataWindow_white.png';">
+				<div class="title-chinese">
+					<span class="${(SYS_LOGIN_NAME!=null && SYS_LOGIN_NAME!='')?string('','layui-hide')}" ><span style="letter-spacing: 0px !important;" ></span>${SYS_LOGIN_NAME!''}<span style="letter-spacing: 0px !important;" ></span></span>
+				</div>
+				<!-- <div class="title-english">Data on Demand BI & Analytics
+					Online  Platform</div> -->
+			</div>
+			<div class="login-box">
+			<form action="${basePath}/login" class="layui-form login-form" method="post" id="loginForm" name="f" >
+				<div class="layui-form-item item-username" style="display: <#if SYS_USER_TENANT==1><#else>none</#if>">
+					<span class="layui-form-label login-box-label">
+						<img alt="" src="${basePath}/images/tenant2.png">
+					</span>
+					<div class="layui-input-block login-select-div">
+						<select  id="tenantId" name="tenantId" class="layui-inline"  autofocus="autofocus" onchange="changeTenant()">
+							<option  value="1">系统租户</option>
+							<#if tenantList??&&tenantList?size>0>
+								<#list tenantList as rec>
+									<option value = "${rec.id}"  <#if tenantId==rec.id>selected</#if>>${rec.name}</option>
+								</#list>
+							</#if>
+						</select>
+					</div>
+				</div>
+				<div class="layui-form-item item-username">
+					<span class="layui-form-label login-box-label">
+						<img alt="" src="${basePath}/images/user_edu.png">
+					</span>
+					<div class="layui-input-block login-input-div">
+						<input type="text" name="username" value="${username!}" lay-verify="title" autofocus="autofocus" autocomplete="off" placeholder="<@spring.message 'login.username'/>" class="login-input">
+					</div>
+				</div>
+				<div class="layui-form-item item-password">
+					<span class="layui-form-label login-box-label">
+						<img alt="" src="${basePath}/images/ps_edu.png">
+					</span>
+					<div class="layui-input-block login-input-div">
+						<input type="password"id="passwordInput" lay-verify="title" autocomplete="off" placeholder="<@spring.message 'login.password'/>" class="login-input">
+						<input type="hidden" name="password" lay-verify="title" autocomplete="off" placeholder="<@spring.message 'login.password'/>" class="login-input">
+					</div>
+				</div>
+				<div  id="check_code_div" class="input_outer layui-form-item check_code" style="margin-bottom: 0px;display:${(SYS_CHECK_CODE=='1')?string('block','none')}">
+							<div class=" login-input-div layui-inline" style="margin-left:0px;width:70%;">
+								<input id="verifyCode" name="verifyCode" autocomplete="off" class="verifyCode login-input" value="" type="text" placeholder="<@spring.message 'login.Verification_Code'/>" style="width:84%">
+							</div>
+							<img src="${basePath}/kaptcha/new" id="checkcode_img" onclick="changeImg()" class="checkcode-img"/>
+	            </div>
+				<div class="layui-form-item error-div" >
+					<span>
+						<span class="error_msg" style="display: ${(message_login!='')?string('block','none')};">${message_login!}</span>
+					</span>
+
+				</div>
+				
+				<div class="layui-form-item">
+	            	<a id="btn_login" href="javascript:" class="layui-btn layui-btn-primary login-btn" ><@spring.message 'login.nbspSign'/></a>
+	            </div>
+	            <a class="forget-pwd" style="display: ${(FORGET_PASSWORD_PROMPT!='1')?string('none','block')};" target="_blank" href="${basePath}/userInfo/forget/forgetPwd" style="color: #fff"><@spring.message 'login.Forget_the_password'/>？</a>
+			</form>
+			</div>
+		<footer class="login-footer">
+				<p>${SYS_COPYRIGHT!''}</p>
+		</footer>
+	<script>
+		function changeTenant(){
+			var tenantId = $("#tenantId").val();
+			window.location.href="${basePath}/login?tenantId="+tenantId;
+    	}
+		var usernameCannotBeEmpty = "<@spring.message 'login.The_username_cannot_be_empty'/>";
+	    var passwordCannotBeEmpty = "<@spring.message 'login.The_password_cannot_be_empty'/>";
+	    var captchaCannotBeEmpty = "<@spring.message 'login.The_captcha_cannot_be_empty'/>";
+	    var publicKeyCannotFind = "<@spring.message 'login.publicKey_cannot_find'/>！";
+	    var passwordCannotMoreThan64= "<@spring.message 'config.Password_length_should_not_be_more_than_64_place'/>！";
+	</script>
+		<script type="text/javascript" src="${basePath}/js/jquery-2.2.4.min.js"></script>
+		<script type="text/javascript" src="${basePath}/js/Barrett.js"></script>
+		<script type="text/javascript" src="${basePath}/js/BigInt.js"></script>
+		<script type="text/javascript" src="${basePath}/js/RSA.js"></script>   
+		<script type="text/javascript" src="${basePath}/js/login.js"></script>  
+	</body>
+
+</html>

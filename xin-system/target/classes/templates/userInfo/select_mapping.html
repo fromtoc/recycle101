@@ -1,0 +1,114 @@
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<style>
+	.fixed-table-body {
+    	height: auto;
+    }
+</style>
+<div id="body" class="layui-body" style="">
+	<div class="layui-tab" style="-webkit-box-sizing: initial;">
+		<input type="hidden" id="biUserId" name="biUserId" />
+	  <div id="toolbar" class="layui-form layui-form-pane" action="">
+	  	<label class="layui-form-label"><@spring.message 'user.username'/></label>
+	  	<div class="layui-inline">
+	        <input type="text" id="username" name="username" placeholder="<@spring.message 'tips.input'/>"
+			autocomplete="off" class="layui-input">
+		</div>
+           <div class="layui-inline">
+           	<button type="button" id="query" class="layui-btn layui-btn-sm layui-btn-normal" onclick="query()"><i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/></button>
+	    </div>
+         </div>
+	  <div class="layui-tab-content">
+	    <div class="layui-tab-item layui-show">
+	    	<table id="table"
+	    		   data-toolbar="#toolbar"
+	               data-toggle="table"
+	               data-search="false"
+	               data-side-pagination="server"
+	               data-pagination="true"
+	               data-query-params-type=""
+	               data-click-to-select="true"
+	               data-url="${basePath}/userInfo/page"
+	               data-query-params="queryParams">
+	            <thead>
+	            <tr>
+	            	<th data-align="center"
+	                	data-halign="center"
+	                	data-checkbox="true"
+	                	data-width="1%"><@spring.message 'list.serialNum'/></th>
+	                <th data-align="center"
+	                	data-halign="center"
+	                	data-formatter="indexFormatter"
+	                	data-width="1%"><@spring.message 'list.serialNum'/></th>
+	                <th data-align="left" 
+	                	data-width="25%"
+	                	data-halign="center"
+	                	data-field="username"><@spring.message 'user.username'/></th>
+	                <th data-align="left" 
+	                	data-width="10%"
+	                	data-halign="center"
+	                	data-field="realname" ><@spring.message 'user.realname'/></th>
+	                <th data-align="left"
+					    data-halign="center"
+					    data-valign="middle"
+					    data-field="orgName"><@spring.message 'biMapping.organization'/></th>
+	                <th data-align="center"
+	                	data-width="20%" 
+	                	data-halign="center"
+	                	data-field="registerTime"
+	                	data-formatter="dateTimeFormatter"><@spring.message 'list.createTime'/></th>
+	            
+	            </tr>
+	            </thead>
+	        </table>
+	    </div>
+	  </div>
+	</div>
+</div>
+<script>
+	$('#add_user').on('click',function(){
+        	var username = $('#username').val();
+        	$('#table').bootstrapTable('refresh', {query: {username: username}});
+    });
+    
+    
+	var mstrUserIdNot = '${id!}';
+	var biServerId = '';
+	
+	function init(record) {
+		biServerId = record.biServerId;
+		biUserId = record.id
+	}
+
+	function queryParams(params) {
+    	params.BiUserIdNot = mstrUserIdNot;
+    	params.username = $('#username').val();
+		return params;
+	}
+	
+	function query() {
+		$('#table').bootstrapTable('refresh');
+	}
+	
+	function getData() {
+		var records = $('#table').bootstrapTable('getSelections');
+		if (records!=null && records.length>0) {
+			var userIds = [];
+			for (var i=0;i<records.length;i++) {
+				userIds.push(records[i].id);
+			}
+			var data = {
+				mstrUserId:mstrUserIdNot,
+				userIds:userIds,
+				biUserId:biUserId,
+				biServerId:biServerId
+			};
+			return data;
+		
+		} else {
+			return null;
+		}
+	}
+	
+	
+</script>

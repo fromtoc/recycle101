@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<#include "common/common_ztree.html" />
+<link rel="stylesheet" href="${basePath}/plugins/font-awesome-4.7.0/css/font-awesome.css" media="all">
+<style>
+	html,body{overflow: hidden}
+	.layui-treeSelect .ztree li span.button.ico_open{display:none;}.layui-treeSelect .ztree li span.button.ico_close{display:none;}.layui-treeSelect .ztree li span.button.ico_docu:before{content:"\e621";}.layui-treeSelect .ztree li span.button.bottom_close:before,.layui-treeSelect .ztree li span.button.center_close:before,.layui-treeSelect .ztree li span.button.roots_close:before,.layui-treeSelect .ztree li span.button.root_close:before{content:"\e623";}.layui-treeSelect .ztree li span.button.bottom_open:before,.layui-treeSelect .ztree li span.button.roots_open:before,.layui-treeSelect .ztree li span.button.center_open:before,.layui-treeSelect .ztree li span.button.root_open:before{content:"\e625";}
+</style>
+<script type="text/javascript">
+	var zTree;
+	var zTreeMobile
+	var treeSetting = {
+        check: {
+            enable: false
+        },
+        view: {
+			<@shiro.lacksRole name='role_test' >
+			addHoverDom:addHoverDom,
+			removeHoverDom:removeHoverDom,
+			</@shiro.lacksRole>
+            dblClickExpand: false,
+            showLine: true,
+            selectedMulti: false,
+        },
+        data: {
+            simpleData: {
+                enable:true,
+                idKey: "id",
+                pIdKey: "parentId",
+            }
+        },
+        async: {
+			enable: true,
+			url: "${basePath}/menu/list?isMobile=0",
+			autoParam:["id"],
+			type:'get'
+		},
+        callback: {
+            onClick: zTreeOnClick,
+            onAsyncSuccess: onResourceTreeAsyncSuccess
+        },
+        treeNode:{
+			open:false
+		}
+	};
+	var treeSettingMobile = {
+        check: {
+            enable: false
+        },
+        view: {
+			<@shiro.lacksRole name='role_test' >
+			addHoverDom:addHoverDomMobile,
+			removeHoverDom:removeHoverDomMobile,
+			</@shiro.lacksRole>
+            dblClickExpand: false,
+            showLine: true,
+            selectedMulti: false,
+        },
+        data: {
+            simpleData: {
+                enable:true,
+                idKey: "id",
+                pIdKey: "parentId",
+                rootPId: 0
+            }
+        },
+        async: {
+			enable: true,
+			url: "${basePath}/menu/list?isMobile=1",
+			autoParam:["id"],
+			type:'get'
+		},
+        callback: {
+            onClick: zTreeOnClickMobile,
+            onAsyncSuccess: onResourceTreeAsyncSuccessMobile
+        },
+	    treeNode:{
+			open:false
+		}
+	};
+ 	$(function(){
+ 		$.fn.zTree.init($("#tree"), treeSetting);
+ 		$.fn.zTree.init($("#tree_mobile"), treeSettingMobile);
+    	zTree = $.fn.zTree.getZTreeObj("tree");
+    	zTreeMobile = $.fn.zTree.getZTreeObj("tree_mobile");
+    	// $('#menu_info').load('${basePath}/menu/info');
+    });
+	
+ 	layui.use('element', function(){
+		var element = layui.element; 
+		element.on('tab(docDemoTabBrief)', function(elem){
+			if(elem.index==0){
+				$('#isMobileMenu').val("0")
+			}else{
+				$('#isMobileMenu').val("1")
+			}
+		});
+ 	});
+	
+	function addHoverDom(treeId, treeNode) {
+    	if (treeNode.state==0 && treeNode.id!=1) {
+    		return false;
+    	}
+        var sObj = $("#" + treeNode.tId + "_span");
+        if (sObj[0].innerText.length>20) {
+        	sObj.html(sObj[0].innerText.substring(0, 20) + "...");
+        }
+        
+        if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0 || $("#editBtn_"+treeNode.tId).length>0) return;
+        var addStr = "";
+        if(treeNode.level < 2 && !treeNode.resourceId){//第三级和资源菜单没有添加功能
+        	addStr = "<span class='button add' id='addBtn_" + treeNode.tId
+               + "'title="+'<@spring.message "action.add"/>'+"  onfocus='this.blur();'></span>";
+        }
+        addStr += "<span class='button edit' id='editBtn_" + treeNode.tId + "' title="+'<@spring.message "action.edit"/>'+" onfocus='this.blur();'></span>";
+        if (!treeNode.isParent && treeNode.id!=1) {
+	        addStr += "<span class='button remove' id='removeBtn_" + treeNode.tId + "' title="+'<@spring.message "action.delete"/>'+" onfocus='this.blur();'></span>";
+        }
+        sObj.after(addStr);
+        var btnAdd = $("#addBtn_"+treeNode.tId);
+        if (btnAdd) btnAdd.bind("click", function(){
+        	addMenu(treeNode);
+            return false;
+        });
+        
+        var btnEdit = $("#editBtn_"+treeNode.tId);
+        if (btnEdit) btnEdit.bind("click", function(){
+        	editMenu(treeNode);
+            return false;
+        });
+        
+        var btnDel = $("#removeBtn_"+treeNode.tId);
+        if (btnDel) btnDel.bind("click", function(){
+            delMenu(treeNode);
+            return false;
+        });
+    };
+    
+    function addHoverDomMobile(treeId, treeNode) {
+    	if (treeNode.state==0 && treeNode.id!=1) {
+    		return false;
+    	}
+        var sObj = $("#" + treeNode.tId + "_span");
+        if (sObj[0].innerText.length>20) {
+        	sObj.html(sObj[0].innerText.substring(0, 20) + "...");
+        }
+        
+        if (treeNode.editNameFlag || $("#editBtn_"+treeNode.tId).length>0) return;
+        var addStr = "";
+        if(treeNode.level < 1 && !treeNode.resourceId){//非资源和第一级菜单有添加
+        	addStr = "<span class='button add' id='addBtn_" + treeNode.tId
+            + "'title="+'<@spring.message "action.add"/>'+"  onfocus='this.blur();'></span>";
+        }
+        addStr += "<span class='button edit' id='editBtn_" + treeNode.tId + "' title="+'<@spring.message "action.edit"/>'+" onfocus='this.blur();'></span>";
+        if (!treeNode.isParent && treeNode.id!=1) {
+	        addStr += "<span class='button remove' id='removeBtn_" + treeNode.tId + "' title="+'<@spring.message "action.delete"/>'+" onfocus='this.blur();'></span>";
+        }
+        sObj.after(addStr);
+        var btnAdd = $("#addBtn_"+treeNode.tId);
+        if (btnAdd) btnAdd.bind("click", function(){
+        	addMenuMobile(treeNode);
+            return false;
+        });
+        
+        var btnEdit = $("#editBtn_"+treeNode.tId);
+        if (btnEdit) btnEdit.bind("click", function(){
+        	editMenuMobile(treeNode);
+            return false;
+        });
+        
+        var btnDel = $("#removeBtn_"+treeNode.tId);
+        if (btnDel) btnDel.bind("click", function(){
+            delMenuMobile(treeNode);
+            return false;
+        });
+        
+    };
+    
+    function removeHoverDom(treeId, treeNode) {
+        $("#addBtn_"+treeNode.tId).unbind().remove();
+        $("#removeBtn_"+treeNode.tId).unbind().remove();
+        $("#editBtn_"+treeNode.tId).unbind().remove();
+    };
+    
+    function removeHoverDomMobile(treeId, treeNode) {
+        $("#addBtn_"+treeNode.tId).unbind().remove();
+        $("#removeBtn_"+treeNode.tId).unbind().remove();
+        $("#editBtn_"+treeNode.tId).unbind().remove();
+    };
+    
+    function zTreeOnClick(event, treeId, treeNode) {
+    	$("#Operation_label").text('');
+    	$('#checkedId').val(treeNode.id);
+    	//treeNode.parentName = parentNode==null ? '' : parentNode.name;
+    	//treeNode.linkType=treeNode.linkType.toString();
+    	//$('#form_menu').fillValue2Form(treeNode);
+    	layui.form.val('form_menu',treeNode);
+    	$("#resource_label").html(treeNode.resourceName);
+    	$("#introduce_label").html(treeNode.introduce);
+    	$("#linkUrl_label").html(treeNode.linkUrl);
+    	$("#btn_del").removeClass('layui-hide');
+    	$("#showStyleDiv").addClass('layui-hide');
+    	if (treeNode.state==0) {
+    		$("#btn_submit").addClass('layui-hide');
+    		$("#btn_reset").addClass('layui-hide');
+    		$("#btn_del").addClass('layui-hide');
+    	} else {
+    		$("#btn_submit").removeClass('layui-hide');
+    		$("#btn_reset").removeClass('layui-hide');
+    		$("#btn_del").removeClass('layui-hide');
+    	}
+    	
+    	if (treeNode.getParentNode()!=null){
+    		var parentNode = treeNode.getParentNode();
+    		$('#parentId').val(parentNode.id);
+	    	layui.treeSelect.checkNode('parentId', parentNode.id);
+    	} else {
+    		$('#parentId').val(0);
+	    	layui.treeSelect.checkNode('parentId', 0);
+    	}
+    	layui.treeSelect.checkNode('type',treeNode.type);
+    	
+    }
+    
+    function zTreeOnClickMobile(event, treeId, treeNode) {
+    	$("#Operation_label_mobile").text('');
+    	//$('#checkedId').val(treeNode.id);
+    	//treeNode.parentName = parentNode==null ? '' : parentNode.name;
+    	//treeNode.linkType=treeNode.linkType.toString();
+    	//$('#form_menu').fillValue2Form(treeNode);
+    	layui.form.val('form_menu_mobile',treeNode);
+    	$("#resource_label_mobile").html(treeNode.resourceName);
+    	$("#introduce_label_mobile").html(treeNode.introduce);
+    	$("#linkUrl_label_mobile").html(treeNode.linkUrl);
+    	$("#btn_del_mobile").removeClass('layui-hide');
+    	
+    	if (treeNode.state==0) {
+    		$("#btn_submit_mobile").addClass('layui-hide');
+    		$("#btn_reset_mobile").addClass('layui-hide');
+    		$("#btn_del_mobile").addClass('layui-hide');
+    	} else {
+    		$("#btn_submit_mobile").removeClass('layui-hide');
+    		$("#btn_reset_mobile").removeClass('layui-hide');
+    		$("#btn_del_mobile").removeClass('layui-hide');
+    	}
+    	
+    	
+    	if (treeNode.getParentNode()!=null){
+    		var parentNode = treeNode.getParentNode();
+    		$('#parentIdMobile').val(parentNode.id);
+	    	layui.treeSelect.checkNode('parentIdMobile', parentNode.id);
+    	} else {
+    		$('#parentIdMobile').val(0);
+	    	layui.treeSelect.checkNode('parentIdMobile', 0);
+    	}
+    	layui.treeSelect.checkNode('typeMobile',treeNode.type);
+    }
+    
+    function onResourceTreeAsyncSuccess(event, treeId, treeNode, msg){
+    	//var node = zTree.getNodeByParam('id', 1,null);//获取id为1的点
+    	//zTree.expandNode(node, true, false);//指定选中ID节点展开
+    /*	zTree.expandAll(true);*/
+		/*var nodes = zTree.getNodes();
+    	layui.treeSelect.zTree('parentId').loadData(nodes); */
+    	$('#menu_info').load('${basePath}/menu/info');
+    }
+    
+    function onResourceTreeAsyncSuccessMobile(event, treeId, treeNode, msg){
+    	$('#menu_info_mobie').load('${basePath}/menu/infomobile');
+    }
+    
+	function getParentNodes(node,allNode){
+		if(node!=null){
+			if (allNode=='') {
+				allNode = node['id'];
+			}else {
+				allNode += ","+node['id'];
+			}
+			curNode = node.getParentNode();
+			getParentNodes(curNode,allNode);
+		}else{
+			parentResIds = allNode;
+		}
+	}
+    
+    function addMenu(treeNode) {
+    	$('#btn_submit').text('<@spring.message"action.add"/> ');
+    	$("#Operation_label").text('<@spring.message"action.add"/> ');
+    	$("#linkUrl_label").html('');
+    	$("#resource_label").html('');
+    	$('#form_menu')[0].reset();
+    	$("input[type='hidden']").val("");
+    	$('#checkedId').val(treeNode.id);
+   		$('#parentId').val(treeNode.id);
+   		$('#isMobile').val('0');
+   		$("#btn_del").addClass('layui-hide');
+   		$("#showStyleDiv").addClass('layui-hide');
+    	layui.treeSelect.checkNode('parentId', treeNode.id);
+    }
+    
+    function addMenuMobile(treeNode) {
+    	$('#btn_submit_mobile').text('<@spring.message"action.add"/>');
+    	$("#Operation_label_mobile").text('<@spring.message"action.add"/>');
+    	$("#linkUrl_label_mobile").html('');
+    	$("#resource_label_mobile").html('');
+    	$('#form_menu_mobile')[0].reset();
+    	$("#form_menu_mobile input[type='hidden']").val("");
+    	//$('#checkedId').val(treeNode.id);
+   		$('#parentIdMobile').val(treeNode.id);
+   		$('#isMobileMobile').val('1');
+   		$("#btn_del_mobile").addClass('layui-hide');
+    	layui.treeSelect.checkNode('parentIdMobile', treeNode.id);
+    }
+    
+    function delMenu(treeNode) {
+        if (treeNode.isParent) {
+        	parent.layer.alert('<@spring.message"tips.treeDelete"/>!');
+         	return;
+        } else {
+        	parent.layer.confirm('<@spring.message"menu.delete_menu"/> 【'+treeNode.name+'】？',  {title:'<@spring.message "action.info"/>',
+                   btn:['<@spring.message"banner.Determine"/>','<@spring.message"action.cancel"/>'],
+				yes: function(index, layero){
+			  		$.ajax({url:'${basePath}/menu/delete/'+treeNode.id,type:'delete',
+			  			success:function(result){
+				    		zTree.reAsyncChildNodes(null, "refresh",function(){
+					    		var nodes = zTree.getNodes();
+						    	layui.treeSelect.zTree('parentId').loadData(nodes);
+							});
+				    		$('#form_menu')[0].reset();
+				    		$("#form_menu input[type='hidden']").val("");
+				    		parent.layer.close(index);
+                               if (result.code==0) {
+                                   parent.layer.msg("<@spring.message 'result.success'/>");
+							}else{
+                                   parent.layer.msg("<@spring.message 'result.fail'/>");
+							}
+				    	}
+			  		});
+		                
+				}
+         	});
+        }
+    }
+    
+    function delMenuMobile(treeNode) {
+        if (treeNode.isParent) {
+        	parent.layer.alert('<@spring.message"tips.treeDelete"/>!');
+         	return;
+        } else {
+        	parent.layer.confirm('<@spring.message"menu.delete_menu"/> 【'+treeNode.name+'】？',  {title:'<@spring.message "action.info"/>',
+                   btn:['<@spring.message"banner.Determine"/>','<@spring.message"action.cancel"/>'],
+				yes: function(index, layero){
+			  		$.ajax({url:'${basePath}/menu/delete/'+treeNode.id,type:'delete',
+			  			success:function(result){
+				    		zTreeMobile.reAsyncChildNodes(null, "refresh",function(){
+					    		var nodes = zTreeMobile.getNodes();
+						    	layui.treeSelect.zTreeMobile('parentIdMobile').loadData(nodes);
+							});
+				    		$('#form_menu_mobile')[0].reset();
+				    		$("#form_menu_mobile input[type='hidden']").val("");
+				    		parent.layer.close(index);
+                               if (result.code==0) {
+                                   parent.layer.msg("<@spring.message 'result.success'/>");
+							}else{
+                                   parent.layer.msg("<@spring.message 'result.fail'/>");
+							}
+				    	}
+			  		});
+		                
+				}
+         	});
+        }
+    }
+	    
+    function editMenu(treeNode) {
+    	$('#btn_submit').text('<@spring.message"action.edit"/> ');
+    	$("#Operation_label").text('<@spring.message"action.edit"/> ');
+    	$('#checkedId').val(treeNode.id);
+    	$("#btn_del").removeClass('layui-hide');
+    	$("#showStyleDiv").addClass('layui-hide');
+    	if (treeNode.parentId!=null&&treeNode.parentId!=''){
+    		var parentNode = treeNode.getParentNode();
+    		$('#parentId').val(parentNode.id);
+	    	layui.treeSelect.checkNode('parentId', parentNode.id);
+    	}
+    	$('#isMobile').val('0');
+    	layui.treeSelect.checkNode('type',treeNode.type);
+    	//根据子节点判断是否需要显示展示风格项
+    	var nodeChilds = treeNode.children;
+    	var isResource = true;
+    	if(nodeChilds){
+    		for (var i = 0, len = nodeChilds.length; i < len; i++) {
+        		if(!nodeChilds[i].resourceId){
+        			isResource = false;
+        			break;
+        		}
+        	}
+    	}
+    	if(!treeNode.resourceId && isResource && treeNode.level < 2){
+    		$("#showStyleDiv").removeClass('layui-hide');
+    		treeNode.showStyle = treeNode.showStyle?treeNode.showStyle:'list';//如果为空则为list（默认）
+    	}
+    	layui.form.val('form_menu',treeNode)
+    }
+    
+    function editMenuMobile(treeNode) {
+    	$('#btn_submit_mobile').text('<@spring.message"action.edit"/> ');
+    	$("#Operation_label_mobile").text('<@spring.message"action.edit"/> ');
+    	//$('#checkedId').val(treeNode.id);
+    	$("#btn_del_mobile").removeClass('layui-hide');
+    	if (treeNode.parentId!=null&&treeNode.parentId!=''){
+    		var parentNode = treeNode.getParentNode();
+    		$('#parentIdMobile').val(parentNode.id);
+	    	layui.treeSelect.checkNode('parentIdMobile', parentNode.id);
+    	}
+    	$('#isMobileMobile').val('1');
+    	layui.treeSelect.checkNode('typeMobile',treeNode.type);
+    	layui.form.val('form_menu_mobile',treeNode)
+    }
+
+	function initMenuTree(){
+		//var treeHeight = $('body').height()-$('.treerow').offset().top;
+		var treeHeight = document.documentElement.clientHeight-$('.treerow').offset().top;
+		$('#menu_tree_div').height(treeHeight);
+	}
+    
+</script>
+
+</head>
+<body onload="initMenuTree()">
+	<@system.path id="${menuId!}"></@system.path>
+	<div class="layui-fluid">
+		<input type="hidden" id="isMobileMenu" />
+		<div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+		  <ul class="layui-tab-title">
+		    <li class="layui-this"><@spring.message 'menu.Web_Report_type'/></li>
+		    <li><@spring.message 'menu.Mobile_Report_type'/></li>
+		  </ul>
+		  <div class="layui-tab-content" style="height: 100px;">
+		  	<!-- PC报表 -->
+		    <div class="layui-tab-item layui-show">
+				<div class="layui-row treerow" style="padding-left:12px">
+				    <div class="layui-col-md3" id="menu_tree_div" style="overflow: auto">
+						<ul id="tree" class="ztree"></ul>
+				    </div>
+				    <div class="layui-col-md9" id="menu_info">
+				    	
+				    </div>
+			    </div>
+		    </div>
+		    <!-- Mobile报表 -->
+		    <div class="layui-tab-item">
+		    	<div class="layui-row treerow" style="padding-left:12px">
+				    <div class="layui-col-md3" id="menu_tree_div_mobile" style="overflow: auto">
+						<ul id="tree_mobile" class="ztree"></ul>
+				    </div>
+				    <div class="layui-col-md9" id="menu_info_mobie">
+				    	
+				    </div>
+			    </div>
+		    </div>
+		  </div>
+		</div> 
+	</div>
+	<div id="iconSelDialog" style="display:none">
+		<#include "resource/icon_select.html" />
+	</div>
+	
+</body>
+</html>

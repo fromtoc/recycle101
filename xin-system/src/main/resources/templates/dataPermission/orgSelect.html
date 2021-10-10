@@ -1,0 +1,104 @@
+<#include "common/common.html" />
+<#include "common/common_table.html" />
+<style>
+	.fixed-table-body {
+    	height: auto;
+    }
+</style>
+<div id="body" class="layui-body" style="">
+	<div class="layui-tab" style="-webkit-box-sizing: initial;">
+		<div id="toolbar" class="layui-form layui-form-pane" action="">
+			<input type="hidden" name="orgId" id="orgId" value="${orgId}">
+			<label class="layui-form-label" title="<@spring.message 'dataPermission.data_per_name'/>"><@spring.message 'dataPermission.data_per_name'/></label>
+			<div class="layui-inline">
+	        	<input type="text" id="dpname" name="dpname" placeholder="<@spring.message 'tips.input'/>"
+			autocomplete="off" class="layui-input">
+			</div>
+           	<div class="layui-inline">
+           		<button type="button" id="query" class="layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon">&#xe615;</i> <@spring.message 'action.query'/></button>
+	    	</div>
+		</div>
+	  	<div class="layui-tab-content">
+			<div class="layui-tab-item layui-show">
+				<table id="table"
+	    		   data-toolbar="#toolbar"
+	    		   data-click-to-select="true"
+	               data-toggle="table"
+	               data-search="false"
+	               data-side-pagination="server"
+	               data-pagination="true"
+	               data-query-params-type=""
+	               data-url="${basePath}/dataPermission/page"
+	               data-query-params="queryParams">
+	            	<thead>
+	            		<tr>
+			            	<th data-align="center"
+			                	data-halign="center"
+			                	data-checkbox="true"
+			                	data-width="1%"><@spring.message 'list.serialNum'/></th>
+			                <th data-align="center"
+			                	data-halign="center"
+			                	data-formatter="indexFormatter"
+			                	data-width="1%"><@spring.message 'list.serialNum'/></th>
+			                <th data-align="center" 
+			                	data-width="20%"
+			                	data-halign="center"
+			                	data-field="dpname"><@spring.message 'dataPermission.data_per_name'/></th>
+			                <th data-align="center" 
+			                	data-width="20%"
+			                	data-halign="center"
+			                	data-field="extcode" ><@spring.message 'dataPermission.data_per_code'/></th>
+			                <th data-align="center" 
+			                	data-width="20%"
+			                	data-halign="center"
+			                	data-field="dptype" ><@spring.message 'dataPermission.data_per_type'/></th>
+			                <th data-align="center"
+			                	data-width="5%" 
+			                	data-halign="center"
+			                	data-field="sort" ><@spring.message 'list.order'/></th>
+	            		</tr>
+					</thead>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	$('#query').on('click',function(){
+		var orgId = $('#orgId').val();
+       	var dpname = $('#dpname').val();
+       	//var dptype = $('#dptype').val();
+       	$('#table').bootstrapTable('refresh', {query: {dpname: dpname, orgId:orgId}});
+    });
+    
+	function init() {
+	}
+
+	function queryParams(params) {
+		var dpname = $('#dpname').val();
+       	//var dptype = $('#dptype').val();
+		var orgId = $('#orgId').val();
+		params.dpname = dpname
+		//params.dptype = dptype
+    	params.orgId = orgId;
+		return params;
+	}
+	
+	function getData() {
+		var orgId = $('#orgId').val();
+		var records = $('#table').bootstrapTable('getSelections');
+		if (records!=null && records.length>0) {
+			var dataPermissions = [];
+			for (var i=0;i<records.length;i++) {
+				dataPermissions.push(records[i].id);
+			}
+			var data = {
+				orgId:orgId,
+				dataPermissions:dataPermissions
+			};
+			return data;
+		} else {
+			return null;
+		}
+	}
+</script>

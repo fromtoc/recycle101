@@ -1,0 +1,86 @@
+<#include "common/common.html" />
+<form id="form_edit" lay-filter="form_edit" class="layui-form " action="">
+	<input type="hidden" name="id" id="id"/>
+	<div class="layui-form-item">
+		<label class="layui-form-label">resourceId</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="resourceId" name="resourceId"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><@spring.message "resource.Record_type"/>：1<@spring.message 'action.view'/>2<@spring.message "action.download"/>3<@spring.message "action.collect"/>4<@spring.message "comment.comment"/></label>
+		<div class="layui-input-block" >
+	      <input type="number" id="type" name="type"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">creater</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="creater" name="creater"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">createrName</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="createrName" name="createrName"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">createTime</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="createTime" name="createTime"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">ip</label>
+	    <div class="layui-input-block" >
+	      <input type="text" id="ip" name="ip"  lay-verify="required" lay-verType="tips" class="layui-input" placeholder="<@spring.message 'tips.inputSome'/>">
+	    </div>
+	</div>
+	<button class="layui-hide" lay-submit  id="btn_submit" lay-filter="btn_submit"><@spring.message "action.save"/></button>
+</form>
+
+<script type="text/javascript">
+	var is_verify = false;
+	layui.use([ 'form'],function() {
+		var form = layui.form;
+		form.verify({
+			  length: function(value,item){
+				  if(value.length<2 || value.length>30){
+                      return '<@spring.message "biMapping.please_enter_2_to_30_characters"/>';
+				  }
+			  },
+			  textarea: function(value,item){
+				  if(value.length>250){
+                      return '<@spring.message "biMapping.Length_should_not_exceed_250"/>';
+				  }
+			  }
+			})  
+		form.on('submit(btn_submit)', function(data){
+			is_verify = true;
+			return false;
+		})
+	});
+	
+	function init (record) {
+		/* 
+		$.get('/resourceLog/info/'+record.id,function(result){
+			layui.form.val('form_edit',result.data);
+		});
+		 */
+		var obj = Object.assign({}, record); 
+		layui.form.val('form_edit',obj);
+	}
+	
+  	
+	function getData(){
+		$('#btn_submit').click();
+		if (is_verify) {
+			return $('#form_edit').serialize();
+		} else {
+			return null;
+		}
+  	}
+	
+	
+</script>

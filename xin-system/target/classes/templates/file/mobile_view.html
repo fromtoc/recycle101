@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+	<title>${(record.nameBefore)!'<@spring.message "model.preview"/>'}</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+	<#include "common/common.html" />
+	<#include "common/common_table.html" />
+	<link href="${basePath}/plugins/video/css/video-js.css" rel="stylesheet">
+		<link rel="stylesheet" href="${basePath}/plugins/layui/2.4.3/css/layui.css" />
+		<link rel="stylesheet" href="${basePath}/plugins/zui/zui.min.css" >
+		<script src="${basePath}/plugins/video/js/video.min.js"></script> 
+        <script src="${basePath}/plugins/video/js/zh-CN.js"></script>
+        <script src="${basePath}/js/jquery-2.2.4.min.js"></script>
+        <style>
+html,body{
+	height:100%;
+	overflow:hidden;
+}
+.m {
+	width: 100%;
+	height: 100%;
+	margin-left: auto;
+	margin-right: auto;
+	/* margin-top: 10px; */
+	display:none;
+}
+.video-js {
+	width:100%;
+}
+.imgDiv{
+	position: absolute;
+   	top: 50%;
+   	left: 50%;
+   	transform: translate(-50%, -50%);
+}
+</style>
+	
+</head>
+<body>
+	<div id="file_div" style="height:100%;">
+    <#if record??>
+    	<#if (record.filePathView?ends_with("pdf"))>
+	    	<iframe id="file_iframe" width="100%" height="100%" frameborder="0" scrolling="no"  src=""></iframe>
+	    <#elseif (record.filePathView?ends_with("mp4")) || (record.filePathView?ends_with("avi")) >
+		    <div class="m">
+		    <video id="my-video" class="video-js vjs-big-play-centered" controls preload="auto" style="width:100%;"
+				   data-setup="{}" controls="controls">
+				   <source src="${basePath+record.filePathView}" type="video/mp4">
+				   <source src="${basePath+record.filePathView}" type='video/webm' />
+		   		   <source src="${basePath+record.filePathView}" type='video/ogg' />
+			<@spring.message "fileView.videoPlayError"/>！
+			</video>
+		      
+		    </div>
+	    <!-- <#elseif (record.filePathView?ends_with("pdf"))>
+	    <#elseif  (record.filePathView?ends_with("txt"))> -->
+	    <#elseif  ((record.filePathView?ends_with("png")) || (record.filePathView?ends_with("jpg")) || (record.filePathView?ends_with("gif")))  >
+			<div class="imgDiv" >
+				<img alt="${(record.name)!}" style="max-width:38em;" src="${basePath+record.filePathView}" />
+	    	</div>
+		</#if>
+	</#if>
+	</div>
+</body>
+<#include "common/common.html" />
+<link rel="stylesheet" href="${basePath}/plugins/zui/zui.min.css" >
+      <script type="text/javascript">
+      videojs.options.flash.swf = "video-js.swf";
+      layui.use([ 'layer'],function() {
+    	  
+  		var layer = layui.layer;
+      	var fileType = '${(record.fileType)!}';
+      	var filePathView = '${(record.filePathView)!}';
+      	var basePath = '${basePath}';
+      	
+      	//$('#my-video').css('height',document.documentElement.clientHeight);
+      	if (fileType!=null) {
+      		if (fileType=='mp3' || fileType=='mp4' || fileType=='avi' || fileType=='flv'|| fileType=='rm') {
+      			 $('.m').show();
+				var myPlayer = videojs('my-video');
+				videojs("my-video").ready(function(){
+					var myPlayer = this;
+					myPlayer.play();
+				}); 
+      		} else if (filePathView!=null && filePathView.endsWith('.pdf')) {
+      			$('#file_iframe').attr('src','${basePath}/plugins/pdfjs/web/viewer.html?file=${basePath+record.filePathView}');
+      		} else if (filePathView!=null && (filePathView.endsWith('png') ||filePathView.endsWith('jpg') ||filePathView.endsWith('gif') )) {
+      			//location.href='${basePath}/plugins/pdfjs/web/viewer.html?file=${basePath+record.filePathView}';
+      		} else if (filePathView!=null && filePathView.endsWith('txt') ) {
+      			$('#file_iframe').attr('src','${basePath+record.filePathView}');
+      		} else {
+      			layer.msg('<@spring.message "fileView.fileLoadError"/>！');
+      		}
+      	} else {
+      		layer.msg('<@spring.message "fileView.fileLoadError"/>！');
+      	}
+		layer.closeAll('loading');	 
+		
+		
+  		
+      })
+      
+	function changeFrameHeight(){
+		    //var ele= document.getElementById("my-video"); 
+		    //var height=document.documentElement.clientHeight-60;
+    	  /* $('#my-video').css('height',document.documentElement.clientHeight-98);
+    	  $('#file_iframe').css('height',document.documentElement.clientHeight-98); */
+		var navbarHeight = 0;
+		if($('.tabs-navbar',parent.document)){
+			navbarHeight = $('.tabs-navbar',parent.document).outerHeight(true)
+			if(navbarHeight>0){
+				navbarHeight += 10;
+			}
+		}
+		var clientH = document.documentElement.clientHeight;
+		var leftTop = $('#file_div').offset().top ;
+		var iframeHeight = clientH - leftTop - navbarHeight;
+		$("#file_iframe").css("cssText","height:"+iframeHeight+"px !important");
+		$('#my-video').css("cssText","height:"+iframeHeight+"px !important");
+	}
+	window.onresize=function(){  
+		changeFrameHeight();  
+	} 
+	$(function(){changeFrameHeight();});
+		
+      
+		</script> 
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="keywords" content="">
+    <meta http-equiv="description" content="">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <#include "common/common.html" />
+  </head>
+<style>
+.btn-blockquote{
+	display: inline-block;
+    border-left: 5px solid #539fff;
+    line-height: 0px;
+    font-size: 10pt;
+}
+</style>
+  <body>
+  	<div id="error_div" class="layui-container layui-hide">
+		<blockquote class="layui-elem-quote " style="color:#FF5722"><@spring.message 'userInfo.SetTheAuthorityOfIndependentAnalysis'/>！</blockquote>
+	</div>
+  </body>
+  <script>
+  	var url = "${userFolder!}"
+  	if (url!=null && url!="" && url!= undefined) {
+  		location.href = url
+  	} else {
+  		$('#error_div').removeClass('layui-hide');
+  	}
+  </script>
+   
+</html>

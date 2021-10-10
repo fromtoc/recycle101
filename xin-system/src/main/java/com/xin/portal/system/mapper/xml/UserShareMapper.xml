@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.UserShareMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.UserShare">
+        <id column="id" property="id" />
+        <result column="resource_id" property="resourceId" />
+        <result column="share_type" property="shareType" />
+        <result column="user_id" property="userId" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, resource_id AS resourceId, share_type AS shareType, user_id AS userId, create_time AS createTime
+    </sql>
+
+</mapper>

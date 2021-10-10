@@ -1,0 +1,107 @@
+<#include "common/common.html" />
+<style>
+.layui-form-label {
+	text-align: left !important
+}
+
+.btn-blockquote {
+	display: inline-block;
+	border-left: 5px solid #539fff;
+	line-height: 0px;
+	font-size: 10pt;
+}
+</style>
+<fieldset class="layui-elem-field layui-field-title"
+	style="margin-top: 30px;">
+	<legend><@spring.message 'dict.importDictValueProcess'/></legend>
+</fieldset>
+
+<div class="layui-container">
+	<ul class="layui-timeline">
+		<li class="layui-timeline-item"><i
+			class="layui-icon layui-timeline-axis">&#xe63f;</i>
+			<div class="layui-timeline-content layui-text">
+				<h3 class="layui-timeline-title"><@spring.message 'biMapping.download_Excel_template'/></h3>
+					<button id="downExcel"
+				class="layui-btn layui-btn-normal layui-btn-sm"><@spring.message 'biMapping.click_me_to_download'/></button>
+			</div>
+		</li>
+		<li class="layui-timeline-item"><i
+			class="layui-icon layui-timeline-axis">&#xe63f;</i>
+			<div class="layui-timeline-content layui-text">
+				<h3 class="layui-timeline-title"><@spring.message 'biMapping.Enter_data_according_to_rules'/></h3>
+				<ul>
+		         <li>
+		         	<blockquote class=" layui-elem-quote btn-blockquote"><@spring.message 'dict.itemName_cannot_be_empty_or_repeated'/></blockquote>
+				</li>
+				<li>
+		         	<blockquote class=" layui-elem-quote btn-blockquote"><@spring.message 'dict.itemValue_cannot_be_empty'/></blockquote>
+				</li>
+				<li>
+		         	<blockquote class=" layui-elem-quote btn-blockquote"><@spring.message 'dict.itemOrder_cannot_be_empty'/></blockquote>
+				</li>
+		      	</ul>
+			</div>
+		</li>
+		<li class="layui-timeline-item"><i
+			class="layui-icon layui-timeline-axis">&#xe63f;</i>
+			<div class="layui-timeline-content layui-text">
+				<h3 class="layui-timeline-title"><@spring.message 'biMapping.upload_Excel_data'/></h3>
+				<p>
+					<div class="layui-upload-drag" id="upload">
+						<i class="layui-icon "></i>
+						<p><@spring.message 'biMapping.Click_Upload_or_drag_the_file_here'/></p>
+					</div>
+				</p>
+			</div></li>
+		<li class="layui-timeline-item"><i
+			class="layui-icon layui-timeline-axis">&#xe63f;</i>
+			<div class="layui-timeline-content layui-text">
+				<div class="layui-timeline-title"><@spring.message 'biMapping.import_results'/><span id="error_msg" style="color:red"></span></div>
+			</div>
+		</li>
+	</ul>
+</div>
+<form>
+	<div>
+	<input type="hidden" name="dictCode" id="dictCode">
+	</div>
+</form>
+
+<script type="text/javascript">
+	
+	function init(dictCode) {
+		$('#dictCode').val(dictCode);
+	}
+	
+	layui.use([ 'form', 'layer', 'upload' ], function() {
+		var form = layui.form, layer = layui.layer, upload = layui.upload;
+		//拖拽上传
+		upload.render({
+			elem : '#upload',
+			accept : 'file',
+			acceptMime : '.xlsx',
+			exts : 'xlsx|csv',
+			url : basePath + '/dict/import',
+			before: function(obj){ //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
+				this.data = {dictCode:$('#dictCode').val()};
+				var index = layer.load(2, {
+	    			  shade: [0.1,'#fff'] //0.1透明度的白色背景
+	    			});
+			  },
+			done : function(res) {
+				layer.closeAll('loading'); //关闭loading
+				if(res.code==1){
+                    parent.layer.msg("<@spring.message 'dict.itemValue_isAlreadyExist'/>");
+				}else if(res.code==0){
+                    parent.layer.msg("<@spring.message 'biMapping.Import_successful_There_are'/>"+res.msg+"<@spring.message 'biMapping.pieces_of_data'/>");
+                }
+				/*parent.layer.msg(res.msg);
+				$('#error_msg').html(res.msg);*/
+			}
+		});
+		$("#downExcel").click(function() {
+			window.open('${basePath}/file/download/template/字典项值_导入模板.xlsx');
+		})
+	})
+</script>

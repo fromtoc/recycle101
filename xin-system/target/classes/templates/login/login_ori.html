@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<link rel="shortcut icon" href="${basePath}/images/favicon.ico" type="image/x-icon">
+<meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+<meta name="viewport" content="width=device-width, initial-scale=1"> 
+<link href="${basePath}/images/favicon.ico" rel="icon" type="image/x-icon" />
+<title>登录</title>
+</head>
+<body  onkeydown="keyLogin();">
+    <div class="login-box">
+        <div class="login-header">
+                <img src="${basePath}${(SYS_LOGO!='')?string('${SYS_LOGO}','/images/${CACHE_CONFIG_SYS_LOGO!'dataWindow.png'}')}" />
+                <span>${SYS_LOGIN_NAME!''}</span>
+        </div>
+        <div class="login-main">
+            <div class="main-box">
+                <form action="${basePath}/login" id="loginForm" name="f" method="post">
+                    <div class="input_outer">
+                        <span class="icon_user"></span>
+                        <input name="username" class="login-input"  type="text" placeholder="<@spring.message 'login.Please_enter_your_account'/>">
+                    </div>
+                    <div class="input_outer">
+                        <span class="icon_password"></span>
+                        <input name="password" class="login-input" style=" position:absolute; z-index:100;"value="" type="password" placeholder="<@spring.message 'please_enter_the_password'/>">
+                    </div>
+                    <div class="error_msg" style="visibility: ${(message_login!='')?string('block','hidden')};">${message_login!}</div>
+                    <div class="mb2"><a class="btn-submit" href="javascript:submit();" style="color: #FFFFFF">登录</a></div>
+                </form>
+            </div>
+        </div>
+        <div class="login-footer">
+                ${SYS_COPYRIGHT!''}
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+	if(top.window.location.href != window.location.href){
+	    top.location.replace('${basePath}/login');
+	}
+		function submit(){
+			document.getElementById("loginForm").submit();
+		}
+		
+		function keyLogin(){
+			if (event.keyCode==13)  //回车键的键值为13
+				 submit(); //调用登录按钮的登录事件
+			}
+	</script>
+<style>
+    *, *:after, *:before {
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    html,body {
+        width: 100%;
+        height: 100%;
+        margin:0;
+        padding: 0;
+        font-family: Microsoft YaHei
+    }
+    div {
+        /*border: 1px solid red;*/
+    }
+    .login-box {
+        
+    }
+    .main-box {
+        position: absolute;
+        top: 43%;
+        left: 65%;
+        margin-top: -20px;
+        margin-left: -20px;
+        background-color:rgba(255, 255, 255, 0.8);
+        padding: 20px;
+    }
+    .login-header {
+        position: relative;
+        height: 65px;
+        padding-left: 20%;
+        padding-right: 20%;
+        padding-top: 8px;
+        
+    }
+    .login-header img {
+        float: left
+    }
+    span {
+        color:black;
+        float: left;
+        padding-left: 20px;
+        font-size: 18pt;
+        line-height: 47px;
+    }
+    .login-main {
+        background: url('images/timg.jpg');
+        height: 80%;
+        position: absolute;
+        left: 0px;
+        right: 0;
+        top: 65px;
+        bottom: 0;
+        z-index: 998;
+        width: auto;
+        overflow: hidden;
+        overflow-y: auto;
+        box-sizing: border-box;
+        background-color: rgba(0,0,0,0.2);
+    }
+    .login-footer {
+        height: 10%;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 44px;
+        line-height: 44px;
+        padding: 0 15px;
+        text-align: center;
+    }
+
+    .input_outer {
+        height: 46px;
+        padding: 0 5px;
+        margin-bottom: 30px;
+        border-radius: 5px;
+        position: relative;
+        border: rgba(0,0,255,0.2) 2px solid !important;
+    }
+    .login-input {
+        width: 220px;
+        height: 46px;
+        outline: none;
+        display: inline-block;
+        font: 14px "microsoft yahei",Helvetica,Tahoma,Arial,"Microsoft jhengHei";
+        margin-left: 50px;
+        border: none;
+        background: none;
+        line-height: 46px;
+        color:#000
+    }
+
+    .icon_user {
+        width: 25px;
+        height: 25px;
+        background: url(images/login_ico.png);
+        background-position: -125px 0;
+        position: absolute;
+        margin: 10px 13px;
+    }
+
+    .icon_password {
+        width: 25px;
+        height: 25px;
+        background-image: url(images/login_ico.png);
+        background-position: -125px -34px;
+        position: absolute;
+        margin: 10px 13px;
+    }
+    .btn-submit {
+        line-height: 20px;
+        text-align: center;
+        font-size: 20px;
+        border-radius: 5px;
+        background: #0096e6;
+        padding: 15px;
+        margin-top: 20px;
+        display: block;
+        text-decoration: none;
+        outline: none;
+    }
+    .error_msg {
+        padding-left: 17px;
+        color: #ff0000;
+        margin-top: -10px;
+    	font-size: 14px;
+    }
+</style>
+</html>

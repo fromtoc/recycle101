@@ -1,0 +1,44 @@
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>xin-root</artifactId>
+		<groupId>xin-root</groupId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<packaging>jar</packaging>
+	<artifactId>xin-system</artifactId>
+
+	<build>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+		<!--<plugins>
+            &lt;!&ndash; 解决编译时缺少本地jar包报错 &ndash;&gt;
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5</version>
+                <configuration>
+                    <encoding>utf-8</encoding>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <compilerArguments>
+                        <extdirs>${basedir}\mstr-web;${basedir}\sap-bo</extdirs>
+                    </compilerArguments>
+                </configuration>
+            </plugin>
+		</plugins>-->
+	</build>
+</project>

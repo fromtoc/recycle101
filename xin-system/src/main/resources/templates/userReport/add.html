@@ -1,0 +1,82 @@
+ <#include "common/common.html" />
+ <style>
+ 	.my-label {
+ 		width:100px!important;
+ 	}
+ 	 	.wide-input {
+ 		width:85%;
+ 	}
+ </style>
+ 
+<form id="form_add" class="layui-form" action=""
+	style="padding-top:10px;">
+	<div style="margin-left:100px;">
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label"><@spring.message 'list.name'/></label>
+			<div class="layui-input-inline">
+				<input type="text" id="name" name="name" value=""
+					class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label"><@spring.message 'list.type'/></label>
+			<div class="layui-input-block">
+				<input type="radio" name="reportType" lay-filter="reportType" value="3" title="Report" checked> 
+				<input type="radio" name="reportType" lay-filter="reportType" value="55" title="Document">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label my-label"><@spring.message 'list.describe'/></label>
+			<div class="layui-input-inline" style="width:50%">
+				<textarea placeholder="<@spring.message 'tips.inputSome'/>" class="layui-textarea" name="remark" id= "remark" ></textarea>
+			</div>
+		</div>
+	</div>
+</form>
+
+<script type="text/javascript">
+	function init () {
+		
+	}
+	
+	
+	function getData(){
+		
+		if (check()) {
+			return $('#form_add').serialize();
+		} else {
+			return null;
+		}
+
+  	}
+  	
+	function check() {
+		var selectors = ["#name"];
+		var result = true;
+		$.each(selectors,function(index, rec){
+			if (!checkField(rec)) {
+				result = false;
+				return false;//调出循环
+			}
+			
+		});
+  		return result;
+  	}
+  	
+  	function checkField(selector){
+  		var value = $(selector).val();
+  		if (value==null || value == '') {
+  			$(selector).addClass("layui-form-danger");
+  			$(selector).focus();
+  			layer.tips('<@spring.message "tips.inputSome"/>', selector);
+  			return false;
+  		} else {
+  			return true;
+  		}
+  	}
+	
+	layui.use([ 'form' ],function() {
+		var form = layui.form;
+		
+	})
+</script>

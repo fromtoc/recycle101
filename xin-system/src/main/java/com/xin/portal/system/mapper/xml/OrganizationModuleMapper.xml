@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.OrganizationModuleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.OrganizationModule">
+        <result column="organization_id" property="organizationId" />
+        <result column="module_id" property="moduleId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        organization_id, module_id
+    </sql>
+	<select id="getModuleByOrgId" resultMap="BaseResultMap">
+		SELECT t.* FROM t_organization_module t INNER JOIN t_module t1 ON t.module_id=t1.id AND t1.state=0 
+		AND t.organization_id=#{id,jdbcType=VARCHAR} ORDER BY  t1.create_time DESC
+	</select>
+</mapper>

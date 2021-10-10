@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="${basePath}/css/animate.min.css" media="all"/>
+		<link rel="stylesheet" href="${basePath}/plugins/bootstrap/css/bootstrap.min.css" media="all" />
+		
+		<script type="text/javascript" src="${basePath}/js/jquery-1.8.3.min.js" ></script>
+		
+		<script src="${basePath}/js/echarts.min.js"></script>
+		<script src="${basePath}/plugins/echartsV3/echarts-gl.min.js"></script>
+		<script src="${basePath}/plugins/echartsV3/china.js"></script>
+		<script src="${basePath}/js/animatext.min.js"></script>
+		<link rel="stylesheet" href="${basePath}/plugins/layui/2.4.3/css/layui.css"media="all" />
+		<script type="text/javascript" src="${basePath}/plugins/layui/2.4.3/layui.js"></script>
+
+	<style>
+			body{
+			}
+			.container{
+				border: 1px solid #ddd;
+				border-radius:5px;
+				height: 700px;
+				box-shadow: 1px 1px 1px 1px #ddd;
+			}
+			.div1{
+				border: 1px solid #ddd;
+				border-radius:5px;
+				height: 200px;
+				color: #538283;
+				box-shadow: 1px 1px 1px 1px #ddd;
+			}
+			.demo3{
+				padding-top: 15px;
+			}
+		</style>
+	</head>
+	<body>
+		  <div class="layui-fluid" style="margin-top: 10px;">
+			  <div class="layui-row">
+			    <div id="myChart1" class="layui-col-sm7 container" style="widows: 100%;height: 670px;">
+			   
+			    </div>
+			    <div class="layui-col-sm5 " style="margin-left: ;">
+			      	<div class="layui-row">
+			      		<div class="layui-col-sm1 " style="">
+			      			&nbsp;
+			      		</div>
+					    <div class="layui-col-sm11 div1">
+					      	<div class="layui-row">
+							    <div class="layui-col-sm6 myborder">
+							      <div class="" style="border-right: 1px  dashed #ddd;height: 100px;border-bottom: 1px  dashed #ddd;text-align: center;">
+							      		<div class=""><h2 class="demo3 ">277</h2></div>
+							      		<span>现有门店数</span>
+							      </div>
+							      <div class="" style="border-right: 1px  dashed #ddd;height: 100px;text-align: center;">
+							      		<div id="myChart2" class="" style="height: 70px;width: 200px;"></div>
+							      		<div style="margin-top: 5px;z-index: 99999;">当月销售额</div>
+							      </div>
+							    </div>
+							    <div class="layui-col-sm6 myborder">
+							      <div class="" style="border-bottom: 1px  dashed #ddd;height: 100px;text-align: center;">
+							      		<div class=""><h2 class="demo3 ">277</h2></div>
+							      		<span>现有门店</span>
+							      </div>
+							      <div class="" style="height: 100px;text-align: center;">
+							      		<div class=""><h2 class="demo3 ">3534</h2></div>
+							      		<span >员工数</span>
+							      </div>
+							    </div>
+							</div>
+					    </div>
+					    <div class="layui-col-sm12 ">
+					    	
+					    </div>
+					
+					</div>
+			    </div>
+			    
+			    <div class="layui-col-sm5 " style="margin-top:8px ;">
+			      	<div class="layui-row">
+			      		<div class="layui-col-sm1 " style="">
+			      			&nbsp;
+			      		</div>
+					    <div id ="myChart3" class="layui-col-sm11 div1" style="height: 200px;">
+					      	
+					    </div>
+					    <div class="layui-col-sm12 ">
+					    	
+					    </div>
+					
+					</div>
+			    </div>
+			    
+			    <div class="layui-col-sm5 " style="margin-top:8px ;">
+			      	<div class="layui-row">
+			      		<div class="layui-col-sm1 " style="">
+			      			&nbsp;
+			      		</div>
+					    <div class="layui-col-sm11 ">
+					      	<div id="table" style="width:100%;height:300px">
+				      		    <table class="layui-table" lay-size="sm">
+								  	<thead >
+									    <tr style="background: #9AB8C0;">
+									      <th>工号</th>
+									      <th>姓名</th>
+									      <th>当月目标销售额（万元）</th>
+									      <th>当月完成销售额（万元）</th>
+									      <th>完成率</th>
+									    </tr> 
+									  </thead>
+									  <tbody>
+									    <tr>
+									      <td>001289</td>
+									      <td>李成</td>
+									      <td>240</td>
+									      <td>180</td>
+									      <td>80%</td>
+									    </tr>
+									    <tr style="background: #CBDADF;">
+									      <td>001219</td>
+									      <td>tom</td>
+									      <td>200</td>
+									      <td>170</td>
+									      <td>90%</td>
+									    </tr>
+									    <tr>
+									      <td>001888</td>
+									      <td>Jack</td>
+									      <td>200</td>
+									      <td>209</td>
+									      <td>108%</td>
+									    </tr>
+									    <tr style="background: #CBDADF;">
+									      <td>001790</td>
+									      <td>Lucy</td>
+									      <td>200</td>
+									      <td>100</td>
+									      <td>50%</td>
+									    </tr>
+									    <tr>
+									      <td>001567</td>
+									      <td>李白</td>
+									      <td>200</td>
+									      <td>102</td>
+									      <td>51%</td>
+									    </tr>
+									    <tr style="background: #CBDADF;">
+									      <td>001555</td>
+									      <td>陈小龙</td>
+									      <td>300</td>
+									      <td>280</td>
+									      <td>92%</td>
+									    </tr>
+									    <tr>
+									      <td>001222</td>
+									      <td>李皮皮</td>
+									      <td>400</td>
+									      <td>280</td>
+									      <td>70%</td>
+									    </tr>
+									  </tbody>
+								</table>
+		     		</div>
+					    </div>
+					    <div id="" class="layui-col-sm12 ">
+					    	
+					    </div>
+					
+					</div>
+			    </div>
+			   
+			  </div>
+		</div>
+		<script>
+			
+			$(function (){
+				//页面最外层的高度
+				var parent = $(window.parent).height();
+				var head = $(window.parent.document).find(".layui-header").outerHeight();
+				var titleHeight=$("#container_head").outerHeight();
+				
+				//处理mstr_iframe：margin-top=-47留下的47像素问题
+				leftHeight=parent-head-titleHeight-47;
+				$(window.parent.document).find(".main-body").height(parent-head);
+				$(".demo3").animatext({speed: 150,
+					mode: "words",
+					effect: 'swing',
+					infinite: true
+				});
+				
+			})
+			var myChart1 = echarts.init(document.getElementById('myChart1'));  
+			/*获取地图数据*/
+			myChart1.showLoading();
+			var name_title = "全国门店分布"
+			var nameColor = " #0DB9F2"
+			var name_fontFamily = 'Microsoft yahei'
+			var subname_fontSize = 15
+			var name_fontSize = 18
+			var mapName = 'china'
+			var data = [
+			    {name:"北京",value:277},
+			    {name:"天津",value:42},
+			    {name:"河北",value:102},
+			    {name:"山西",value:81},
+			    {name:"内蒙古",value:47},
+			    {name:"辽宁",value:67},
+			    {name:"吉林",value:82},
+			    {name:"黑龙江",value:66},
+			    {name:"上海",value:224},
+			    {name:"江苏",value:92},
+			    {name:"浙江",value:114},
+			    {name:"安徽",value:109},
+			    {name:"福建",value:116},
+			    {name:"江西",value:91},
+			    {name:"山东",value:119},
+			    {name:"河南",value:137},
+			    {name:"湖北",value:116},
+			    {name:"湖南",value:114},
+			    {name:"重庆",value:91},
+			    {name:"四川",value:125},
+			    {name:"贵州",value:62},
+			    {name:"云南",value:83},
+			    {name:"西藏",value:9},
+			    {name:"陕西",value:80},
+			    {name:"甘肃",value:56},
+			    {name:"青海",value:10},
+			    {name:"宁夏",value:18},
+			    {name:"新疆",value:67},
+			    {name:"广东",value:123},
+			    {name:"广西",value:59},
+			    {name:"海南",value:14},
+			    ];
+			    
+			var geoCoordMap = {};
+			var toolTipData = [ 
+			    {name:"北京",value:[{name:"目标销售额",value:4005},{name:"实际销售额",value:3534}]},
+			    {name:"天津",value:[{name:"目标销售额",value:220},{name:"实际销售额",value:200}]},
+			    {name:"河北",value:[{name:"目标销售额",value:600},{name:"实际销售额",value:420}]},
+			    {name:"山西",value:[{name:"目标销售额",value:400},{name:"实际销售额",value:410}]},
+			    {name:"内蒙古",value:[{name:"目标销售额",value:230},{name:"实际销售额",value:240}]},
+			    {name:"辽宁",value:[{name:"目标销售额",value:390},{name:"实际销售额",value:280}]},
+			    {name:"吉林",value:[{name:"目标销售额",value:410},{name:"实际销售额",value:410}]},
+			    {name:"黑龙江",value:[{name:"目标销售额",value:350},{name:"实际销售额",value:310}]},
+			    {name:"上海",value:[{name:"目标销售额",value:120},{name:"实际销售额",value:120}]},
+			    {name:"江苏",value:[{name:"目标销售额",value:470},{name:"实际销售额",value:450}]},
+			    {name:"浙江",value:[{name:"目标销售额",value:570},{name:"实际销售额",value:570}]},
+			    {name:"安徽",value:[{name:"目标销售额",value:570},{name:"实际销售额",value:520}]},
+			    {name:"福建",value:[{name:"目标销售额",value:590},{name:"实际销售额",value:570}]},
+			    {name:"江西",value:[{name:"目标销售额",value:490},{name:"实际销售额",value:420}]},
+			    {name:"山东",value:[{name:"目标销售额",value:670},{name:"实际销售额",value:520}]},
+			    {name:"河南",value:[{name:"目标销售额",value:690},{name:"实际销售额",value:680}]},
+			    {name:"湖北",value:[{name:"目标销售额",value:600},{name:"实际销售额",value:560}]},
+			    {name:"湖南",value:[{name:"目标销售额",value:620},{name:"实际销售额",value:520}]},
+			    {name:"重庆",value:[{name:"目标销售额",value:470},{name:"实际销售额",value:440}]},
+			    {name:"四川",value:[{name:"目标销售额",value:650},{name:"实际销售额",value:600}]},
+			    {name:"贵州",value:[{name:"目标销售额",value:320},{name:"实际销售额",value:300}]},
+			    {name:"云南",value:[{name:"目标销售额",value:420},{name:"实际销售额",value:410}]},
+			    {name:"西藏",value:[{name:"目标销售额",value:50},{name:"实际销售额",value:40}]},
+			    {name:"陕西",value:[{name:"目标销售额",value:380},{name:"实际销售额",value:420}]},
+			    {name:"甘肃",value:[{name:"目标销售额",value:280},{name:"实际销售额",value:280}]},
+			    {name:"青海",value:[{name:"目标销售额",value:50},{name:"实际销售额",value:50}]},
+			    {name:"宁夏",value:[{name:"目标销售额",value:100},{name:"实际销售额",value:80}]},
+			    {name:"新疆",value:[{name:"目标销售额",value:360},{name:"实际销售额",value:310}]},
+			    {name:"广东",value:[{name:"目标销售额",value:630},{name:"实际销售额",value:600}]},
+			    {name:"广西",value:[{name:"目标销售额",value:290},{name:"实际销售额",value:300}]},
+			    {name:"海南",value:[{name:"目标销售额",value:80},{name:"实际销售额",value:60}]},
+			];
+			var myChart1 = echarts.init(document.getElementById('myChart1'));  
+			/*获取地图数据*/
+			myChart1.showLoading();
+			var mapFeatures = echarts.getMap(mapName).geoJson.features;
+			myChart1.hideLoading();
+			mapFeatures.forEach(function(v) {
+			    // 地区名称
+			    var name = v.properties.name;
+			    // 地区经纬度
+			    geoCoordMap[name] = v.properties.cp;
+			
+			});
+			
+			// console.log("============geoCoordMap===================")
+			// console.log(geoCoordMap)
+			// console.log("================data======================")
+			console.log(data)
+			console.log(toolTipData)
+			var max = 480,
+			    min = 9; // todo 
+			var maxSize4Pin = 100,
+			    minSize4Pin = 20;
+			
+			var convertData = function(data) {
+			    var res = [];
+			    for (var i = 0; i < data.length; i++) {
+			        var geoCoord = geoCoordMap[data[i].name];
+			        if (geoCoord) {
+			            res.push({
+			                name: data[i].name,
+			                value: geoCoord.concat(data[i].value),
+			            });
+			        }
+			    }
+			    return res;
+			};
+			option1 = {
+			    title: {
+			        text: name_title,
+			        x: 'center',
+			        textStyle: {
+			            color: nameColor,
+			            fontFamily: name_fontFamily,
+			            fontSize: name_fontSize
+			        },
+			        subtextStyle:{
+			            fontSize:subname_fontSize,
+			            fontFamily:name_fontFamily
+			        }
+			    },
+			    tooltip: {
+			        trigger: 'item',
+			        formatter: function(params) {
+			            if (typeof(params.value)[2] == "undefined") {
+			                var toolTiphtml = ''
+			                for(var i = 0;i<toolTipData.length;i++){
+			                    if(params.name==toolTipData[i].name){
+			                        toolTiphtml += toolTipData[i].name+':<br>'
+			                        for(var j = 0;j<toolTipData[i].value.length;j++){
+			                            toolTiphtml+=toolTipData[i].value[j].name+':'+toolTipData[i].value[j].value+"<br>"
+			                        }
+			                    }
+			                }
+			                console.log(toolTiphtml)
+			                // console.log(convertData(data))
+			                return toolTiphtml;
+			            } else {
+			                var toolTiphtml = ''
+			                for(var i = 0;i<toolTipData.length;i++){
+			                    if(params.name==toolTipData[i].name){
+			                        toolTiphtml += toolTipData[i].name+':<br>'
+			                        for(var j = 0;j<toolTipData[i].value.length;j++){
+			                            toolTiphtml+=toolTipData[i].value[j].name+':'+toolTipData[i].value[j].value+"<br>"
+			                        }
+			                    }
+			                }
+			                console.log(toolTiphtml)
+			                // console.log(convertData(data))
+			                return toolTiphtml;
+			            }
+			        }
+			    },
+			    // legend: {
+			    //     orient: 'vertical',
+			    //     y: 'bottom',
+			    //     x: 'right',
+			    //     data: ['credit_pm2.5'],
+			    //     textStyle: {
+			    //         color: '#fff'
+			    //     }
+			    // },
+			    visualMap: {
+			        show: false,
+			        min: 0,
+			        max: 200,
+			        left: 'left',
+			        top: 'bottom',
+			        text: ['高', '低'], // 文本，默认为数值文本
+			        calculable: true,
+			        seriesIndex: [1],
+			        inRange: {
+			            // color: ['#3B5077', '#031525'] // 蓝黑
+			            // color: ['#ffc0cb', '#800080'] // 红紫
+			            // color: ['#3C3B3F', '#605C3C'] // 黑绿
+			            // color: ['#0f0c29', '#302b63', '#24243e'] // 黑紫黑
+			            // color: ['#23074d', '#cc5333'] // 紫红
+			            color: ['#00467F', '#A5CC82'] // 蓝绿
+			            // color: ['#1488CC', '#2B32B2'] // 浅蓝
+			            // color: ['#00467F', '#A5CC82'] // 蓝绿
+			            // color: ['#00467F', '#A5CC82'] // 蓝绿
+			            // color: ['#00467F', '#A5CC82'] // 蓝绿
+			            // color: ['#00467F', '#A5CC82'] // 蓝绿
+			
+			        },
+			        
+			    },
+			    /*工具按钮组*/
+			    // toolbox: {
+			    //     show: true,
+			    //     orient: 'vertical',
+			    //     left: 'right',
+			    //     top: 'center',
+			    //     feature: {
+			    //         dataView: {
+			    //             readOnly: false
+			    //         },
+			    //         restore: {},
+			    //         saveAsImage: {}
+			    //     }
+			    // },
+			    geo: {
+			        show: true,
+			        map: mapName,
+			        layoutCenter:['50%','55%'],
+			        layoutSize:700,
+			        label: {
+			            normal: {
+			                show: false
+			            },
+			            emphasis: {
+			                show: false,
+			            }
+			        },
+			        roam: true,
+			        itemStyle: {
+			            normal: {
+			                areaColor: '#031525',
+			                borderColor: '#3B5077',
+			            },
+			            emphasis: {
+			                areaColor: '#2B91B7',
+			            }
+			        }
+			    },
+			    series: [{
+			            name: '散点',
+			            type: 'scatter',
+			            coordinateSystem: 'geo',
+			            data: convertData(data),
+			            symbolSize: function(val) {
+			                return val[2] / 10;
+			            },
+			            label: {
+			                normal: {
+			                    formatter: '{b}',
+			                    position: 'right',
+			                    show: true
+			                },
+			                emphasis: {
+			                    show: true
+			                }
+			            },
+			            itemStyle: {
+			                normal: {
+			                    color: '#05C3F9'
+			                }
+			            }
+			        },
+			        {
+			            type: 'map',
+			            map: mapName,
+			            geoIndex: 0,
+			            aspectScale: 0.95, //长宽比
+			            showLegendSymbol: false, // 存在legend时显示
+			            label: {
+			                normal: {
+			                    show: true
+			                },
+			                emphasis: {
+			                    show: false,
+			                    textStyle: {
+			                        color: '#fff'
+			                    }
+			                }
+			            },
+			            roam: true,
+			            itemStyle: {
+			                normal: {
+			                    areaColor: '#031525',
+			                    borderColor: '#3B5077',
+			                },
+			                emphasis: {
+			                    areaColor: '#2B91B7'
+			                }
+			            },
+			            animation: false,
+			            data: data
+			        },
+			        {
+			            name: '点',
+			            type: 'scatter',
+			            coordinateSystem: 'geo',
+			            symbol: 'pin', //气泡
+			            symbolSize: function(val) {
+			                var a = (maxSize4Pin - minSize4Pin) / (max - min);
+			                var b = minSize4Pin - a * min;
+			                b = maxSize4Pin - a * max;
+			                return a * val[2] + b;
+			            },
+			            label: {
+			                normal: {
+			                    show: true,
+			                    textStyle: {
+			                        color: '#fff',
+			                        fontSize: 9,
+			                    }
+			                }
+			            },
+			            itemStyle: {
+			                normal: {
+			                    color: '#F62157', //标志颜色
+			                }
+			            },
+			            zlevel: 6,
+			            data: convertData(data),
+			        },
+			        {
+			            name: 'Top 5',
+			            type: 'effectScatter',
+			            coordinateSystem: 'geo',
+			            data: convertData(data.sort(function(a, b) {
+			                return b.value - a.value;
+			            }).slice(0, 5)),
+			            symbolSize: function(val) {
+			                return val[2] / 10;
+			            },
+			            showEffectOn: 'render',
+			            rippleEffect: {
+			                brushType: 'stroke'
+			            },
+			            hoverAnimation: true,
+			            label: {
+			                normal: {
+			                    formatter: '{b}',
+			                    position: 'right',
+			                    show: true
+			                }
+			            },
+			            itemStyle: {
+			                normal: {
+			                    color: 'yellow',
+			                    shadowBlur: 10,
+			                    shadowColor: 'yellow'
+			                }
+			            },
+			            zlevel: 1
+			        },
+			
+			    ]
+			};
+			myChart1.setOption(option1);
+			myChart1.hideLoading();
+			window.onresize = myChart1.resize;
+			
+			var myChart2 = echarts.init(document.getElementById('myChart2'));  
+			/*获取地图数据*/
+			myChart2.showLoading();
+			/**
+			 * 图标所需数据
+			 */
+			var data = {
+			    value: 68,
+			    text: '世间',
+			    color: '#5170A2',
+			    title: '',
+			    left: 'center',
+			}
+			
+			////////////////////////////////////////
+			
+			var value = data.value 
+			option2 = {
+			    backgroundColor: '#fff',
+			    title: {
+			        x: '2%',
+			        y: '2%',
+			        textStyle: {
+			            fontWeight: 12,
+			            fontSize: 12,
+			            color: '#687284'
+			        },
+			        text: data.title || ''
+			    },
+			    tooltip: {
+			    	show:false,
+			        trigger: 'item'
+			        //   formatter: '{c}%'
+			    },
+			 
+			    series: [{
+			        type: 'pie',
+			        radius: ['30', '35'],
+			        hoverAnimation: false,
+			        label: {
+			            normal: {
+			                position: 'center'
+			            }
+			        },
+			        center: ['62%', '60%'],
+			        data: [{
+			                value: value,
+			                name: "完成率(%)",
+			                itemStyle: {
+			                    normal: {
+			                        color: data.color,
+			                    }
+			                },
+			                label: {
+			                    normal: {
+			                        // formatter: '{d} %',
+			                        textStyle: {
+			                            fontSize: 14,
+			                            fontWeight: 600,
+			                            color: data.color,
+			                        }
+			                    }
+			                }
+			            },
+			            {
+			                value: 100 - value,
+			                name: '占位',
+			                tooltip: {
+			                    show: false
+			                },
+			                itemStyle: {
+			                    normal: {
+			                        color: '#E0E3E9',
+			                    }
+			                },
+			                label: {
+			                    normal: {
+			                        formatter: value + '',
+			                        textStyle: {
+			                            fontSize: 12,
+			                            color: data.color
+			                        }
+			                    },
+			
+			                }
+			            }
+			        ]
+			    }]
+			}
+			myChart2.setOption(option2);
+			myChart2.hideLoading();
+			myChart2.resize();
+			
+			
+			var myChart3 = echarts.init(document.getElementById('myChart3'));  
+			/*获取地图数据*/
+			myChart3.showLoading();
+			var dataAxis = ['立水桥', '霍营', '樱花', '五道口', '月坛南街'];
+			var data = [220, 182, 179, 150, 143];
+			var yMax = 250;
+			var dataShadow = [];
+			
+			for (var i = 0; i < data.length; i++) {
+			    dataShadow.push(yMax);
+			}
+			
+			option3 = {
+			    title: {
+			        text: '门店销售额前5',
+			        textStyle:{
+			                    color:'#0DB9F2',        //颜色
+			                    fontStyle:'normal',     //风格
+			                    fontWeight:'bold',    //粗细
+			                    fontFamily:'Microsoft yahei',   //字体
+			                    fontSize:14     //大小
+			                    
+			               },
+			        subtext: '',
+			        x:'center',
+			        textAlign:'center'
+			        
+			    },
+			    xAxis: {
+			        data: dataAxis,
+			        axisLabel: {
+			            inside: true,
+			            textStyle: {
+			                color: '#fff'
+			            }
+			        },
+			        axisTick: {
+			            show: true
+			        },
+			        axisLine: {
+			            show: false
+			        },
+			        z: 10
+			    },
+			    yAxis: {
+			        axisLine: {
+			            show: false
+			        },
+			        axisTick: {
+			            show: false
+			        },
+			        axisLabel: {
+			            textStyle: {
+			                color: '#999'
+			            }
+			        }
+			    },
+			    dataZoom: [
+			        {
+			            type: 'inside'
+			        }
+			    ],
+			    series: [
+			        { // For shadow
+			            type: 'bar',
+			            itemStyle: {
+			                normal: {color: 'rgba(0,0,0,0.05)'}
+			            },
+			            barGap:'-100%',
+			            barCategoryGap:'40%',
+			            data: dataShadow,
+			            animation: false
+			        },
+			        {
+			            type: 'bar',
+			            itemStyle: {
+			                normal: {
+			                    color: new echarts.graphic.LinearGradient(
+			                        0, 0, 0, 1,
+			                        [
+			                            {offset: 0, color: '#79A19E'},
+			                            {offset: 1, color: '#608B9D'}
+			                        ]
+			                    )
+			                },
+			                emphasis: {
+			                    color: new echarts.graphic.LinearGradient(
+			                        0, 0, 0, 1,
+			                        [
+			                            {offset: 0, color: '#2378f7'},
+			                            {offset: 0.7, color: '#2378f7'},
+			                            {offset: 1, color: '#83bff6'}
+			                        ]
+			                    )
+			                }
+			            },
+			            data: data
+			        }
+			    ]
+			};
+			
+			// Enable data zoom when user click bar.
+			var zoomSize = 6;
+			myChart3.on('click', function (params) {
+			    console.log(dataAxis[Math.max(params.dataIndex - zoomSize / 2, 0)]);
+			    myChart.dispatchAction({
+			        type: 'dataZoom',
+			        startValue: dataAxis[Math.max(params.dataIndex - zoomSize / 2, 0)],
+			        endValue: dataAxis[Math.min(params.dataIndex + zoomSize / 2, data.length - 1)]
+			    });
+			});
+				myChart3.setOption(option3);
+				myChart3.hideLoading();
+				myChart3.resize();
+		</script>
+	</body>
+</html>

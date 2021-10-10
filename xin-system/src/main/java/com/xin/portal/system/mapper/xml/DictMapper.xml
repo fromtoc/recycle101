@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xin.portal.system.mapper.DictMapper" >
+  <resultMap id="BaseResultMap" type="com.xin.portal.system.model.Dict" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="dict_name" property="dictName" jdbcType="VARCHAR" />
+    <result column="dict_code" property="dictCode" jdbcType="VARCHAR" />
+    <result column="item_name" property="itemName" jdbcType="VARCHAR" />
+    <result column="item_value" property="itemValue" jdbcType="VARCHAR" />
+    <result column="item_order" property="itemOrder" jdbcType="INTEGER" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="items" property="items" jdbcType="VARCHAR" />
+    <result column="is_system" property="issystem" jdbcType="INTEGER" />
+    <result column="is_source" property="isSource" jdbcType="INTEGER" />
+    <result column="query_sql" property="querySql" jdbcType="VARCHAR" />
+    <result column="source_id" property="sourceId" jdbcType="VARCHAR" />
+    <result column="parent_dict_code" property="parentDictCode" jdbcType="VARCHAR" />
+    <result column="tenant_id" property="tenantId" jdbcType="VARCHAR" />
+  </resultMap>
+  <delete id="delById" parameterType="java.lang.String" >
+    delete from t_dict
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="delByCode" parameterType="java.lang.String" >
+    delete from t_dict
+    where dict_code = #{dictCode,jdbcType=VARCHAR}
+  </delete>
+  <insert id="save" useGeneratedKeys="true" keyProperty="id"  parameterType="com.xin.portal.system.model.Dict" databaseId="mysql">
+    insert into t_dict ( dict_name, dict_code, 
+      item_name, item_value, item_order, 
+      remark, is_system , is_source, query_sql, source_id)
+    values ( #{dictName,jdbcType=VARCHAR}, lower(#{dictCode,jdbcType=VARCHAR}), 
+      #{itemName,jdbcType=VARCHAR}, #{itemValue,jdbcType=VARCHAR}, #{itemOrder,jdbcType=INTEGER}, 
+      #{remark,jdbcType=VARCHAR}, #{issystem,jdbcType=INTEGER}, #{isSource,jdbcType=INTEGER},
+      #{querySql,jdbcType=VARCHAR}, #{sourceId,jdbcType=VARCHAR})
+  </insert>
+  
+  <insert id="save" useGeneratedKeys="true" keyProperty="id"  parameterType="com.xin.portal.system.model.Dict" >
+    insert into t_dict ( dict_name, dict_code, 
+      item_name, item_value, item_order, 
+      remark, is_system , is_source, query_sql, source_id)
+    values ( #{dictName,jdbcType=VARCHAR}, lower(#{dictCode,jdbcType=VARCHAR}), 
+      #{itemName,jdbcType=VARCHAR}, #{itemValue,jdbcType=VARCHAR}, #{itemOrder,jdbcType=INTEGER}, 
+      #{remark,jdbcType=VARCHAR}, #{issystem,jdbcType=INTEGER}, #{isSource,jdbcType=INTEGER},
+      #{querySql,jdbcType=VARCHAR}, #{sourceId,jdbcType=VARCHAR})
+  </insert>
+  
+  <insert id="save" useGeneratedKeys="true" keyProperty="id"  parameterType="com.xin.portal.system.model.Dict" databaseId="oracle" >
+    <selectKey keyProperty="id" resultType="int" order="BEFORE">
+         select SEQ_T_DICT_ID.nextval as id from dual
+     	</selectKey>
+    insert into t_dict (id, dict_name, dict_code, 
+      item_name, item_value, item_order, 
+      remark, is_system , is_source, query_sql, source_id)
+    values (#{id}, #{dictName,jdbcType=VARCHAR}, lower(#{dictCode,jdbcType=VARCHAR}), 
+      #{itemName,jdbcType=VARCHAR}, #{itemValue,jdbcType=VARCHAR}, #{itemOrder,jdbcType=INTEGER}, 
+      #{remark,jdbcType=VARCHAR}, #{issystem,jdbcType=INTEGER}, #{isSource,jdbcType=INTEGER},
+      #{querySql,jdbcType=VARCHAR}, #{sourceId,jdbcType=VARCHAR})
+  </insert>
+  
+  <update id="update" parameterType="com.xin.portal.system.model.Dict" >
+    update t_dict
+    set 
+    	<if test="dictName!=null and dictName!=''">
+    	dict_name = #{dictName,jdbcType=VARCHAR},
+    	</if>
+      item_name = #{itemName,jdbcType=VARCHAR},
+      item_value = #{itemValue,jdbcType=VARCHAR},
+      item_order = #{itemOrder,jdbcType=INTEGER},
+      parent_dict_code = #{parentDictCode,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR},
+      is_source = #{isSource,jdbcType=INTEGER},
+      query_sql = #{querySql,jdbcType=VARCHAR},
+      source_id = #{sourceId,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select id, dict_name, dict_code, item_name, item_value, item_order, remark, is_system , is_source, query_sql, source_id,parent_dict_code
+    from t_dict
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="findPageList" resultMap="BaseResultMap">
+     select id, dict_name, dict_code, item_name, item_value, item_order, remark,is_system, is_source, query_sql, source_id,parent_dict_code
+    from t_dict 
+    <where>
+    	dict_name is not null
+    	<if test="dictName!=null and dictName!=''">
+    		<bind name="pattern1" value="'%'+dictName+'%'"/>
+    		and dict_code in (select dict_code from t_dict where dict_name like #{pattern1})
+    	</if>
+    	<if test="dictCode!=null and dictCode!=''">
+    		<bind name="pattern2" value="'%'+dictCode+'%'"/>
+    		and dict_code like #{pattern2}
+    	</if>
+    	
+    </where>
+    order by id desc,dict_code,item_order
+  </select>
+  
+  <select id="findList" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.Dict">
+     select id, dict_name, dict_code, item_name, item_value, item_order, remark, is_system , is_source, query_sql, source_id,parent_dict_code
+    from t_dict 
+    <where>
+    	<if test="dictCode!=null and dictCode!=''">
+    		and dict_code = #{dictCode}
+    	</if>
+    </where>
+	order by id,item_order
+  </select>
+  
+  <select id="find" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.Dict">
+     select id, dict_name, dict_code, item_name, item_value, item_order, remark, is_system , is_source, query_sql, source_id,parent_dict_code
+    from t_dict 
+    <where>
+    	<if test="id!=null and id!=''">
+    		and id = #{id}
+    	</if>
+    	<if test="dictCode!=null and dictCode!=''">
+    		and dict_code = #{dictCode} and dict_name is not null
+    	</if>
+    </where>
+  </select>
+  
+  <select id="findWithTenantId" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.Dict">
+     select id, dict_name, dict_code, item_name, item_value, item_order, remark, is_system , is_source, query_sql, source_id,parent_dict_code
+    from t_dict 
+    <where>
+    	tenant_id = #{tenantId}
+    	<if test="id!=null and id!=''">
+    		and id = #{id}
+    	</if>
+    	<if test="dictCode!=null and dictCode!=''">
+    		and dict_code = #{dictCode} and dict_name is not null
+    	</if>
+    </where>
+  </select>
+  
+  <select id="findListByName" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.Dict">
+     select id, dict_name, dict_code, item_name, item_value, item_order, remark, is_system , is_source, query_sql, source_id,parent_dict_code
+    from t_dict 
+    <where>
+    	<if test="dictCode!=null and dictCode!=''">
+    		and dict_code = #{dictCode}
+    	</if>
+    	<if test="dictName!=null and dictName!=''">
+    		or dict_name = #{dictName}
+    	</if>
+    </where>
+  </select>
+  
+  <select id="findItemList" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.Dict">
+    select id, dict_name, dict_code, item_name, item_value, item_order, remark,is_system, is_source, query_sql, source_id,parent_dict_code
+    from t_dict
+    <where>
+    	dict_code=#{dictCode} and item_name is not null
+    </where>
+    order by item_order asc
+  </select>
+  
+  <select id="findItemListWithTenantId" resultMap="BaseResultMap" parameterType="com.xin.portal.system.model.Dict">
+    select id, dict_name, dict_code, item_name, item_value, item_order, remark,is_system, is_source, query_sql, source_id,parent_dict_code
+    from t_dict
+    <where>
+    	dict_code=#{dictCode} and item_name is not null
+    	and tenant_id = #{tenantId}
+    </where>
+    order by item_order asc
+  </select>
+  
+  <insert id="insertDictAllColunmForNewTenant" parameterType="com.xin.portal.system.model.Dict"
+  useGeneratedKeys="true" keyProperty="id" >
+  	INSERT INTO t_dict 
+	 	( id,
+		dict_name,
+		dict_code,
+		item_name,
+		item_value,
+		item_order,
+		remark,
+		tenant_id,
+		is_system, 
+		is_source, 
+		query_sql, 
+		source_id
+		 )  VALUES 
+	 	( #{id,jdbcType=VARCHAR},
+		#{dictName,jdbcType=VARCHAR},
+		#{dictCode,jdbcType=VARCHAR},
+		#{itemName,jdbcType=VARCHAR},
+		#{itemValue,jdbcType=VARCHAR},
+		#{itemOrder,jdbcType=INTEGER},
+		#{remark,jdbcType=VARCHAR},
+		#{tenantId,jdbcType=VARCHAR},
+		#{issystem,jdbcType=INTEGER},
+		#{isSource,jdbcType=INTEGER}, 
+		#{querySql,jdbcType=VARCHAR}, 
+		#{sourceId,jdbcType=VARCHAR})
+  </insert>
+
+    <select id="findBytype" resultMap="BaseResultMap">
+        SELECT * FROM t_dict WHERE dict_code='input_type' AND item_name IS NOT NULL  ORDER BY item_order
+    </select>
+</mapper>

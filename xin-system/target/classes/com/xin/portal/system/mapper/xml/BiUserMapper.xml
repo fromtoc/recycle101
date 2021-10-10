@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.BiUserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.BiUser">
+        <id column="id" property="id" />
+        <result column="username" property="username" />
+        <result column="password" property="password" />
+        <result column="remark" property="remark" />
+        <result column="own_folder_id" property="ownFolderId" />
+        <result column="bi_server_id" property="biServerId" />
+        <result column="biServerName" property="biServerName" />
+        <result column="bi_object_id" property="biObjectId" />
+        <result column="type" property="type" />
+        <result column="state" property="state" />
+        <result column="update_time" property="updateTime" />
+        <result column="tenant_id" property="tenantId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        login_name,password, own_folder_id, remark,project_id
+    </sql>
+    
+    <select id="find" parameterType="com.xin.portal.system.model.BiUser" resultType="com.xin.portal.system.model.BiUser">
+    	select mu.id,
+    		login_name as loginName,
+    		password,
+    		remark,
+    		own_folder_id as ownFolderId,
+    		project_id as projectId,
+    		mu.mstr_id as mstrId,
+    		mp.server as serverName,
+    		mp.port as serverPort,
+    		mp.project as projectName
+    	from t_bi_user mu 
+    	left join t_user_mapping um on mu.id = um.mapping_user_id
+    	left join t_bi_project mp on mu.project_id = mp.id
+    	<where>
+    		<if test="userId!=null and userId!=''">
+    			and um.user_id = #{userId}
+    		</if>
+    		<if test="type!=null and type!=''">
+    			and um.type = #{type}
+    		</if>
+    	</where>
+    </select>
+    
+    <select id="findList" parameterType="com.xin.portal.system.model.BiUser" resultMap="BaseResultMap">
+    	select bu.id,
+    		username
+    		password,
+			bu.bi_group,
+    		bu.remark,
+    		bu.own_folder_id ,
+    		bu.bi_object_id ,
+			bu.bi_server_id,
+			bu.type,
+			bu.state,
+			bu.update_time,
+    		bs.name as serverName	
+    	from t_bi_user bu 
+    	left join t_bi_server bs on bu.bi_server_id = bs.id
+    	<where>
+    		<if test="biServerId!=null and biServerId!=''">
+    			and bu.bi_server_id = #{biServerId}
+    		</if>
+    	</where>
+    </select>
+
+
+	<select id="findBiUser" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select  a.username,a.password  from   t_bi_user  a
+			left join t_bi_server b
+			on a.bi_server_id=b.id
+			LEFT JOIN t_bi_mapping c
+			on  c.bi_user_id = a.id
+		where  c.user_id = #{userId} and b.id = #{serverId}
+	</select>
+    
+
+</mapper>

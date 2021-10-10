@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.ThirdAppParamMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.ThirdAppParam">
+        <id column="id" property="id" />
+        <result column="app_name" property="appName" />
+        <result column="app_type" property="appType" />
+        <result column="app_id" property="appId" />
+        <result column="app_secret" property="appSecret" />
+        <result column="app_token" property="appToken" />
+        <result column="app_aeskey" property="appAeskey" />
+        <result column="app_corpid" property="appCorpid" />
+        <result column="callback_url" property="callbackUrl" />
+        <result column="logo_url" property="logoUrl" />
+        <result column="relation_param" property="relationParam" />
+        <result column="is_enable" property="isEnable" />
+        <result column="creater" property="creater" />
+        <result column="create_time" property="createTime" />
+        <result column="updater" property="updater" />
+        <result column="update_time" property="updateTime" />
+        <result column="tenant_id" property="tenantId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, app_name, app_type, app_id, app_secret, app_token, app_aeskey, app_corpid, logo_url, relation_param, is_enable, creater, create_time, updater, update_time, tenant_id
+    </sql>
+    
+    <select id="findPageList" resultType="com.xin.portal.system.model.ThirdAppParam" parameterType="com.xin.portal.system.model.ThirdAppParam">
+    	SELECT 
+			tap.id,
+			tap.app_name as appName,
+			tap.app_type as appType,
+			tap.app_id as appId,
+			tap.app_secret as appSecret,
+			tap.app_token as appToken,
+			tap.app_aeskey as appAeskey,
+			tap.app_corpid as appCorpid,
+			tap.callback_url as callbackUrl,
+			tap.logo_url as logoUrl,
+        	tap.relation_param as relationParam,
+			tap.is_enable as isEnable,
+			tap.creater,
+			uic.realname as createName,
+			tap.create_time as createTime,
+			tap.updater,
+			uiu.realname as updateName,
+			tap.update_time as updateTime,
+			tap.tenant_id as tenantId
+		FROM t_third_app_param tap
+		left join t_user_info uic on uic.id=tap.creater
+		left join t_user_info uiu on uiu.id=tap.updater
+		<where>
+	    	<if test="id!=null and id!=''">
+				tap.id = #{id}
+			</if>
+			<if test="appType!=null and appType!=''">
+				and tap.app_type = #{appType}
+			</if>
+			<if test="appName!=null and appName!=''">
+				and tap.app_name = #{appName}
+			</if>
+			<if test="isEnable!=null and isEnable!=''">
+				and tap.is_enable = #{isEnable}
+			</if>
+			<if test="tenantId!=null and tenantId!=''">
+				and tap.tenant_id = #{tenantId}
+			</if>
+    	</where>
+    	order by tap.create_time desc
+	</select>
+
+    <select id="findeListByParam" parameterType="com.xin.portal.system.model.ThirdAppParam" resultType="com.xin.portal.system.model.ThirdAppParam" >
+    	SELECT 
+			tap.id,
+			tap.app_name as appName,
+			tap.app_type as appType,
+			tap.app_id as appId,
+			tap.app_secret as appSecret,
+			tap.app_token as appToken,
+			tap.app_aeskey as appAeskey,
+			tap.app_corpid as appCorpid,
+			tap.callback_url as callbackUrl,
+			tap.logo_url as logoUrl,
+        	tap.relation_param as relationParam,
+			tap.is_enable as isEnable,
+			tap.creater,
+			uic.realname as createName,
+			tap.create_time as createTime,
+			tap.updater,
+			uiu.realname as updateName,
+			tap.update_time as updateTime,
+			tap.tenant_id as tenantId
+		FROM t_third_app_param tap
+		left join t_user_info uic on uic.id=tap.creater
+		left join t_user_info uiu on uiu.id=tap.updater
+		<where>
+			<if test="id!=null and id!=''">
+				tap.id = #{id}
+			</if>
+			<if test="appType!=null and appType!=''">
+				and tap.app_type = #{appType}
+			</if>
+			<if test="appName!=null and appName!=''">
+				and tap.app_name = #{appName}
+			</if>
+			<if test="isEnable!=null and isEnable!=''">
+				and tap.is_enable = #{isEnable}
+			</if>
+			<if test="tenantId!=null and tenantId!=''">
+				and tap.tenant_id = #{tenantId}
+			</if>
+		</where>
+    </select>
+
+</mapper>

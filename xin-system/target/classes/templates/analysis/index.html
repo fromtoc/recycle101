@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title><@spring.message 'analysis.Chan_Dao_analysis'/></title>
+<#include "common/common.html" />
+<style>
+.el-step__head:hover {
+	color: #67c23a;
+	border-color: #67c23a;
+	cursor: pointer;
+}
+
+.tab-content {
+	margin-top: 30px;
+	text-align: center
+}
+
+.el-tabs__header {
+	display: none;
+}
+</style>
+
+</head>
+<body>
+<@system.path id="${menuId!}"></@system.path>
+	<form id="query_form" class="layui-form layui-form-pane"
+		style="padding-top: 5px;">
+		<div class="layui-inline">
+			<label class="layui-form-label"
+				style="width: 150px; text-align: center;"><@spring.message 'analysis.Select_item'/></label>
+			<div class="layui-input-inline" style="width: 250px">
+				<select id="pid" name="pid" style="width: 250px">
+					<#list project as rect> <#if (rect.id==15)>
+					<option value="${(rect.id)!}" selected="selected">${(rect.name)!}</option>
+					<#else>
+					<option value="${(rect.id)!}">${(rect.name)!}</option></#if> </#list>
+				</select>
+			</div>
+		</div>
+		<div class="layui-inline">
+			<label class="layui-form-label"><@spring.message 'analysis.Query_time_interval'/></label>
+			<div class="layui-input-inline" style="width: 300px">
+				<input type="text" class="layui-input" id="timeInterval"
+					placeholder=" - ">
+			</div>
+		</div>
+		<div class="layui-inline">
+			<div class="layui-input-inline">
+				<button type="button" id="query"
+					class="layui-btn layui-btn-sm layui-btn-normal">
+					<@spring.message 'action.query'/>
+				</button>
+			</div>
+		</div>
+	</form>
+	<div id="main3" style="width: 100%; height: 600px;"></div>
+	<div id="main4" style="width: 100%; height: 450px;"></div>
+	<div id="main5" style="width: 100%; height: 600px;"></div>
+	<script src="${basePath}/plugins/echartsV3/echarts-all-3.js"
+		charset="utf-8" type="text/javascript"></script>
+	<script>
+		layui.use([ 'form', 'laydate' ], function() {
+			$ = layui.jquery;
+			var form = layui.form, laydate = layui.laydate;
+			laydate.render({
+				elem : '#timeInterval',
+				type : 'date',
+				theme : '#1E9FFF',
+				range : true
+			});
+			form.render();
+
+			$('#query').on('click', function(data) {
+				layer.msg("<@spring.message 'analysis.Enquiry'/>", { icon:16,shade:0.3,time:300000});
+				var pid = $('#pid').val();
+				var date1;
+				var date2;
+				var timeInterval = $('#timeInterval').val();
+				if (timeInterval!=null && timeInterval!='') {
+					var times = timeInterval.split(' - ');
+					date1 = times[0];
+					date2 = times[1];
+				} else {
+					layer.closeAll();
+		  			layer.msg("<@spring.message 'analysis.Please_enter_the_date'/>");
+					return false;
+				}
+				dataInit(pid,date1,date2);
+				reportInit();
+				pieData(pid,date1,date2);
+				pieDataInit();
+				riverData(pid,date1,date2);
+				riverDataInit();
+				layer.closeAll();
+			});
+			
+		});
+
+		// 基于准备好的dom，初始化echarts实例
+		var myChart = echarts.init(document.getElementById('main3'));
+		var myChart1 = echarts.init(document.getElementById('main4'));
+		var myChart2 = echarts.init(document.getElementById('main5'));
+		var data = null;
+		var piedata = null;
+		var riverdata = null;
+
+		function dataInit(pid,date1,date2) {
+			$.ajax({
+				type : "POST",
+				url : basePath + '/analysis/data?pid='+pid+'&date1='+date1+"&date2="+date2,
+				async : false,
+				error : function(request) {
+
+				},
+				success : function(result) {
+					data = result;
+					console.log(data);
+				}
+			});
+		}
+
+		function pieData(pid,date1,date2) {
+			$.ajax({
+				type : "POST",
+				url : basePath + '/analysis/pieData?pid='+pid+'&date1='+date1+"&date2="+date2,
+				async : false,
+				error : function(request) {
+
+				},
+				success : function(result) {
+					piedata = result;
+				}
+			});
+		}
+
+		function riverData(pid,date1,date2) {
+			$.ajax({
+				type : "POST",
+				url : basePath + '/analysis/riverData?pid='+pid+'&date1='+date1+"&date2="+date2,
+				async : false,
+				error : function(request) {
+
+				},
+				success : function(result) {
+					riverdata = result;
+					console.log(riverdata);
+				}
+			});
+		}
+
+		function reportInit() {
+			var option1 = {
+				title : {
+					text : "<@spring.message 'analysis.Modular_Time_Statistics'/>",
+					left : 'center'
+				},
+				tooltip : {
+					trigger : 'axis',
+					axisPointer : { // 坐标轴指示器，坐标轴触发有效
+						type : 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+					}
+				},
+				legend : {
+					data : data.category
+				},
+				grid : {
+					left : '3%',
+					right : '4%',
+					bottom : '3%',
+					containLabel : true
+				},
+				xAxis : {
+					type : 'value'
+				},
+				yAxis : {
+					type : 'category',
+					data : data.category
+				},
+				series : data.series
+			};
+			myChart.setOption(option1);
+		}
+
+		function pieDataInit() {
+			var option2 = {
+				title : {
+					text : "<@spring.message 'analysis.Total_Time_Statistics_of_Projects'/>",
+					left : 'center'
+				},
+				tooltip : {
+					trigger : 'item',
+					formatter : "{a} <br/>{b} : {c} ({d}%)"
+				},
+				legend : {
+					bottom : 10,
+					left : 'center',
+					data : data.category
+				},
+				series : [ {
+					type : 'pie',
+					radius : '70%',
+					center : [ '50%', '50%' ],
+					selectedMode : 'single',
+					data : piedata,
+					itemStyle : {
+						emphasis : {
+							shadowBlur : 10,
+							shadowOffsetX : 0,
+							shadowColor : 'rgba(0, 0, 0, 0.5)'
+						}
+					}
+				} ]
+			};
+			myChart1.setOption(option2);
+		}
+
+		function riverDataInit() {
+			var option3 = {
+				title : {
+					text : "<@spring.message 'analysis.Daily_person-hour_statistics'/>",
+					left : 'center'
+				},
+				tooltip : {
+					trigger : 'axis',
+					axisPointer : {
+						type : 'cross',
+						label : {
+							backgroundColor : '#6a7985'
+						}
+					}
+				},
+				legend : {
+					data : riverdata.category
+				},
+				grid : {
+					left : '3%',
+					right : '4%',
+					bottom : '3%',
+					containLabel : true
+				},
+				xAxis : [ {
+					type : 'category',
+					boundaryGap : false,
+					data : riverdata.category
+				} ],
+				yAxis : [ {
+					type : 'value'
+				} ],
+				series : riverdata.series
+			};
+			myChart2.setOption(option3);
+		}
+	</script>
+</body>
+</html>

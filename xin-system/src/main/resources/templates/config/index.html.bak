@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>index.html</title>
+	
+    <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+    <meta http-equiv="description" content="this is my page">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    
+    <#include "common/common.html" />
+	<#include "common/common_table.html" />
+
+  </head>
+  
+  <body>
+  	 <@system.path id="${menuId!}"></@system.path>
+  	 <div >
+     	<div class="layui-inline layui-hide">
+     		<button id="btn_add_config" class="layui-btn layui-btn-sm layui-btn-normal">
+			  <i class="layui-icon">&#xe608;</i> <@spring.message 'sysConfig.addConfig'/>
+			</button>
+	    </div>
+    </div>
+    <table id="table"
+   		   data-toolbar="#toolbar"
+           data-toggle="table"
+           data-search="false"
+           data-pagination="false"
+           data-query-params-type=""
+           data-data-type="json"
+           data-url="${basePath}/config/findList"
+              >
+           <thead>
+           <tr>
+           	   <th data-align="center"
+               	data-halign="center"
+			    data-valign="middle"
+               	data-formatter="opeFormatter" ><@spring.message 'action.action'/></th>
+               <th data-align="center"
+               	data-halign="center"
+               	data-formatter="indexFormatter"
+               	data-valign="middle"
+               	data-width="1%"><@spring.message 'list.serialNum'/></th>
+               <th data-align="left" 
+               	data-halign="center"
+			    data-valign="middle"
+               	data-field="name"><@spring.message 'sysConfig.configItem'/></th>
+               <th data-align="left" 
+               	data-halign="center"
+			    data-valign="middle"
+               	data-field="value"
+               	data-formatter="valueFormatter"><@spring.message 'sysConfig.configValue'/></th>
+               <th data-align="left" 
+               	data-halign="center"
+			    data-valign="middle"
+               	data-field="remark" ><@spring.message 'list.describe'/></th>
+           </tr>
+           </thead>
+       </table>
+      
+  </body>
+  <script>
+  
+  	layui.use([ 'form'],function() {
+		var form = layui.form, 
+			layer = layui.layer;
+			$('#btn_add_config').on('click',function(data){
+				addConfig();
+			});
+	});
+  	
+  	function valueFormatter(value,row,index) {
+  		if (row.code=='SYS_THEME') {
+  			if (value=='theme_left_shen') {
+  				return '<@spring.message "sysConfig.themeLeft"/>';
+  			} else if (value=='theme_default') {
+  				return '<@spring.message "sysConfig.themeTop"/>';
+  			}
+  		} else if (row.code=='SYS_CHECK_CODE'||row.code=='SYS_FIRST_UPDATE_PWD'||row.code=='SYS_USER_EMAIL'||row.code=='SYS_USER_EMAIL'||row.code=='SYS_MENU_ICON') {
+  			if (value=='0') {
+  				return '<@spring.message "action.disable"/>';
+  			} else if (value=='1') {
+  				return '<@spring.message "action.enable"/>';
+  			}
+  		} else if (row.code=='SYS_LOCALE') {
+  			if (value=='zh_CN') {
+  				return '<@spring.message "sysConfig.langTypeCN"/>';
+  			} else if (value=='zh_TW') {
+  				return '<@spring.message "sysConfig.langTypeTW"/>';
+  			} else if (value=='en_US') {
+  				return '<@spring.message "sysConfig.langTypeUS"/>';
+  			}
+  		} else if (row.code=='SYS_LOGIN_PAGE'){
+  			if (value=='login/login_lenovo'){
+  				return 'LOGIN1';
+  			}
+  			if (value=='login/login_shen'){
+  				return 'LOGIN2';
+  			}
+  			if (value=='login/login_xdf'){
+  				return 'LOGIN3';
+  			}
+  			if (value=='login/login_edu'){
+  				return 'LOGIN4';
+  			}
+  		} else if (row.code=='SYS_LOGO'){
+  			if (value=='logo_dod'){
+  				return 'DOD';
+  			}
+  		} else if (row.code=='SYS_FIRST_UPDATE_PWD'){
+  			if (value=='1') {
+  				return '<@spring.message "action.enable"/>';
+  			} else {
+  				return '<@spring.message "action.disable"/>';
+  			}
+  		}
+  		return value;
+  	}
+  
+  	function paramFormatter(value,row,index) {
+  		var v =   '<ul>'
+					+'<li><@spring.message "BI.report"/>：'+row.paramReport+'</li>'
+					+'<li><@spring.message "BI.document"/>：'+row.paramDoc+'</li>'
+					+'<li><@spring.message "BI.folder"/>：'+row.paramFolder+'</li>'
+				  +'</ul>';
+  		return v;
+  	}
+	var isTestRole = "<@shiro.hasRole name='role_test' >true</@shiro.hasRole>" ? true : false;
+	function opeFormatter(value,row,index) {
+		if (isTestRole) {
+			return '<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled " disabled title="禁用" ><i class="layui-icon layui-icon-more"></i> </button>';
+		}
+  		if (row.state == 0) {
+  			return '';
+  		}
+  		
+		var v = '<div class="layui-btn-group">'
+                        		+'<button class="layui-btn layui-btn-normal layui-btn-sm" title="编辑" onclick="javascript:editConfig(\'%\')"><i class="layui-icon">&#xe642;</i></button>'
+                        		//+'<button class="layui-btn layui-btn-normal layui-btn-sm" data-tip="删除" onclick="javascript:delConfig(%)"><i class="layui-icon">&#xe640;</i> </button>'
+                        		+'</div>'; 
+        return v.replace(new RegExp(/(%)/g),row.id);
+	}
+	
+	function addConfig() {
+		var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message "sysConfig.addConfigItem"/>',
+			type:2,
+			content:'${basePath}/config/add',
+			area: ['600px', '400px'],
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+						$.ajax({
+			                type: "POST",
+			                url:'${basePath}/config/save',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message "result.addFail"/>！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('<@spring.message "result.addSuccess"/>！');
+									reloadTable();
+			                	}
+
+			                	else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+					} else{
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+    
+    
+    function delConfig(id,name) {
+        parent.layer.confirm('<@spring.message "sysConfig.deleteConfig"/>？', {
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			yes: function(index, layero){
+		  		$.post('${basePath}/config/delete',{id:id},function(result){
+		    		if(result.code==0){
+                		parent.layer.close(index);
+						reloadTable();
+                	}else{
+                		parent.layer.msg(result.msg);
+                	}
+		    		
+			    });
+	                
+			}
+        });
+    }
+    
+    
+    function editConfig(id) {
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: '<@spring.message "sysConfig.editConfig"/>',
+			type:2,
+			content:'${basePath}/config/edit?id='+id,
+			area: ['600px', '400px'],
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath}/config/update',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message "result.updateFail"/>！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('<@spring.message "result.updateSuccess"/>！');
+									reloadTable();
+			                	}else{
+			                		parent.layer.msg(result.msg);
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+		            } else{
+		            	isSubmit = false;
+		            }
+				}
+    		}
+		});
+    }
+    
+    function reloadTable() {
+    	$('#table').bootstrapTable('refresh', null);
+    }
+  </script>
+</html>

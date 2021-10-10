@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xin.portal.system.mapper.IssueRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xin.portal.system.model.IssueRecord">
+        <id column="id" property="id" />
+        <result column="issue_id" property="issueId" />
+        <result column="content" property="content" />
+        <result column="creater" property="creater" />
+        <result column="create_time" property="createTime" />
+        <result column="tenant_id" property="tenantId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, issue_id, content, creater, create_time, tenant_id
+    </sql>
+    
+    <select id="findPageList" parameterType="com.xin.portal.system.model.IssueRecord" resultMap="BaseResultMap">
+    	SELECT 
+		  sr.id,
+		  sr.issue_id,
+		  s.title,
+		  sr.content,
+		  sr.creater,
+		  ui.realname AS createName,
+		  sr.create_time,
+		  sr.tenant_id
+		FROM
+		  t_issue_record sr
+		LEFT JOIN t_issue s ON s.id=sr.issue_id
+		LEFT JOIN t_user_info ui ON ui.id=sr.creater
+		<where>
+			<if test="issueId!=null and issueId!=''">
+		  		AND sr.issue_id = #{issueId}
+		  	</if>
+		</where>
+		order by sr.create_time desc
+    </select>
+
+</mapper>

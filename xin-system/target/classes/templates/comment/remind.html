@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <link rel="stylesheet" href="${basePath}/plugins/dropdown/jquery.dropdown.min.css">
+    <link rel="stylesheet" href="${basePath}/plugins/bootstrap/css/bootstrap.css">
+
+    <script src="${basePath}/js/jquery-2.2.4.min.js"></script>
+    <script src="${basePath}/plugins/dropdown/jquery.dropdown.min.js"></script>
+    <script src="${basePath}/plugins/dropdown/mock.js"></script>
+    <script src="${basePath}/plugins/bootstrap/js/bootstrap.js"></script>
+    <script src="${basePath}/plugins/dropdown/jquery.dropdown.min.js"></script>
+    <style>
+        body {
+            width: 85%;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+<form action="">
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="dropdown-mul-1">
+                <select style="display:none" name="" id="" multiple placeholder="<@spring.message 'tips.choos'/>"> </select>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    var adminList = JSON.parse('${remindList!}');
+    var json1 = Mock.mock({
+        data:  adminList
+    });
+    $('.dropdown-mul-1').dropdown({
+        data: json1.data,
+        limitCount: 40,
+        multipleMode: 'label',
+        choice: function() {
+          /*  console.log(arguments, this);*/
+        }
+    });
+    function getData(){
+        var userList = [];
+        var selected = $(".dropdown-chose");
+        for(var i=0;i<selected.length;i++){
+            var user={
+                name:$(selected[i]).html(),
+                id:$(selected[i]).attr("data-value")
+            }
+            userList.push(user)
+
+        }
+        if(userList.length>0){
+            return userList;
+        }else{
+            return null;
+        }
+    }
+</script>
+</body>
+</html>

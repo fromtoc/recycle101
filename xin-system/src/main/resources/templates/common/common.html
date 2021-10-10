@@ -1,0 +1,54 @@
+<link rel="shortcut icon" href="${basePath}/images/favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="${basePath}/plugins/layui/2.4.3/css/layui.css"media="all" />
+<!-- <link rel="stylesheet" href="${basePath}/css/global.css" media="all"> -->
+<link rel="stylesheet" href="${basePath}/plugins/font-awesome-4.7.0/css/font-awesome.css" media="all">
+<link rel="stylesheet" href="${basePath}/css/layui-ext.css" media="all">
+<link href="${basePath}/images/favicon.ico" rel="icon" type="image/x-icon" />
+<#if SYS_LOCALE=='zh_CN'>
+<script type="text/javascript" src="${basePath}/plugins/layui/2.4.3/layui.js"></script>
+<#elseif (SYS_LOCALE== 'zh_TW')>
+<script type="text/javascript" src="${basePath}/plugins/layui/2.4.3/layui_zh_TW.js"></script>
+<#elseif (SYS_LOCALE== 'en_US')>
+<script type="text/javascript" src="${basePath}/plugins/layui/2.4.3/layui_en_US.js"></script>
+<#else>
+<script type="text/javascript" src="${basePath}/plugins/layui/2.4.3/layui.js"></script>
+</#if>
+<script type="text/javascript" src="${basePath}/js/jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="${basePath}/js/util.js"></script>
+<script type="text/javascript">
+	var locale = '${SYS_LOCALE}';
+	var localeFlag = "";
+	if(locale!=null && locale!='' && locale!= undefined){
+		switch (locale) {
+		  case 'zh_TW':
+			localeFlag = "_zh_TW";
+		    break;
+		  case 'en_US':
+			localeFlag = "_en_US";
+		    break;
+		  case 'zh_CN':
+			localeFlag = "";
+		    break;
+		  default:
+			localeFlag = '';
+		    break;
+		}
+	}
+	var basePath = '${basePath}';
+	layui.config({
+		base: basePath + '/plugins/layui/2.4.3/lay/modules'+localeFlag+'/',
+		version:new Date().getTime()
+	}).extend({
+	    treeSelect: 'treeSelect',
+        tabrightmenu:'tabrightmenu'
+	});
+</script>
+<!--<script type="text/javascript" src="${basePath}/js/system.js"></script>-->
+<script id="dictSel" type="text/html">
+<select name="{{d.name}}" lay-verify="required" lay-filter="{{d.name}}">
+{{#  layui.each(d.list, function(index, item){ }}
+    <option value="{{ item.itemValue }}" >{{ item.itemName }}</option>
+{{#  }); }}
+</select>
+</script>
+			

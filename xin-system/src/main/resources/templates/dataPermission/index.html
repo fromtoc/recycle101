@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+    <meta http-equiv="description" content="this is my page">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <#include "common/common.html" />
+	<#include "common/common_table.html" />
+	<#include "common/common_ztree.html" />
+  </head>
+<body style="padding:10px;">
+	<div class="layui-fluid">
+	<@system.path id="${menuId!}"></@system.path>
+		<div class="layui-row">
+			<div class="layui-col-md2">
+				<ul id="tree" class="ztree" style="overflow:auto;"></ul>
+		    </div>
+		    <div class="layui-col-md10">
+		    	<input type="hidden" name="typeId" id="typeId" >
+				<form id="query_form"  class="layui-form layui-form-pane">
+					<button type="button" onclick="javascript:addDataPermission();" class=" layui-btn layui-btn-sm layui-btn-normal <@shiro.hasRole name='role_test' >layui-btn-disabled</@shiro.hasRole>" <@shiro.hasRole name='role_test' >disabled</@shiro.hasRole>><i class="layui-icon">&#xe654;</i><@spring.message 'action.add'/></button>
+					<div class="layui-inline">
+						<label class="layui-form-label"><@spring.message 'dataPermission.data_per_name'/></label>
+						<div class="layui-input-inline">
+				        	<input name="dpname" id="dpname" class="layui-input" type="text" autocomplete="off">
+				      	</div>
+				    </div>
+				    <div class="layui-inline">
+				        <button type="button" id="query" class="layui-btn layui-btn-sm layui-btn-normal btn-opt" data-tip="<@spring.message 'action.query'/>"><i class="layui-icon">&#xe615;</i></button>
+				        <button type="button" class="reset layui-btn layui-btn-sm layui-btn-normal btn-opt" data-tip="<@spring.message 'action.reset'/>"><i class="glyphicon glyphicon-refresh"></i></button>
+				    </div>
+				</form>
+			    <table id="table"
+			  		   data-toolbar="#toolbar"
+			  		   data-click-to-select="true"
+			             data-toggle="table"
+			             data-search="false"
+			             data-side-pagination="server"
+			             data-pagination="true"
+			             data-query-params-type=""
+			             data-url="${basePath}/dataPermission/page"
+			             data-query-params="queryParams">
+			          	<thead>
+			          		<tr>
+			          		<th data-align="center"
+			               	data-halign="center"
+						    data-valign="middle"
+			               	data-formatter="opeFormatter" ><@spring.message 'action.action'/></th>
+			                <th data-align="center"
+			                	data-halign="center"
+			                	data-formatter="indexFormatter"
+			                	data-width="1%"><@spring.message 'list.serialNum'/></th>
+			                <th data-align="center" 
+			                	data-width="15%"
+			                	data-halign="center"
+			                	data-field="dpname"><@spring.message 'dataPermission.data_per_name'/></th>
+			                <th data-align="center" 
+			                	data-width="15%"
+			                	data-halign="center"
+			                	data-field="dptype" ><@spring.message 'dataPermission.data_per_type'/></th>
+			                <th data-align="center" 
+			                	data-width="15%"
+			                	data-halign="center"
+			                	data-field="extcode" ><@spring.message 'dataPermission.data_per_code'/></th>
+			                <th data-align="center"
+			                	data-width="5%" 
+			                	data-halign="center"
+			                	data-field="sort" ><@spring.message 'list.order'/></th>
+			                <th data-align="center"
+			                	data-width="30%" 
+			                	data-halign="center"
+			                	data-field="remark" ><@spring.message 'list.remark'/></th>
+			          		</tr>
+					</thead>
+				</table>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+	function zTreeOnClick(event, treeId, treeNode) {
+		$('#typeId').val(treeNode.id);
+    	$('#table').bootstrapTable('refresh');
+    }
+	
+	function onAsyncSuccess(){
+    	var treeObj = $.fn.zTree.getZTreeObj("tree");
+    	treeObj.expandAll(true);
+    }
+	
+	var ztree;
+	
+	$(function(){
+		$('.reset').on('click',function(){
+			$('#query_form')[0].reset();
+			$('#table').bootstrapTable('refresh');
+		});
+		
+		$('#query').on('click',function(){
+			var dpname = $.trim($('#dpname').val());
+			var typeId = $('#typeId').val() 
+			$('#table').bootstrapTable('refresh',{query: {dpname: dpname, typeId: typeId}});
+		});
+		//初始化树
+		var dpTypeSetting = {
+			check: {
+				enable: false
+			},
+			view: {
+				<@shiro.lacksRole name='role_test' >
+					addHoverDom:addHoverDom,
+					removeHoverDom:removeHoverDom,
+				</@shiro.lacksRole>
+				dblClickExpand: false,
+				showLine: true,
+				selectedMulti: false,
+			},
+			data: {
+				simpleData: {
+					enable:true,
+					idKey: "id",
+					pIdKey: "parentId",
+					rootId:"0"
+				}
+			},
+		    async: {
+				enable: true,
+				contentType: "application/json",
+				url: "${basePath}/dataPermissionType/list", 
+			},
+			callback: {
+				onClick: zTreeOnClick,
+				onAsyncSuccess: onAsyncSuccess,
+			}
+		};
+		$.fn.zTree.init($("#tree"), dpTypeSetting);
+		ztree = $.fn.zTree.getZTreeObj("tree");
+		
+	});
+	
+	function addHoverDom(treeId, treeNode) {
+        var sObj = $("#" + treeNode.tId + "_span");
+        if (sObj[0].innerText.length>20) {
+        	sObj.html(sObj[0].innerText.substring(0, 20) + "...");
+        }
+        if (treeNode.editNameFlag || $("#editBtn_"+treeNode.tId).length>0) return;
+        var addStr = "";
+        if(treeNode.isParent || treeNode.parentId == 0 || treeNode.level == 0){//根节点有添加
+        	addStr =  "<span class='button add' id='addBtn_" + treeNode.tId
+            + "' title="+"<@spring.message'action.add'/>"+" onfocus='this.blur();'></span>";
+        }
+        addStr += "<span class='button edit' id='editBtn_" + treeNode.tId 
+        		+ "' title="+"<@spring.message'action.edit'/>"+" onfocus='this.blur();'></span>";
+        if (!treeNode.isParent && treeNode.parentId != 0 && treeNode.level != 0) {
+	        addStr += "<span class='button remove' id='removeBtn_" + treeNode.tId 
+	        	+ "'  title="+"<@spring.message'action.delete'/>"+" onfocus='this.blur();'></span>";
+        }
+        sObj.after(addStr);
+        var btn = $("#addBtn_"+treeNode.tId);
+        if (btn) btn.bind("click", function(){
+        	addDPType(treeNode);
+            return false;
+        });
+        
+        var btn = $("#editBtn_"+treeNode.tId);
+        if (btn) btn.bind("click", function(){
+        	editDPType(treeNode);
+            return false;
+        });
+        
+        var btnDel = $("#removeBtn_"+treeNode.tId);
+        if (btnDel) btnDel.bind("click", function(){
+        	delDPType(treeNode);
+            return false;
+        });
+        
+    };
+    
+    function addDPType(treeNode) {
+    	var isSubmit = false;
+    	parent.layer.open({
+			title: "<@spring.message'listManage.List_add'/>",
+			type:2,
+			content:'${basePath}/dataPermissionType/add',
+			area: ['30%', '60%'],
+			btn:['<@spring.message"banner.Determine"/>','<@spring.message"action.cancel"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				iframeWin.init(treeNode);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath}/dataPermissionType/save',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg("<@spring.message 'result.fail'/>");
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+			                		ztree.reAsyncChildNodes(null, "refresh");
+									layer.msg("<@spring.message 'result.success'/>");
+			                	}else if(result.code==-2){
+			                		parent.layer.msg("<@spring.message 'dataPermission.data_code_is_exist'/>！");
+			                		isSubmit = false;
+			                	}else{
+			                		parent.layer.msg("<@spring.message 'result.fail'/>");
+			                		isSubmit = false;
+			                	}
+			                }
+			            });
+					}else {
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+    }
+    
+    function delDPType(treeNode) {
+    	var zTree = $.fn.zTree.getZTreeObj("tree");
+        if (treeNode.isParent) {
+        	parent.layer.alert('<@spring.message"tips.treeDelete"/>!');
+         	return;
+        } else {
+        	parent.layer.confirm("<@spring.message 'action.delete'/>",  {title:'<@spring.message "action.info"/>',
+        		btn:["<@spring.message 'action.ok'/>","<@spring.message 'action.cancel'/>"],
+				yes: function(index, layero){
+			  		$.ajax({
+			  			url:'${basePath}/dataPermissionType/delete/'+treeNode.id,
+			  			type:"DELETE",
+			  			success:function(result){
+				    		parent.layer.close(index);
+				    		if (result.code==0) {
+				    			ztree.reAsyncChildNodes(null, "refresh");
+					    		parent.layer.msg("<@spring.message 'result.success'/>");
+				    		} else if(result.code==-2){
+		                		parent.layer.msg("<@spring.message 'dataPermission.delete_data_of_type'/>！");
+		                		isSubmit = false;
+		                	} else {
+				    			parent.layer.msg("<@spring.message 'result.fail'/>");
+				    		}
+				    		
+					    }
+			  		});
+				}
+         	});
+        }
+    }
+    
+    function editDPType(treeNode) {
+    	var isSubmit = false;
+    	parent.layer.open({
+    		title: "<@spring.message 'action.edit'/>",
+			type:2,
+			content:'${basePath}/dataPermissionType/edit?id='+treeNode.id,
+			area: ['30%', '60%'],
+			btn:["<@spring.message 'action.ok'/>","<@spring.message 'action.cancel'/>"],
+			success: function(layero){
+				//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+				//var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				//var parentNodes = zTree.getNodesByParam("id", treeNode.parentId, null);
+				//treeNode.parentName = parentNodes[0].name;
+				//iframeWin.init(treeNode);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+						$.ajax({
+			                type: "POST",
+			                url:'${basePath}/dataPermissionType/update',
+			                data:data,
+			                error: function(request) {
+			                	parent.layer.msg("<@spring.message 'result.fail'/>");
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+			                		ztree.reAsyncChildNodes(null, "refresh");
+									layer.msg("<@spring.message 'result.success'/>");
+			                	}else if(result.code==-2){
+			                		parent.layer.msg("<@spring.message 'dataPermission.data_code_is_exist'/>！");
+			                		isSubmit = false;
+			                	}else{
+			                		parent.layer.msg("<@spring.message 'result.fail'/>");
+			                	}
+		                		isSubmit = false;
+			                }
+			            });
+					}else {
+						isSubmit = false;
+					}
+				}
+   		    	
+    		}
+		});
+    }
+
+    function removeHoverDom(treeId, treeNode) {
+        $("#addBtn_"+treeNode.tId).unbind().remove();
+        $("#removeBtn_"+treeNode.tId).unbind().remove();
+        $("#editBtn_"+treeNode.tId).unbind().remove();
+    };
+    
+	function queryParams(params) {
+		var dpname = $.trim($('#dpname').val());
+		var typeId = $.trim( $('#typeId').val());
+		params.dpname = dpname;
+		params.typeId = typeId;
+		return params;
+	}
+	
+  	//是否是测试用户
+  	var isTestRole = "<@shiro.hasRole name='role_test' >true</@shiro.hasRole>" ? true : false;
+  	function opeFormatter(value,row,index) {
+		if (isTestRole || ($('#typeId').val()==null || $('#typeId').val() == '')) {
+			return '<button class="layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled " disabled title='+"<@spring.message 'action.disable'/>"+' ><i class="layui-icon layui-icon-more"></i> </button>';
+		}
+		var v = '<div class="layui-btn-group">'
+			+'<button class="layui-btn layui-btn-normal layui-btn-sm btn-opt" data-tip="<@spring.message "action.edit"/>" onclick="javascript:edit(\''+row.id+'\')"><i class="layui-icon">&#xe642;</i></button>'
+			+'<button class="layui-btn layui-btn-normal layui-btn-sm btn-opt" data-tip="<@spring.message "action.delete"/>" onclick="javascript:del(\''+row.id+'\')"><i class="layui-icon">&#xe640;</i></button>'
+			+'</div>';
+      	return v;
+	}
+	
+	function addDataPermission(){
+		var nodes = ztree.getSelectedNodes();
+		if (nodes==null || nodes.length==0 || nodes[0].parentId == 0 || nodes[0].level == 0) {
+			layer.msg("<@spring.message 'dataPermission.select_data_type'/>！");
+			return;
+		}
+		var isSubmit = false;
+		parent.layer.open({
+			title: '<@spring.message "dataPermission.add_data_per"/>',
+			type:2,
+			content:'${basePath}/dataPermission/add',
+			area: ['40%', '80%'],
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				iframeWin.init(nodes[0]);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+						$.ajax({
+			                type: "POST",
+			                url:'${basePath}/dataPermission/save',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message "result.addFail"/>！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('<@spring.message "result.addSuccess"/>！');
+									reloadTable();
+			                	}else if(result.code == -2){
+			                		parent.layer.msg('<@spring.message "dataPermission.data_code_is_exist"/>！');
+                                    isSubmit = false;
+			                	}else{
+			                		parent.layer.msg('<@spring.message "result.addFail"/>！');
+                                    isSubmit = false;
+                                }
+			                }
+			            });
+					} else{
+						isSubmit = false;
+					}
+				}
+    		}
+		});
+	}
+	
+	function edit(id){
+		var isSubmit = false;
+		parent.layer.open({
+			title: '<@spring.message "dataPermission.edit_data_per"/>',
+			type:2,
+			content:'${basePath}/dataPermission/edit?id='+id,
+			area: ['40%', '80%'],
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			success: function(layero){
+				var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+				var nodes = ztree.getSelectedNodes();
+				iframeWin.init(nodes[0]);
+			},
+			yes:function(index,layero){
+				if(!isSubmit){
+					isSubmit = true;
+	    			var iframeWin = top.window[layero.find('iframe')[0]['name']]; 
+					var data = iframeWin.getData();
+					if (data!=null) {
+		   		    	$.ajax({
+			                type: "POST",
+			                url:'${basePath}/dataPermission/update',
+			                data:data,
+			                async: false,
+			                error: function(request) {
+			                    parent.layer.msg('<@spring.message "tips.inputSome"/>result.updateFail！');
+			                    isSubmit = false;
+			                },
+			                success: function(result) {
+			                	if(result.code==0){
+			                		parent.layer.close(index);
+									parent.layer.msg('<@spring.message "result.updateSuccess"/>！');
+									reloadTable();
+                                }else if(result.code == -2){
+			                		parent.layer.msg('<@spring.message "dataPermission.data_code_is_exist"/>！');
+                                    isSubmit = false;
+			                	}else {
+                                	parent.layer.msg('<@spring.message "tips.inputSome"/>result.updateFail！');
+                                    isSubmit = false;
+                                }
+			                }
+			            });
+		            } else{
+		            	isSubmit = false;
+		            }
+				}
+    		}
+		});
+	}
+	
+	
+	function del(id){
+		parent.layer.confirm('<@spring.message "dataPermission.delete_data_per"/>？',  {title:'<@spring.message "action.info"/>',
+			btn:['<@spring.message "action.ok"/>','<@spring.message "action.cancel"/>'],
+			yes: function(index, layero){
+		  		$.post('${basePath}/dataPermission/delete',{id:id},function(result){
+		    		if(result.code==0){
+                        parent.layer.msg("<@spring.message 'result.deleteSuccess'/>！");
+						reloadTable();
+                	}else{
+                        parent.layer.msg("<@spring.message 'result.deleteFail'/>！");
+                	}
+			    });
+			}
+        });
+	}
+	
+	function reloadTable() {
+    	$('#table').bootstrapTable('refresh', null);
+    }
+	
+</script>
+</html>

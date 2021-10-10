@@ -1,0 +1,236 @@
+﻿//格式：姓名   日期    模块   数据库名称   （数据库字段要有注释，新表要有注释）
+//////////////////角色管理删除租户错乱数据//////////////////////
+DELETE FROM t_role_user WHERE tenant_id = "1102869620780470273"  AND role_id = '4'
+
+
+
+/////////////////////修改菜单名，将提示管理改为筛选管理//////////////////////////////////
+UPDATE t_menu SET NAME = "筛选管理" WHERE  id = '1064467394634825729'
+
+
+//////////////////添加公告已读表//////////////////////
+CREATE TABLE `t_notice_already_read` (
+   `id` varchar(32) NOT NULL COMMENT '主键',
+   `notice_id` varchar(32) NOT NULL COMMENT '公告id',
+   `user_id` varchar(32) NOT NULL COMMENT '用户id',
+   `tenant_id` varchar(32) DEFAULT NULL COMMENT '租户id',
+   PRIMARY KEY (`id`,`notice_id`,`user_id`)
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
+
+
+//////////////////修改问题表，添加是否有回复的字段//////////////////////
+ALTER TABLE  t_issue ADD is_reply VARCHAR(5) DEFAULT '0'  AFTER lv
+
+
+
+//////////////////字典编码的insert语句//////////////////////
+INSERT INTO `datawindow_uat`.`t_dict` (`id`, `dict_name`, `dict_code`, `item_name`, `item_value`, `item_order`, `remark`, `tenant_id`) VALUES ('1125267759369785346', '日期默认值-日', 'date_day', NULL, NULL, NULL, '日期默认值-日', '1');
+INSERT INTO `datawindow_uat`.`t_dict` (`id`, `dict_name`, `dict_code`, `item_name`, `item_value`, `item_order`, `remark`, `tenant_id`) VALUES ('1125268427392389121', NULL, 'date_day', '当日', 'cur_day', '1', '当日', '1');
+INSERT INTO `datawindow_uat`.`t_dict` (`id`, `dict_name`, `dict_code`, `item_name`, `item_value`, `item_order`, `remark`, `tenant_id`) VALUES ('1125272181156057089', NULL, 'date_day', '昨日', 'last_day', '2', '昨日', '1');
+INSERT INTO `datawindow_uat`.`t_dict` (`id`, `dict_name`, `dict_code`, `item_name`, `item_value`, `item_order`, `remark`, `tenant_id`) VALUES ('1125272783768489985', NULL, 'date_day', '当月月初（1号）', 'cur_month_begin', '4', '当月月初（1号）', '1');
+INSERT INTO `datawindow_uat`.`t_dict` (`id`, `dict_name`, `dict_code`, `item_name`, `item_value`, `item_order`, `remark`, `tenant_id`) VALUES ('1125309944563732482', NULL, 'date_day', '前天', 'tdb_yesterday', '3', '前天', '1');
+INSERT INTO `datawindow_uat`.`t_dict` (`id`, `dict_name`, `dict_code`, `item_name`, `item_value`, `item_order`, `remark`, `tenant_id`) VALUES ('1125310225070395393', NULL, 'date_day', '上月月初（1号）', 'last_month_begin', '6', '上月月初（1号）', '1');
+INSERT INTO `datawindow_uat`.`t_dict` (`id`, `dict_name`, `dict_code`, `item_name`, `item_value`, `item_order`, `remark`, `tenant_id`) VALUES ('1125310319136051201', NULL, 'date_day', '上月月底', 'last_month_end', '7', '上月月底', '1');
+
+
+
+
+//////////////修改角色表的数据使初始的3个角色state为0----对应前台页面无法修改这3个角色///////////////////
+
+UPDATE  t_role  SET  state =  '0'  WHERE CODE IN("admin_system","role_test","EVERYONE") 
+
+
+////////////修改t_service_state表，添加发送三个字段/////////////////////////////////////
+
+ALTER TABLE t_service_state ADD mail_frequency INT DEFAULT NULL COMMENT "发送邮件频率" AFTER retention_time
+
+
+ALTER TABLE t_service_state ADD mail_count INT DEFAULT NULL COMMENT "发送邮件次数" AFTER mail_frequency
+
+ALTER TABLE t_service_state ADD is_sent_mail INT DEFAULT 0 COMMENT "异常时是否发送过邮件：0.未发送  1.已发送" AFTER mail_count
+
+
+
+
+
+///////////////////////////2019/06/05为mstr添加导出权限/////////////////////////////////////////
+INSERT INTO `t_permission` (`id`, `resource_type_id`, `name`, `code`, `resource_id`, `tenant_id`) VALUES ('10', '3', '导出', 'export', NULL, '1');
+INSERT INTO `t_permission` (`id`, `resource_type_id`, `name`, `code`, `resource_id`, `tenant_id`) VALUES ('11', '4', '导出', 'export', NULL, '1');
+INSERT INTO `t_permission` (`id`, `resource_type_id`, `name`, `code`, `resource_id`, `tenant_id`) VALUES ('12', '5', '导出', 'export', NULL, '1');
+
+
+
+//////////////////////////////////2019/06/19删除LOGO设置相关/////////////////////////////////////
+DELETE  FROM t_menu  WHERE   resource_id = '1082827687131643905' 
+DELETE  FROM  t_resource WHERE  id = '1082827687131643905' 
+DELETE  FROM  t_role_permission  WHERE  resource_id = '1082827687131643905' 
+
+
+///////////////////////////////2019/06/25系统设置新添加的SQL////////////////////////
+INSERT INTO `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) VALUES ('1143416447615000578', '系统首页名称', 'SYS_HOME_PAGE_NAME', '首页', '系统首页名称', '1', '1', '1');
+INSERT INTO `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) VALUES ('1143416855343292417', '系统首页类型', 'PREFERENCE_TYPE', 'orgHome', '系统首页类型', '1', '1', '1');
+INSERT INTO `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) VALUES ('1143417204015783937', '系统首页对象值', 'PREFERENCE_VALUE', '', '系统首页对象值', '1', '1', '1');
+
+
+//////////////////////////////2019/06/26修改t_bi_server表 添加3个字段///////////////////////////
+ALTER  TABLE  t_bi_server  ADD  water_mark INT DEFAULT 0  COMMENT'水印标识： 0 关闭  1 开启'   AFTER  state 
+ALTER  TABLE  t_bi_server  ADD  export_mode INT DEFAULT 1 COMMENT'导出方式： 0 SKD方式  1 URL方式' AFTER  water_mark 
+ALTER  TABLE  t_bi_server  ADD  water_mark_text VARCHAR(65) COMMENT'水印文本' AFTER  export_mode 
+
+
+////////////////////////////2019/8/7创建资源字典表///////////////////////////////////////
+CREATE TABLE `t_resource_dict` (
+  `id` varchar(32) NOT NULL,
+  `resource_id` varchar(100) NOT NULL,
+  `name` varchar(255) NOT NULL COMMENT '名称',
+  `dict_value` varchar(255) DEFAULT NULL COMMENT '编码',
+  `explain` varchar(255) DEFAULT NULL COMMENT '说明',
+  `source` varchar(255) DEFAULT NULL COMMENT '来源',
+  `algorithm` varchar(255) DEFAULT NULL COMMENT '算法口径',
+  `modifier` varchar(255) DEFAULT '' COMMENT '创建时间',
+  `modify_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '修改时间',
+  `tenant_id` varchar(32) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='= ''资源字典表'' DEFAULT CHARSET=utf8';
+
+
+
+///////////////////////////2019/8/14系统参数表添加会话有效期数据////////////////////////
+INSERT INTO `datawindow`.`t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) VALUES ('1161514758106423298', '会话有效期', 'SESSION_TIME', '30', '会话（session）有效期，默认为30分钟', '1', '1', '1');
+
+
+/////////////////////////2019/8/23修改评论表中评论字段，调整字段存储的大小//////////////////////////////////
+alter table t_comment  modify content mediumtext 
+
+
+
+/////////////////////////2019/9/2系统设置中的默认语言/////////////////////////////////////////
+INSERT INTO `datawindow`.`t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) VALUES 
+('1745229276919471474', '默认语言', 'CONFIG_LOCALE', 'zh_CN', '系统设置中的系统默认语言', '1', '1', '1');
+##系统默认语言是整个系统的语言基础，即系统日志等记录语言与系统语言一致。
+
+
+////////////////////////2019/9/4为t_tenant表添加非物理删除字段////////////////////////////////////
+alter  table  t_tenant  add  is_delete int  not null DEFAULT 1   COMMENT "0：删除  1：存在"
+
+
+############## 添加自动同步添加mstr用户功能数据库修改 Start ###################
+//系统管理添加是否显示的字段，控制参数是否显示。
+ALTER TABLE `t_config`   
+  ADD COLUMN `is_display` INT(11) DEFAULT 1  NULL  COMMENT '是否显示。1、是；0、否（默认显示）' AFTER `state`;
+//添加参数是否同步创建mstr用户
+insert into `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) values('13','同步创建MSTR用户','SYS_SYNC_CREATE_MSTR_USER','1','创建数窗用户的时候是否同步创建MSTR用户。1，是；0(或者空，或者不设置这个参数)否','1','0','1');
+//记住mstr选择
+ALTER TABLE `t_bi_project`   
+  CHANGE `is_indepen_pro` `is_indepen_pro` INT(4) DEFAULT 0  NULL  COMMENT 'MSTR项目是否为默认自动同步添加项目 1：是、0：否（默认）所有MSTR项目中只能有一个是自动同步添加的默认项目';
+
+###########################  系统设置修改  ##################################
+insert into `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) values('1139067372094410753','重复登录','REPEAT_LOGIN','1','1、开启，表示同意重复登录。0,、关闭，表示不同意。','1','1','1');
+insert into `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) values('1139067372203462657','不同意重复登录选择','NOT_ALLOW_REPEAT_LOGIN_WAY','1','0、已登录不允许再登陆。  1、后登录踢出先登录','1','1','1');
+insert into `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) values('1139067372295737346','登录提示信息','LOGIN_PROMPT','0','1、开启。登录提示。  0、关闭  登录不提示。','1','1','1');
+insert into `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) values('1139067372388012034','是否开启忘记密码提示','FORGET_PASSWORD_PROMPT','0','1、开启， 提示 。     0 、关闭 不提示','1','1','1');
+insert into `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) values('1139067372622893057','是否开启密码定期更新提示','PASSWORD_UPDATE_REGULARLY','0','1、开启   提示。   0关闭、不提示','1','1','1');
+insert into `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) values('1139067372807442433','开启密码定期更新提示时间','PASSWORD_UPDATE_REGULARLY_TIME','1','1  表示一个月  2， 表示两个月','1','1','1');
+insert into `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) values('1139067372924882946','密码强度要求','PASSWORD_STRENGTH_REQUIRE','0','1、开启， 要求 。     0 、关闭 不要求','1','1','1');
+insert into `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) values('1139067373252038657','长度至少','LEAST_LENGTH','0','1、勾选       0、不勾选','1','1','1');
+insert into `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) values('1139067373612748802','长度值','LENGTH_VALUE','6','默认6','1','1','1');
+insert into `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) values('1139067373830852610','包含数字','CONTAIN_NUMBER','0','1、勾选       0、不勾选','1','1','1');
+insert into `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) values('1139067373927321601','包含字母','CONTAINT_LETTERS','0','1、勾选       0、不勾选','1','1','1');
+insert into `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) values('1139067374015401985','包含符号','CONTAINT_SYMBOLS','0','1、勾选       0、不勾选','1','1','1');
+insert into `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) values('1139067374107676673','登录页标题','SYS_LOGIN_NAME','德昂数窗平台','登录页标题','1','1','1');
+insert into `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) values('1139067374204145665','系统顶部LOGO','SYS_MAIN_LOGO','','value值应该为上传的路径（t_file表中的file_path_view字段值）。','1','1','1');
+
+
+#修改密码修改提示，添加最后修改时间
+ALTER TABLE `t_user`   
+  ADD COLUMN `reset_key_lasttime` DATETIME NULL  COMMENT '最后一次修改密码的时间' AFTER `reset_pwd`;
+ALTER TABLE `t_user`   
+  CHANGE `reset_key` `reset_key` CHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '0'   NULL  COMMENT '0:第一次登录 1:重置密码 2:已修改密码';
+
+#邮件相关
+INSERT INTO `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) VALUES ('1139455854113611777', '密码', 'MAIL_PASSWORD', 'FKdrgnnVXPmpmGJ9', '密码', '1', '1', '1');
+INSERT INTO `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) VALUES ('1139456362219986946', '端口', 'MAIL_PORT', '465', '端口', '1', '1', '1');
+INSERT INTO `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) VALUES ('1139456805784412162', '发件人地址', 'MAIL_FROM', 'support-3@dataondemand.cn', '发件人地址', '1', '1', '1');
+INSERT INTO `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) VALUES ('1139457178377019393', '显示名称', 'MAIL_ACCOUNT', 'displayName', '显示名称', '1', '1', '1');
+INSERT INTO `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) VALUES ('1139457931510439938', '邮件服务器', 'MAIL_HOST', 'smtp.exmail.qq.com', '邮件服务器', '1', '1', '1');
+
+#####################################   消息中心
+CREATE TABLE `t_message_center`(  
+  `id` VARCHAR(255) NOT NULL COMMENT '主键',
+  `title` TEXT COMMENT '消息标题',
+  `content` TEXT COMMENT '消息内容',
+  `receive_user` VARCHAR(255) COMMENT '接收人',
+  `produce_user` VARCHAR(255) COMMENT '消息产生人； 如果是系统直接赋值：“system”，其他的用户填写用户id',
+  `create_time` DATETIME COMMENT '消息创建时间',
+  `type` INT(11) COMMENT '消息类型; 1.系统提示（包括“用户过期提醒”，“系统警告”）；2.交互信息（包括\“回复评论\”、“评论消息”）；3.通知消息（包括“公告消息”、“通知消息”）',
+  `is_read` INT(11) NOT NULL DEFAULT 0 COMMENT '是否已读 0、未读；1、已读',
+  `read_time` DATETIME COMMENT '读取时间',
+  `levels` INT(11) COMMENT '消息等级',
+  `resource_id` VARCHAR(255) COMMENT '资源id',
+  `issue_id` VARCHAR(255) COMMENT '问题id',
+  `tenant_id` VARCHAR(255) COMMENT '租户id',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB CHARSET=utf8;
+
+
+#首页修改  
+INSERT INTO `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) VALUES ('1143416447615000578', '系统首页名称', 'SYS_HOME_PAGE_NAME', '首页', '系统首页名称', '1', '1', '1');
+INSERT INTO `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) VALUES ('1143416855343292417', '系统首页类型', 'PREFERENCE_TYPE', 'orgHome', '系统首页类型', '1', '1', '1');
+INSERT INTO `t_config` (`id`, `name`, `code`, `value`, `remark`, `state`, `is_display`, `tenant_id`) VALUES ('1143417204015783937', '系统首页对象值', 'PREFERENCE_VALUE', '', '系统首页对象值', '1', '1', '1');
+
+
+############################################### 个人设置
+CREATE TABLE `t_user_setting`(  
+  `id` VARCHAR(255) NOT NULL,
+  `user_id` VARCHAR(255) COMMENT '用户id',
+  `naviga_style` VARCHAR(255) COMMENT '导航风格',
+  `theme_style` VARCHAR(255) COMMENT '主题风格',
+  `system_msg` INT(11) NOT NULL DEFAULT 0 COMMENT '是否发送系统消息',
+  `comment_msg` INT(11) NOT NULL DEFAULT 0 COMMENT '是否发送评论消息',
+  `notice_msg` INT(11) NOT NULL DEFAULT 0 COMMENT '是否发送通知消息',
+  `issue_msg` INT(11) NOT NULL DEFAULT 0 COMMENT '是否发送问题回复消息',
+  `tenant_id` VARCHAR(255) COMMENT '租户id',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB CHARSET=utf8;
+################################  
+
+
+####################################微信 推送   #######################################################
+enable 为关键字报错，故改为is_enable 
+
+ALTER TABLE `t_user_wx_work`   
+  CHANGE `enable` `is_enable` VARCHAR(255) CHARSET utf8 COLLATE utf8_general_ci NULL  COMMENT '成员启用状态。1表示启用的成员，0表示被禁用。注意，服务商调用接口不会返回此字段';
+
+
+################################ 资源类型
+
+ALTER TABLE `t_resource_type`   
+  CHANGE `sort` `sort` INT(11) NULL  COMMENT '排序';
+####################添加smartBI资源的权限信息
+INSERT INTO `t_permission` (`id`, `resource_type_id`, `name`, `code`, `resource_id`, `sort`, `tenant_id`) VALUES ('38108049124679148101', '10', '日志', 'log', NULL, '7', '1');
+INSERT INTO `datawindow`.`t_permission` (`id`, `resource_type_id`, `name`, `code`, `resource_id`, `sort`, `tenant_id`) VALUES ('40405394234729553282', '10', '分享', 'share', NULL, '5', '1');
+INSERT INTO `datawindow`.`t_permission` (`id`, `resource_type_id`, `name`, `code`, `resource_id`, `sort`, `tenant_id`) VALUES ('56705394346197560393', '10', '评论', 'comment', NULL, '4', '1');
+INSERT INTO `datawindow`.`t_permission` (`id`, `resource_type_id`, `name`, `code`, `resource_id`, `sort`, `tenant_id`) VALUES ('61604084453810995474', '10', '权限用户', 'permission', NULL, '6', '1');
+INSERT INTO `datawindow`.`t_permission` (`id`, `resource_type_id`, `name`, `code`, `resource_id`, `sort`, `tenant_id`) VALUES ('29704084563810995457', '10', '可见', 'view', NULL, '1', '1');
+#####################################  租户管理
+alter  table  t_tenant  add  is_delete int  not null DEFAULT 1   COMMENT "0：删除  1：存在"
+#################日志服务菜单添加
+INSERT INTO `datawindow`.`t_menu` (`id`, `name`, `link_url`, `code`, `status`, `parent_id`, `create_time`, `update_time`, `icon_name`, `sort`, `type`, `link_type`, `state`, `lv`, `introduce`, `creater`, `resource_id`, `tenant_id`) VALUES ('1148794921574227969', '实时日志', '/sysLog/webLog', NULL, NULL, '1075265032535699458', NULL, NULL, NULL, '5', '1074135544087265281', '1', '1', '1', '实时日志', NULL, '1148794668523479042', '1');
+INSERT INTO `datawindow`.`t_menu` (`id`, `name`, `link_url`, `code`, `status`, `parent_id`, `create_time`, `update_time`, `icon_name`, `sort`, `type`, `link_type`, `state`, `lv`, `introduce`, `creater`, `resource_id`, `tenant_id`) VALUES ('1156155168978669569', '用户分析', '/userAnalysis/one', NULL, NULL, '1075265032535699458', NULL, NULL, NULL, '6', '1074135544087265281', '1', '1', '1', '用户分析', NULL, '1156154889294090242', '1');
+INSERT INTO `datawindow`.`t_menu` (`id`, `name`, `link_url`, `code`, `status`, `parent_id`, `create_time`, `update_time`, `icon_name`, `sort`, `type`, `link_type`, `state`, `lv`, `introduce`, `creater`, `resource_id`, `tenant_id`) VALUES ('1156155270988337154', '日志服务', '/sysLog/sysLog', NULL, NULL, '1075265032535699458', NULL, NULL, NULL, '1', '1074135544087265281', '1', '1', '1', '日志服务', NULL, '1156155043493482498', '1');
+INSERT INTO `datawindow`.`t_menu` (`id`, `name`, `link_url`, `code`, `status`, `parent_id`, `create_time`, `update_time`, `icon_name`, `sort`, `type`, `link_type`, `state`, `lv`, `introduce`, `creater`, `resource_id`, `tenant_id`) VALUES ('1161205814962475009', '在线用户管理', '/onlineUserManagement/index', NULL, NULL, '1075265032535699458', NULL, NULL, NULL, '7', '1', '1', '1', '1', '', NULL, '1161204879968227330', '1');
+
+
+####################  字典管理    增加字段is_system（默认值为0，代表用户字典。系统字典值为1，需手动修改数据库）   2019/09/09     陈文威
+ALTER TABLE `datawindow`.`t_dict` ADD COLUMN `is_system` INT(11) DEFAULT 0 NULL COMMENT '是否系统内置，默认0表示用户字典' AFTER `tenant_id`;  
+
+###################  消息中心   增加字段 message_source_id （消息来源ID。例：发布评论a后，发出消息。这条消息的来源就是这个评论a（一般用在评论和问题回复中，为了方便删除消息））    2019/09/10    高海龙
+ALTER TABLE `datawindow`.`t_message_center`   
+  ADD COLUMN `message_source_id` VARCHAR(255) NULL  COMMENT '消息来源ID。例：发布评论a后，发出消息。这条消息的来源就是这个评论a（一般用在评论和问题回复中，为了方便删除消息）' AFTER `resource_id`;
+
+
+############# 资源管理     增加字段 code (用于标记，判断该资源类型)  2019/09/24
+  ALTER TABLE `datawindow`.`t_resource_type`
+    ADD COLUMN `code` INT(11) NULL AFTER `id`;新增资源，根据code类型来选择请求路径（之前用id作为判断，创建租户功能完善后该方法无法实现）
+  
